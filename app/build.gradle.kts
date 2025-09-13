@@ -40,7 +40,12 @@ android {
 }
 
 dependencies {
-
+    implementation("androidx.core:core-ktx:1.13.1") // For Kotlin extensions
+    implementation("androidx.appcompat:appcompat:1.7.0") // UI compatibility
+    implementation("com.google.android.material:material:1.12.0") // Material Design components for grids/modals
+    implementation("androidx.media3:media3-exoplayer:1.4.1") // For advanced audio playback (better than basic MediaPlayer for looping/ fading)
+    implementation("androidx.media3:media3-ui:1.4.1") // If needed for UI integration
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4") // For flexible layouts
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

@@ -23,5 +23,8 @@
             </intent-filter>
         </activity>
     </application>
-
+    <!-- service android:name=".YourAudioService" android:foregroundServiceType="mediaPlayback" /-->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" /> <!-- For background audio -->
+    <uses-permission android:name="android.permission.VIBRATE" /> <!-- For haptics -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" /> <!-- Optional: To handle alarms waking the device -->
 </manifest>
