@@ -30,8 +30,6 @@ fun AlarmItemView(
 
     Box(
         modifier = Modifier
-            .width(100.dp)
-            .height(100.dp)
             .aspectRatio(aspect)
             .background(color, shape = RoundedCornerShape(8.dp))
             .clickable(enabled = !isDisabled) {
@@ -39,6 +37,6 @@ fun AlarmItemView(
                     onSelect(index)
                 }
             }
-            .then(if (selectedItem?.id == index) Modifier.alpha(0f) else Modifier)
+            .alpha(if (selectedItem?.id == index) 0f else 1f)
     )
 }

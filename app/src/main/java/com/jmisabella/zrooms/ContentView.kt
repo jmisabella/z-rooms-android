@@ -10,8 +10,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -23,7 +21,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,16 +28,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
-import androidx.preference.PreferenceManager // Updated import
+import androidx.preference.PreferenceManager
 import com.jmisabela.zrooms.AlarmSelectionView
 
 @Composable
@@ -85,7 +78,6 @@ fun ContentView() {
     var durationMinutes by remember { mutableStateOf(PreferenceManager.getDefaultSharedPreferences(context).getFloat("durationMinutes", 0f).toDouble()) }
     var isAlarmEnabled by remember { mutableStateOf(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("isAlarmEnabled", false)) }
     var isAlarmActive by remember { mutableStateOf(false) }
-    var backgroundOpacity by remember { mutableStateOf(if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean("hasLaunched", false)) 1.0 else 0.0) }
     var selectedAlarmIndex by remember { mutableStateOf(PreferenceManager.getDefaultSharedPreferences(context).getInt("selectedAlarmIndex", -1)) }
     var showingAlarmSelection by remember { mutableStateOf(false) }
 
@@ -107,19 +99,6 @@ fun ContentView() {
         onDispose { context.unbindService(connection) }
     }
 
-    val lifecycleOwner = LocalLifecycleOwner.current
-    DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_START) {
-                PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean("hasLaunched", true).apply()
-            } else if (event == Lifecycle.Event.ON_STOP) {
-                // Cleanup if needed
-            }
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
-    }
-
     Box(Modifier.fillMaxSize()) {
         Box(
             Modifier
@@ -129,15 +108,7 @@ fun ContentView() {
                         colors = listOf(Color(0xFF262626), Color(0xFF4D4D4D)),
                         start = Offset(0f, 0f),
                         end = Offset(0f, Float.POSITIVE_INFINITY)
-                    ),
-                    alpha = backgroundOpacity.toFloat()
-                )
-        )
-        Box(
-            Modifier
-                .fillMaxSize()
-                .background(
-                    color = Color(0xFFCCCCCC).copy(alpha = (1.0 - backgroundOpacity).toFloat())
+                    )
                 )
         )
 
@@ -198,7 +169,7 @@ fun ContentView() {
                     changeRoom = { direction ->
                         val currentIndex = selected.id
                         var newIndex = currentIndex + direction
-                        while (newIndex in 0 until files.size && files[newIndex].isNotEmpty()) {
+                        while (newIndex in 0 until files.size && files[newIndex].isEmpty()) {
                             newIndex += direction
                         }
                         if (newIndex in 0 until files.size) {
