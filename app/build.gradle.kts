@@ -1,3 +1,4 @@
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -31,7 +32,9 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.10"  // Use the latest stable version compatible with your Kotlin version (check androidx.compose.compiler)
+        // Bumped minimally to 1.5.14 for better 1.6.0 compatibility and blendMode support
+        // (matches Kotlin 1.8.x/1.9.x; avoids 1.7.0 mismatch)
+        kotlinCompilerExtensionVersion = "1.5.14"
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -49,30 +52,36 @@ dependencies {
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("com.google.android.material:material:1.12.0")
-    implementation("androidx.media3:media3-exoplayer:1.4.1")
-    implementation("androidx.media3:media3-ui:1.4.1")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.media:media:1.7.0")
     implementation("androidx.preference:preference:1.2.1") // Added for PreferenceManager
+
+    // Use Compose BOM for version consistency (keep as-is; it's working)
     val composeBom = platform("androidx.compose:compose-bom:2024.09.00")
     implementation(composeBom)
     androidTestImplementation(composeBom)
-    implementation("androidx.compose.material:material-icons-extended")
+
+    // BOM-managed Compose deps (no explicit versions; remove duplicates to avoid conflicts)
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.foundation:foundation")
     implementation("androidx.compose.material:material")
+    implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.compose.ui:ui-tooling-preview")
     debugImplementation("androidx.compose.ui:ui-tooling")
-    implementation("androidx.activity:activity-compose:1.9.2")
-    implementation("androidx.navigation:navigation-compose:2.8.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.5")
-    implementation("androidx.media3:media3-common:1.4.1")
-    implementation("androidx.compose.material3:material3:1.3.0")
+    implementation("androidx.compose.material3:material3")
+
+    // Non-BOM deps: Explicit versions compatible with Compose 1.6.0/BOM 2024.09.00
+    // (BOM doesn't cover these; pin to stable releases to fix resolution errors)
+    implementation("androidx.activity:activity-compose:1.9.3") // Latest stable as of Sep 2025
+    implementation("androidx.navigation:navigation-compose:2.8.3") // Latest stable (2.8.3; avoids alpha 2.9.x issues)
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.7") // Latest stable
+    implementation("com.google.android.exoplayer:exoplayer-core:2.19.1")
+
+    // Testing dependencies (align versions with BOM where possible)
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.6.8")
-    debugImplementation("androidx.compose.ui:ui-test-manifest:1.6.8")
-
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+    debugImplementation("androidx.compose.ui:ui-test-manifest")
 }
