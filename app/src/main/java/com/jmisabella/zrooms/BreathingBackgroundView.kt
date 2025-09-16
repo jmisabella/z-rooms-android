@@ -1,332 +1,105 @@
 package com.jmisabella.zrooms
 
+import android.os.Build
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.ShaderBrush
 import androidx.compose.ui.graphics.Color
-import kotlin.math.cos
-import kotlin.math.max
-import kotlin.math.sin
+import android.graphics.RuntimeShader
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.graphics.toArgb
 
 @Composable
 fun BreathingBackground(color: Color, modifier: Modifier = Modifier) {
     val hsva = FloatArray(3)
-    android.graphics.Color.colorToHSV(color.value.toInt(), hsva)
+    android.graphics.Color.colorToHSV(color.toArgb(), hsva)
     val baseHue = hsva[0] / 360f
     val baseSaturation = hsva[1]
     val baseBrightness = hsva[2]
 
-    val transition = rememberInfiniteTransition(label = "breathing")
+    val transition = rememberInfiniteTransition(label = "plasma")
 
-    // Animation for pulsing
-    val scale1 by transition.animateFloat(
-        initialValue = 0.7f,
-        targetValue = 1.3f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(3500, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "scale1"
-    )
-    val scale2 by transition.animateFloat(
-        initialValue = 1.3f,
-        targetValue = 0.7f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(4500, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "scale2"
-    )
-    val opacity1 by transition.animateFloat(
-        initialValue = 0.5f,
-        targetValue = 0.8f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(2500, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "opacity1"
-    )
-    val opacity2 by transition.animateFloat(
-        initialValue = 0.8f,
-        targetValue = 0.5f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(3000, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "opacity2"
-    )
-    val opacity3 by transition.animateFloat(
-        initialValue = 0.3f,
-        targetValue = 0.6f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(2000, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "opacity3"
-    )
-    // Animation for overall fade to darkness over 3 minutes
-    val fadeOpacity by transition.animateFloat(
-        initialValue = 1.0f,
-        targetValue = 0.0f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(180000, easing = LinearEasing), // 3 minutes
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "fadeOpacity"
-    )
-
-    // Animation for gentle movement
-    val angle by transition.animateFloat(
+    val time by transition.animateFloat(
         initialValue = 0f,
-        targetValue = 360f,
+        targetValue = 100000f,
         animationSpec = infiniteRepeatable(
-            animation = tween(12000, easing = LinearEasing), // Faster rotation for trippier effect
+            animation = tween(durationMillis = 100000000, easing = LinearEasing),
             repeatMode = RepeatMode.Restart
         ),
-        label = "angle"
+        label = "time"
     )
 
-    // Derive complementary colors for 2-3 color palette
-    val color1 = hsvToColor(baseHue, baseSaturation * 0.95f, baseBrightness * 1.15f.coerceAtMost(1f))
-    val color2 = hsvToColor((baseHue + 0.15f).mod(1f), baseSaturation * 1.1f.coerceAtMost(1f), baseBrightness * 0.9f)
-    val color3 = hsvToColor((baseHue - 0.15f + 1f).mod(1f), baseSaturation * 0.9f, baseBrightness * 1.2f.coerceAtMost(1f))
-    val color4 = hsvToColor((baseHue + 0.3f).mod(1f), baseSaturation * 1.05f.coerceAtMost(1f), baseBrightness * 1.1f.coerceAtMost(1f))
+    // Rely on external dim overlay for fading
+    val fadeOpacity = 1.0f
 
-    BoxWithConstraints(modifier.fillMaxSize()) {
-        val width = constraints.maxWidth.toFloat()
-        val height = constraints.maxHeight.toFloat()
-        val maxDim = max(width, height)
+    // Derive a 2-3 color palette from the base color
+    val color1 = hsvToColor(baseHue, baseSaturation * 0.95f, baseBrightness * 1.05f.coerceAtMost(1f))
+    val color2 = hsvToColor((baseHue + 0.1f).mod(1f), baseSaturation * 1.05f.coerceAtMost(1f), baseBrightness * 0.95f)
+    val color3 = hsvToColor((baseHue - 0.1f + 1f).mod(1f), baseSaturation * 0.9f, baseBrightness * 1.1f.coerceAtMost(1f))
 
-        // Calculate moving center for dynamic effect
-        val orbitRadiusX = width * 0.12f
-        val orbitRadiusY = height * 0.12f
-        val centerX = width / 2 + (orbitRadiusX * cos(Math.toRadians(angle.toDouble()).toFloat()))
-        val centerY = height / 2 + (orbitRadiusY * sin(Math.toRadians(angle.toDouble()).toFloat()))
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        val shader = remember { RuntimeShader(PLASMA_SHADER) }
 
-        val movingCenter = Offset(centerX, centerY)
-        val offsetCenter = Offset(centerX + width * 0.05f, centerY + height * 0.05f)
+        Canvas(modifier = modifier.fillMaxSize()) {
+            shader.setFloatUniform("time", time * 0.05f)
+            shader.setFloatUniform("fadeOpacity", fadeOpacity)
+            shader.setFloatUniform("resolution", size.width, size.height)
+            // Normalize color components to [0, 1]
+            shader.setFloatUniform("color1", color1.red, color1.green, color1.blue, color1.alpha)
+            shader.setFloatUniform("color2", color2.red, color2.green, color2.blue, color2.alpha)
+            shader.setFloatUniform("color3", color3.red, color3.green, color3.blue, color3.alpha)
 
-        Box(Modifier.fillMaxSize().background(color)) {
-            // Layer 1: Pulsing gradient with moving center (brighter in center)
-            Box(
-                Modifier
-                    .fillMaxSize()
-                    .background(
-                        Brush.radialGradient(
-                            colors = listOf(color1.copy(alpha = opacity1 * fadeOpacity), Color.Transparent),
-                            center = movingCenter,
-                            radius = (maxDim / 1.4f) * scale1
-                        )
-                    )
-            )
-            // Layer 2: Counter-pulsing gradient with fixed center for depth
-            Box(
-                Modifier
-                    .fillMaxSize()
-                    .background(
-                        Brush.radialGradient(
-                            colors = listOf(
-                                color2.copy(alpha = opacity2 * fadeOpacity),
-                                color3.copy(alpha = opacity2 * 0.7f * fadeOpacity),
-                                Color.Transparent
-                            ),
-                            center = Offset(width / 2, height / 2),
-                            radius = (maxDim / 1.8f) * scale2
-                        )
-                    )
-            )
-            // Layer 3: Additional gradient for trippy overlap
-            Box(
-                Modifier
-                    .fillMaxSize()
-                    .background(
-                        Brush.radialGradient(
-                            colors = listOf(
-                                color4.copy(alpha = opacity3 * fadeOpacity),
-                                color2.copy(alpha = opacity3 * 0.5f * fadeOpacity),
-                                Color.Transparent
-                            ),
-                            center = offsetCenter,
-                            radius = (maxDim / 2.2f) * scale1
-                        )
-                    )
-            )
-            // Layer 4: Blob layer for glowing effect
-            for (i in 0 until 10) { // Increased to 10 for more overlap
-                BlobView(
-                    i = i,
-                    transition = transition,
-                    baseHue = baseHue,
-                    baseSaturation = baseSaturation,
-                    baseBrightness = baseBrightness,
-                    fadeOpacity = fadeOpacity
-                )
-            }
+            drawRect(brush = ShaderBrush(shader))
         }
+    } else {
+        // Fallback for older Android versions: solid color background
+        Box(modifier = modifier
+            .fillMaxSize()
+            .background(color)
+        )
     }
 }
 
-//package com.jmisabella.zrooms
-//
-//import androidx.compose.animation.core.LinearEasing
-//import androidx.compose.animation.core.RepeatMode
-//import androidx.compose.animation.core.animateFloat
-//import androidx.compose.animation.core.infiniteRepeatable
-//import androidx.compose.animation.core.rememberInfiniteTransition
-//import androidx.compose.animation.core.tween
-//import androidx.compose.foundation.background
-//import androidx.compose.foundation.layout.Box
-//import androidx.compose.foundation.layout.BoxWithConstraints
-//import androidx.compose.foundation.layout.fillMaxSize
-//import androidx.compose.runtime.Composable
-//import androidx.compose.runtime.getValue
-//import androidx.compose.ui.Modifier
-//import androidx.compose.ui.geometry.Offset
-//import androidx.compose.ui.graphics.Brush
-//import androidx.compose.ui.graphics.Color
-//import kotlin.math.cos
-//import kotlin.math.max
-//import kotlin.math.sin
-//
-//@Composable
-//fun BreathingBackground(color: Color, modifier: Modifier = Modifier) {
-//    val hsva = FloatArray(3)
-//    android.graphics.Color.colorToHSV(color.value.toInt(), hsva)
-//    val baseHue = hsva[0] / 360f
-//    val baseSaturation = hsva[1]
-//    val baseBrightness = hsva[2]
-//
-//    val transition = rememberInfiniteTransition(label = "breathing")
-//
-//    // Animation for pulsing
-//    val scale1 by transition.animateFloat(
-//        initialValue = 0.8f,
-//        targetValue = 1.2f,
-//        animationSpec = infiniteRepeatable(
-//            animation = tween(4000, easing = LinearEasing),
-//            repeatMode = RepeatMode.Reverse
-//        ),
-//        label = "scale1"
-//    )
-//    val scale2 by transition.animateFloat(
-//        initialValue = 1.2f,
-//        targetValue = 0.8f,
-//        animationSpec = infiniteRepeatable(
-//            animation = tween(5000, easing = LinearEasing),
-//            repeatMode = RepeatMode.Reverse
-//        ),
-//        label = "scale2"
-//    )
-//    val opacity1 by transition.animateFloat(
-//        initialValue = 0.4f,
-//        targetValue = 0.7f,
-//        animationSpec = infiniteRepeatable(
-//            animation = tween(3000, easing = LinearEasing),
-//            repeatMode = RepeatMode.Reverse
-//        ),
-//        label = "opacity1"
-//    )
-//    val opacity2 by transition.animateFloat(
-//        initialValue = 0.7f,
-//        targetValue = 0.4f,
-//        animationSpec = infiniteRepeatable(
-//            animation = tween(3500, easing = LinearEasing),
-//            repeatMode = RepeatMode.Reverse
-//        ),
-//        label = "opacity2"
-//    )
-//    // Animation for overall fade to darkness over 3 minutes
-//    val fadeOpacity by transition.animateFloat(
-//        initialValue = 1.0f,
-//        targetValue = 0.0f,
-//        animationSpec = infiniteRepeatable(
-//            animation = tween(180000, easing = LinearEasing), // 3 minutes
-//            repeatMode = RepeatMode.Restart
-//        ),
-//        label = "fadeOpacity"
-//    )
-//
-//    // Animation for gentle movement
-//    val angle by transition.animateFloat(
-//        initialValue = 0f,
-//        targetValue = 360f,
-//        animationSpec = infiniteRepeatable(
-//            animation = tween(15000, easing = LinearEasing),
-//            repeatMode = RepeatMode.Restart
-//        ),
-//        label = "angle"
-//    )
-//
-//    // Derive complementary colors for 2-3 color palette
-//    val color1 = hsvToColor(baseHue, baseSaturation * 0.9f, baseBrightness * 1.1f.coerceAtMost(1f))
-//    val color2 = hsvToColor((baseHue + 0.12f).mod(1f), baseSaturation * 1.0f.coerceAtMost(1f), baseBrightness * 0.95f)
-//    val color3 = hsvToColor((baseHue - 0.12f + 1f).mod(1f), baseSaturation * 0.85f, baseBrightness * 1.15f.coerceAtMost(1f))
-//
-//    BoxWithConstraints(modifier.fillMaxSize()) {
-//        val width = constraints.maxWidth.toFloat()
-//        val height = constraints.maxHeight.toFloat()
-//        val maxDim = max(width, height)
-//
-//        // Calculate moving center for dynamic effect
-//        val orbitRadiusX = width * 0.1f
-//        val orbitRadiusY = height * 0.1f
-//        val centerX = width / 2 + (orbitRadiusX * cos(Math.toRadians(angle.toDouble()).toFloat()))
-//        val centerY = height / 2 + (orbitRadiusY * sin(Math.toRadians(angle.toDouble()).toFloat()))
-//
-//        val movingCenter = Offset(centerX, centerY)
-//
-//        Box(Modifier.fillMaxSize().background(color)) {
-//            // Layer 1: Pulsing gradient with moving center (brighter in center)
-//            Box(
-//                Modifier
-//                    .fillMaxSize()
-//                    .background(
-//                        Brush.radialGradient(
-//                            colors = listOf(color1.copy(alpha = opacity1 * fadeOpacity), Color.Transparent),
-//                            center = movingCenter,
-//                            radius = (maxDim / 1.5f) * scale1
-//                        )
-//                    )
-//            )
-//            // Layer 2: Counter-pulsing gradient with fixed center for depth
-//            Box(
-//                Modifier
-//                    .fillMaxSize()
-//                    .background(
-//                        Brush.radialGradient(
-//                            colors = listOf(
-//                                color2.copy(alpha = opacity2 * fadeOpacity),
-//                                color3.copy(alpha = opacity2 * 0.7f * fadeOpacity),
-//                                Color.Transparent
-//                            ),
-//                            center = Offset(width / 2, height / 2),
-//                            radius = (maxDim / 2f) * scale2
-//                        )
-//                    )
-//            )
-//            // Layer 3: Subtle blob layer for additional glowing effect
-//            for (i in 0 until 8) { // Reduced number for performance
-//                BlobView(
-//                    i = i,
-//                    transition = transition,
-//                    baseHue = baseHue,
-//                    baseSaturation = baseSaturation,
-//                    baseBrightness = baseBrightness,
-//                    fadeOpacity = fadeOpacity
-//                )
-//            }
-//        }
-//    }
-//}
+private const val PLASMA_SHADER = """
+    uniform float time;
+    uniform float fadeOpacity;
+    uniform vec2 resolution;
+    uniform vec4 color1;
+    uniform vec4 color2;
+    uniform vec4 color3;
+
+    half4 main(vec2 fragCoord) {
+        vec2 uv = fragCoord / resolution;
+
+        float v = 0.0;
+        v += sin((uv.x * 8.0) + time);
+        v += sin((uv.y * 8.0) + time * 0.7);
+        v += sin((uv.x + uv.y) * 4.0 + time * 0.4);
+        v += sin(length(uv - vec2(0.5)) * 12.0 + time * 0.3);
+        v /= 4.0;
+        v = sin(v * 3.14159) * 0.5 + 0.5;
+
+        vec3 col;
+        if (v < 0.5) {
+            col = mix(color1.rgb, color2.rgb, v * 2.0);
+        } else {
+            col = mix(color2.rgb, color3.rgb, (v - 0.5) * 2.0);
+        }
+
+        col *= fadeOpacity;
+
+        return half4(col, 1.0);
+    }
+"""
+
