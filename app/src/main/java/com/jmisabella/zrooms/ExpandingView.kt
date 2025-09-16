@@ -1,6 +1,7 @@
 package com.jmisabella.zrooms
 
 import android.content.Context
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -97,6 +98,14 @@ fun ExpandingView(
     var currentFlashSpec by remember { mutableStateOf<FiniteAnimationSpec<Float>>(snap()) }
     val animatedFlashOpacity by animateFloatAsState(flashTarget, currentFlashSpec, label = "flash")
 
+    // Background color animation
+    var targetBackgroundColor by remember { mutableStateOf(color) }
+    val animatedBackgroundColor by animateColorAsState(
+        targetValue = targetBackgroundColor,
+        animationSpec = tween(durationMillis = (dimSeconds * 1000).toInt(), easing = LinearEasing),
+        label = "backgroundColor"
+    )
+
     // Alarm animation
     val infiniteTransition = rememberInfiniteTransition(label = "alarm")
     var isAlarmAnimating by remember { mutableStateOf(false) }
@@ -140,17 +149,16 @@ fun ExpandingView(
             }
     ) {
         Box(Modifier.fillMaxSize()) {
-            BreathingBackground(color = color)
+            BreathingBackground(color = animatedBackgroundColor)
 
-            // Dimming overlay
-            Box(
-                Modifier
-                    .fillMaxSize()
-                    .background(
-                        if (isAlarmActive.value) hsvToColor(0.58f, 0.3f, 0.9f).copy(alpha = effectiveDimOpacity)
-                        else Color.Black.copy(alpha = effectiveDimOpacity)
-                    )
-            )
+            // Dimming overlay (used only for alarm)
+            if (isAlarmActive.value) {
+                Box(
+                    Modifier
+                        .fillMaxSize()
+                        .background(hsvToColor(0.58f, 0.3f, 0.9f).copy(alpha = effectiveDimOpacity))
+                )
+            }
             // Flash overlay
             Box(
                 Modifier
@@ -172,7 +180,6 @@ fun ExpandingView(
                 onEditingChanged = { editing ->
                     showLabel = editing
                 },
-//                modifier = Modifier.padding(horizontal = 40.dp),
                 modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars)
             )
 
@@ -220,6 +227,7 @@ fun ExpandingView(
                 Button(
                     onClick = {
                         dimMode = DimMode.Duration(defaultDimDurationSeconds)
+                        targetBackgroundColor = color // Reset to original color
                         sunTrigger += 1
                     },
                     shape = CircleShape
@@ -236,7 +244,7 @@ fun ExpandingView(
 
                 Button(
                     onClick = {
-                        dimMode = DimMode.Duration(4.0)
+                        dimMode = DimMode.Duration(3.0) // Set to 3 seconds
                         nightsTrigger += 1
                     },
                     shape = CircleShape
@@ -434,6 +442,8 @@ fun ExpandingView(
     // Nights button sequence
     LaunchedEffect(nightsTrigger) {
         if (nightsTrigger > 0) {
+            dimSeconds = 3.0 // Ensure 3-second duration
+            targetBackgroundColor = Color.Black // Animate to black
             currentDimSpec = snap()
             dimTarget = 0f
             dimKey += 1
@@ -444,3 +454,4 @@ fun ExpandingView(
         }
     }
 }
+
