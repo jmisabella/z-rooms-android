@@ -45,6 +45,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -138,6 +139,7 @@ fun ExpandingView(
         Box(Modifier.fillMaxSize()) {
             BreathingBackground(color = color)
 
+            // Dimming overlay
             Box(
                 Modifier
                     .fillMaxSize()
@@ -146,7 +148,7 @@ fun ExpandingView(
                         else Color.Black.copy(alpha = effectiveDimOpacity)
                     )
             )
-
+            // Flash overlay
             Box(
                 Modifier
                     .fillMaxSize()
@@ -438,11 +440,3 @@ fun ExpandingView(
         }
     }
 }
-
-//sealed class DimMode {
-//    data class Duration(val seconds: Double) : DimMode()
-//}
-//
-//fun hsvToColor(hue: Float, saturation: Float, value: Float): Color {
-//    return Color.hsl(hue * 360f, saturation, value)
-//}
