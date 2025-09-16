@@ -8,10 +8,8 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
-import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
-import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Binder
 import android.os.Build
@@ -22,13 +20,17 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
 import androidx.core.app.NotificationCompat
+import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.Player
+import com.google.android.exoplayer2.audio.AudioAttributes as ExoAudioAttributes
 import java.util.Timer
 import kotlin.concurrent.timer
 
 class AudioService : Service() {
     private val binder = AudioBinder()
-    private var ambientPlayer: MediaPlayer? = null
-    private var alarmPlayer: MediaPlayer? = null
+    private var ambientPlayer: ExoPlayer? = null
+    private var alarmPlayer: ExoPlayer? = null
     private var ambientVolume: Float = 0f
     private var alarmVolume: Float = 0f
     private var currentAmbientFile: String? = null
@@ -50,16 +52,19 @@ class AudioService : Service() {
         fun getService(): AudioService = this@AudioService
     }
 
-    private val playbackAudioAttributes = AudioAttributes.Builder()
-        .setUsage(AudioAttributes.USAGE_MEDIA)
-        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+    private val playbackAudioAttributes = ExoAudioAttributes.Builder()
+        .setUsage(com.google.android.exoplayer2.C.USAGE_MEDIA)
+        .setContentType(com.google.android.exoplayer2.C.AUDIO_CONTENT_TYPE_MUSIC)
         .build()
 
     private fun requestAudioFocus(): Boolean {
         val result: Int
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val focusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
-                .setAudioAttributes(playbackAudioAttributes)
+                .setAudioAttributes(android.media.AudioAttributes.Builder()
+                    .setUsage(android.media.AudioAttributes.USAGE_MEDIA)
+                    .setContentType(android.media.AudioAttributes.CONTENT_TYPE_MUSIC)
+                    .build())
                 .setAcceptsDelayedFocusGain(true)
                 .setOnAudioFocusChangeListener(audioFocusChangeListener!!)
                 .build()
@@ -95,7 +100,7 @@ class AudioService : Service() {
                     mainHandler.post {
                         setAmbientVolume(1f)
                         if (ambientPlayer?.isPlaying == false) {
-                            ambientPlayer?.start()
+                            ambientPlayer?.play()
                         }
                     }
                 }
@@ -129,12 +134,13 @@ class AudioService : Service() {
         val fileRes = getAmbientResource(index) ?: return
 
         stopAll {
-            ambientPlayer = MediaPlayer().apply {
-                setAudioAttributes(playbackAudioAttributes)
-                setDataSource(this@AudioService, Uri.parse("android.resource://${packageName}/$fileRes"))
+            ambientPlayer = ExoPlayer.Builder(this@AudioService).build().apply {
+                setAudioAttributes(playbackAudioAttributes, false) // Set to false to manage focus manually
+                val mediaItem = MediaItem.fromUri(Uri.parse("android.resource://${packageName}/$fileRes"))
+                setMediaItem(mediaItem)
+                repeatMode = Player.REPEAT_MODE_ONE
                 prepare()
-                isLooping = true
-                setVolume(0f, 0f)
+                volume = 0f
             }
             ambientVolume = 0f
 
@@ -144,7 +150,7 @@ class AudioService : Service() {
                 return@stopAll
             }
 
-            ambientPlayer?.start()
+            ambientPlayer?.play()
             fadeAmbientVolume(1f, 2000L)
             currentAmbientFile = "ambient_$index"
 
@@ -188,15 +194,16 @@ class AudioService : Service() {
     private fun startAlarm(selectedAlarmIndex: Int?) {
         isAlarmActive = true
         val alarmRes = getAlarmResource(selectedAlarmIndex)
-        alarmPlayer = MediaPlayer().apply {
-            setAudioAttributes(playbackAudioAttributes)
-            setDataSource(this@AudioService, Uri.parse("android.resource://${packageName}/$alarmRes"))
+        alarmPlayer = ExoPlayer.Builder(this@AudioService).build().apply {
+            setAudioAttributes(playbackAudioAttributes, false) // Set to false
+            val mediaItem = MediaItem.fromUri(Uri.parse("android.resource://${packageName}/$alarmRes"))
+            setMediaItem(mediaItem)
+            repeatMode = Player.REPEAT_MODE_ONE
             prepare()
-            isLooping = true
-            setVolume(0f, 0f)
+            volume = 0f
         }
         alarmVolume = 0f
-        alarmPlayer?.start()
+        alarmPlayer?.play()
         fadeVolume(alarmPlayer, alarmVolume, 1f, 500L, { vol -> setAlarmVolume(vol) })
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -208,10 +215,19 @@ class AudioService : Service() {
         }
         hapticGenerator?.vibrate(VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE))
 
-        val interval = alarmPlayer?.duration?.toLong() ?: 1000L
-        alarmTimer = timer(initialDelay = interval, period = interval) {
-            hapticGenerator?.vibrate(VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE))
-        }
+        // For alarm duration, wait until player is ready (ExoPlayer may not have duration immediately)
+        var interval: Long = 1000L // Fallback
+        alarmPlayer?.addListener(object : Player.Listener {
+            override fun onPlaybackStateChanged(playbackState: Int) {
+                if (playbackState == Player.STATE_READY) {
+                    interval = alarmPlayer?.duration ?: 1000L
+                    alarmTimer?.cancel()
+                    alarmTimer = timer(initialDelay = interval, period = interval) {
+                        hapticGenerator?.vibrate(VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE))
+                    }
+                }
+            }
+        })
     }
 
     fun stopAlarm() {
@@ -230,7 +246,7 @@ class AudioService : Service() {
     }
 
     private fun fadeVolume(
-        player: MediaPlayer?,
+        player: ExoPlayer?,
         startVolume: Float,
         target: Float,
         duration: Long,
@@ -262,12 +278,12 @@ class AudioService : Service() {
     }
 
     private fun setAmbientVolume(vol: Float) {
-        ambientPlayer?.setVolume(vol, vol)
+        ambientPlayer?.volume = vol
         ambientVolume = vol
     }
 
     private fun setAlarmVolume(vol: Float) {
-        alarmPlayer?.setVolume(vol, vol)
+        alarmPlayer?.volume = vol
         alarmVolume = vol
     }
 
