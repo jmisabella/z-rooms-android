@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.content.res.Configuration
+import android.os.Build
 import android.os.IBinder
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
@@ -30,6 +31,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -49,6 +52,11 @@ import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.rememberModalBottomSheetState
 import kotlinx.coroutines.launch
+
+private val SelectedItemSaver: Saver<SelectedItem?, Any> = Saver(
+    save = { it?.id },
+    restore = { id -> if (id != null) SelectedItem(id as Int) else null }
+)
 
 @Composable
 fun ContentView() {
@@ -88,7 +96,8 @@ fun ContentView() {
 
     val files = (1..30).map { "ambient_%02d".format(it) }
     val context = LocalContext.current
-    var selectedItem by remember { mutableStateOf<SelectedItem?>(null) }
+//    var selectedItem by remember { mutableStateOf<SelectedItem?>(null) }
+    var selectedItem by rememberSaveable(stateSaver = SelectedItemSaver) { mutableStateOf<SelectedItem?>(null) }
     var durationMinutes by remember { mutableStateOf(PreferenceManager.getDefaultSharedPreferences(context).getFloat("durationMinutes", 0f).toDouble()) }
     var isAlarmEnabled by remember { mutableStateOf(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("isAlarmEnabled", false)) }
     var isAlarmActive by remember { mutableStateOf(false) }
@@ -108,9 +117,27 @@ fun ContentView() {
         }
     }
 
+//    DisposableEffect(Unit) {
+//        context.bindService(Intent(context, AudioService::class.java), connection, Context.BIND_AUTO_CREATE)
+//        onDispose { context.unbindService(connection) }
+//    }
+
     DisposableEffect(Unit) {
-        context.bindService(Intent(context, AudioService::class.java), connection, Context.BIND_AUTO_CREATE)
-        onDispose { context.unbindService(connection) }
+        // Start the service explicitly to make it "started" and prevent destruction on unbind (e.g., during rotation)
+        val serviceIntent = Intent(context, AudioService::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            context.startForegroundService(serviceIntent)
+        } else {
+            context.startService(serviceIntent)
+        }
+
+        // Now bind as before
+        context.bindService(serviceIntent, connection, Context.BIND_AUTO_CREATE)
+
+        onDispose {
+            context.unbindService(connection)
+            // Do NOT call stopService here; let it persist until explicitly stopped (e.g., when audio ends)
+        }
     }
 
     LaunchedEffect(showingAlarmSelection) {
