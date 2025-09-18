@@ -256,7 +256,7 @@ fun ContentView() {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(100.dp)
+                        .height(300.dp)
                         .align(Alignment.BottomCenter)
                         .windowInsetsPadding(WindowInsets.navigationBars)
                         .background(Color.White.copy(alpha = 0.3f)) // Semi-transparent for testing
