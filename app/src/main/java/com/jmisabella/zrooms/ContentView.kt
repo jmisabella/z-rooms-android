@@ -4,6 +4,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.content.res.Configuration
 import android.os.IBinder
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
@@ -35,6 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.geometry.Offset
@@ -116,9 +118,10 @@ fun ContentView() {
     }
 
     val coroutineScope = rememberCoroutineScope()
+    val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
     val sheetState = rememberModalBottomSheetState(
         initialValue = ModalBottomSheetValue.Hidden,
-        skipHalfExpanded = true,
+        skipHalfExpanded = isLandscape,  // Force full expansion in landscape
         confirmValueChange = { newValue ->
             println("confirmValueChange called, newValue=$newValue")
             true // Allow all state changes
@@ -148,7 +151,8 @@ fun ContentView() {
                     }
                 },
                 files = files,
-                audioService = audioService
+                audioService = audioService,
+                isLandscape = isLandscape
             )
         }
     ) {
@@ -309,7 +313,6 @@ fun ContentView() {
 //import androidx.compose.animation.fadeIn
 //import androidx.compose.animation.fadeOut
 //import androidx.compose.foundation.background
-//import androidx.compose.foundation.border
 //import androidx.compose.foundation.gestures.detectDragGestures
 //import androidx.compose.foundation.layout.Arrangement
 //import androidx.compose.foundation.layout.Box
@@ -558,8 +561,6 @@ fun ContentView() {
 //                        .height(300.dp)
 //                        .align(Alignment.BottomCenter)
 //                        .windowInsetsPadding(WindowInsets.navigationBars)
-//                        .background(Color.White.copy(alpha = 0.3f)) // Semi-transparent for testing
-//                        .border(2.dp, Color.Red) // Red border for testing
 //                        .pointerInput(Unit) {
 //                            detectDragGestures(
 //                                onDragStart = { offset ->
