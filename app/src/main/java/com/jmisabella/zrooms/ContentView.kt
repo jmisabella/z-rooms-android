@@ -252,35 +252,36 @@ fun ContentView() {
                 modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 40.dp)
             )
 
-            // Swipe area for main screen
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(100.dp)
-                    .align(Alignment.BottomCenter)
-                    .windowInsetsPadding(WindowInsets.navigationBars)
-                    .background(Color.White.copy(alpha = 0.3f)) // Semi-transparent for testing
-                    .border(2.dp, Color.Red) // Red border for testing
-                    .pointerInput(selectedItem == null) {
-                        detectDragGestures(
-                            onDragStart = { offset ->
-                                println("Swipe area drag started at offset: $offset, showingAlarmSelection=$showingAlarmSelection, selectedItem=$selectedItem")
-                            },
-                            onDragEnd = {
-                                println("Swipe area drag ended, showingAlarmSelection=$showingAlarmSelection")
-                            },
-                            onDragCancel = {
-                                println("Swipe area drag cancelled, showingAlarmSelection=$showingAlarmSelection")
-                            }
-                        ) { _, dragAmount ->
-                            println("Swipe area drag detected, dragAmount=$dragAmount, showingAlarmSelection=$showingAlarmSelection, selectedItem=$selectedItem")
-                            if (dragAmount.y < -10 && selectedItem == null && !showingAlarmSelection) {
-                                println("Swipe up detected in swipe area, setting showingAlarmSelection to true")
-                                showingAlarmSelection = true
+            if (selectedItem == null) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(100.dp)
+                        .align(Alignment.BottomCenter)
+                        .windowInsetsPadding(WindowInsets.navigationBars)
+                        .background(Color.White.copy(alpha = 0.3f)) // Semi-transparent for testing
+                        .border(2.dp, Color.Red) // Red border for testing
+                        .pointerInput(Unit) {
+                            detectDragGestures(
+                                onDragStart = { offset ->
+                                    println("Swipe area drag started at offset: $offset, showingAlarmSelection=$showingAlarmSelection, selectedItem=$selectedItem")
+                                },
+                                onDragEnd = {
+                                    println("Swipe area drag ended, showingAlarmSelection=$showingAlarmSelection")
+                                },
+                                onDragCancel = {
+                                    println("Swipe area drag cancelled, showingAlarmSelection=$showingAlarmSelection")
+                                }
+                            ) { _, dragAmount ->
+                                println("Swipe area drag detected, dragAmount=$dragAmount, showingAlarmSelection=$showingAlarmSelection, selectedItem=$selectedItem")
+                                if (dragAmount.y < -10 && !showingAlarmSelection) {
+                                    println("Swipe up detected in swipe area, setting showingAlarmSelection to true")
+                                    showingAlarmSelection = true
+                                }
                             }
                         }
-                    }
-            )
+                )
+            }
         }
     }
 
@@ -345,7 +346,6 @@ fun ContentView() {
 //import androidx.compose.foundation.layout.WindowInsets
 //import androidx.compose.foundation.layout.navigationBars
 //import androidx.preference.PreferenceManager
-//import com.jmisabella.zrooms.AlarmSelectionContent // New composable for sheet content
 //import androidx.compose.material.ModalBottomSheetLayout
 //import androidx.compose.material.ModalBottomSheetValue
 //import androidx.compose.material.rememberModalBottomSheetState
@@ -421,8 +421,20 @@ fun ContentView() {
 //    val coroutineScope = rememberCoroutineScope()
 //    val sheetState = rememberModalBottomSheetState(
 //        initialValue = ModalBottomSheetValue.Hidden,
-//        skipHalfExpanded = true
+//        skipHalfExpanded = true,
+//        confirmValueChange = { newValue ->
+//            println("confirmValueChange called, newValue=$newValue")
+//            true // Allow all state changes
+//        }
 //    )
+//
+//    LaunchedEffect(sheetState.currentValue) {
+//        println("sheetState.currentValue changed to: ${sheetState.currentValue}")
+//        if (sheetState.currentValue == ModalBottomSheetValue.Hidden && showingAlarmSelection) {
+//            println("Sheet hidden, resetting showingAlarmSelection to false")
+//            showingAlarmSelection = false
+//        }
+//    }
 //
 //    ModalBottomSheetLayout(
 //        sheetState = sheetState,
@@ -434,6 +446,7 @@ fun ContentView() {
 //                    selectedAlarmIndex = index ?: -1
 //                    PreferenceManager.getDefaultSharedPreferences(context).edit().putInt("selectedAlarmIndex", selectedAlarmIndex).apply()
 //                    coroutineScope.launch {
+//                        println("Hiding sheet after selection")
 //                        sheetState.hide()
 //                    }
 //                },
@@ -471,7 +484,11 @@ fun ContentView() {
 //                    contentPadding = PaddingValues(20.dp),
 //                    horizontalArrangement = Arrangement.spacedBy(10.dp),
 //                    verticalArrangement = Arrangement.spacedBy(10.dp),
-//                    modifier = Modifier.fillMaxSize()
+//                    modifier = Modifier
+//                        .fillMaxSize()
+//                        .pointerInput(Unit) {
+//                            detectDragGestures { _, _ -> }
+//                        }
 //                ) {
 //                    items(30) { index ->
 //                        AlarmItemView(
@@ -583,3 +600,4 @@ fun ContentView() {
 //        }
 //    }
 //}
+

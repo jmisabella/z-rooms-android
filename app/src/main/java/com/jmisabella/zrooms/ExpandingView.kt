@@ -12,6 +12,7 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -24,6 +25,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
@@ -48,8 +51,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -75,7 +78,6 @@ fun ExpandingView(
     selectAlarm: () -> Unit
 ) {
     val context = LocalContext.current
-
     val defaultDimDurationMinutes = 3.0
     val defaultDimDurationSeconds = defaultDimDurationMinutes * 60
 
@@ -83,7 +85,8 @@ fun ExpandingView(
     var showTimePicker by remember { mutableStateOf(false) }
     var tempWakeTime by remember { mutableStateOf(Date()) }
     var dimMode by remember { mutableStateOf<DimMode>(DimMode.Duration(defaultDimDurationSeconds)) }
-    var roomChangeTrigger by remember { mutableIntStateOf(0) } // Use int for trigger
+    var roomChangeTrigger by remember { mutableIntStateOf(0) }
+    var dragOffset by remember { mutableStateOf(Offset.Zero) }
 
     // Animation states
     var dimTarget by remember { mutableFloatStateOf(0f) }
@@ -121,8 +124,6 @@ fun ExpandingView(
     )
 
     val effectiveDimOpacity = if (isAlarmAnimating) alarmDimOpacity else animatedDimOpacity
-
-    // Triggers for buttons
     var sunTrigger by remember { mutableIntStateOf(0) }
     var nightsTrigger by remember { mutableIntStateOf(0) }
 
@@ -131,27 +132,11 @@ fun ExpandingView(
             .fillMaxSize()
             .pointerInput(Unit) {
                 detectTapGestures { dismiss() }
-                detectDragGestures { _, dragAmount ->
-                    val translationHeight = dragAmount.y
-                    val translationWidth = dragAmount.x
-                    if (translationHeight < -50) {
-                        selectAlarm()
-                    } else if (translationHeight > 100) {
-                        dismiss()
-                    } else if (translationWidth < -50) {
-                        changeRoom(1)
-                        roomChangeTrigger += 1
-                    } else if (translationWidth > 50) {
-                        changeRoom(-1)
-                        roomChangeTrigger += 1
-                    }
-                }
             }
     ) {
+        // Background and overlays
         Box(Modifier.fillMaxSize()) {
             BreathingBackground(color = animatedBackgroundColor)
-
-            // Dimming overlay (used only for alarm)
             if (isAlarmActive.value) {
                 Box(
                     Modifier
@@ -159,7 +144,6 @@ fun ExpandingView(
                         .background(hsvToColor(0.58f, 0.3f, 0.9f).copy(alpha = effectiveDimOpacity))
                 )
             }
-            // Flash overlay
             Box(
                 Modifier
                     .fillMaxSize()
@@ -167,8 +151,11 @@ fun ExpandingView(
             )
         }
 
+        // Main content
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = 100.dp), // Reserve space for swipe area
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -177,9 +164,7 @@ fun ExpandingView(
                 minValue = 0.0,
                 maxValue = 1440.0,
                 step = 1.0,
-                onEditingChanged = { editing ->
-                    showLabel = editing
-                },
+                onEditingChanged = { editing -> showLabel = editing },
                 modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars)
             )
 
@@ -200,7 +185,6 @@ fun ExpandingView(
                         }
                     }
                 }
-
                 Text(
                     text = text,
                     fontSize = 24.sp,
@@ -216,18 +200,18 @@ fun ExpandingView(
             Text(
                 text = "room ${currentIndex + 1}",
                 fontSize = 14.sp,
-                color = if (currentIndex + 1 <= 5 || currentIndex + 1 >= 28) Color(0xFFB3B3B3) else Color(0xFF4D4D4D),
+                color = if (currentIndex + 1 <= 5 || currentIndex + 1 > 25) Color(0xFFB3B3B3) else Color(0xFF4D4D4D),
                 modifier = Modifier.padding(bottom = 20.dp)
             )
 
             Row(
                 horizontalArrangement = Arrangement.spacedBy(40.dp),
-                modifier = Modifier.padding(bottom = 40.dp)
+                modifier = Modifier.padding(bottom = 20.dp)
             ) {
                 Button(
                     onClick = {
                         dimMode = DimMode.Duration(defaultDimDurationSeconds)
-                        targetBackgroundColor = color // Reset to original color
+                        targetBackgroundColor = color
                         sunTrigger += 1
                     },
                     shape = CircleShape
@@ -244,7 +228,7 @@ fun ExpandingView(
 
                 Button(
                     onClick = {
-                        dimMode = DimMode.Duration(3.0) // Set to 3 seconds
+                        dimMode = DimMode.Duration(3.0)
                         nightsTrigger += 1
                     },
                     shape = CircleShape
@@ -313,6 +297,51 @@ fun ExpandingView(
             }
         }
 
+        // Swipe area
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(100.dp)
+                .align(Alignment.BottomCenter)
+                .windowInsetsPadding(WindowInsets.navigationBars)
+                .background(Color.White.copy(alpha = 0.3f)) // For testing
+                .border(2.dp, Color.Red) // For testing
+                .pointerInput(Unit) {
+                    detectDragGestures(
+                        onDragStart = {
+                            dragOffset = Offset.Zero
+                            println("ExpandingView swipe area drag started at offset: $it")
+                        },
+                        onDragEnd = {
+                            println("ExpandingView swipe area drag ended, dragOffset=$dragOffset")
+                            if (dragOffset.y < -50) { // Swipe up
+                                println("Swipe up detected in ExpandingView swipe area")
+                                selectAlarm()
+                            } else if (dragOffset.y > 50) { // Swipe down
+                                println("Swipe down detected in ExpandingView swipe area")
+                                dismiss()
+                            } else if (dragOffset.x < -50) { // Swipe left
+                                changeRoom(1)
+                                roomChangeTrigger += 1
+                            } else if (dragOffset.x > 50) { // Swipe right
+                                changeRoom(-1)
+                                roomChangeTrigger += 1
+                            }
+                            dragOffset = Offset.Zero
+                        },
+                        onDragCancel = {
+                            println("ExpandingView swipe area drag cancelled")
+                            dragOffset = Offset.Zero
+                        },
+                        onDrag = { change, dragAmount ->
+                            change.consume()
+                            dragOffset += dragAmount
+                            println("ExpandingView swipe area drag detected, dragAmount=$dragAmount, dragOffset=$dragOffset")
+                        }
+                    )
+                }
+        )
+
         if (showTimePicker) {
             Dialog(onDismissRequest = { showTimePicker = false }) {
                 Column(
@@ -371,7 +400,6 @@ fun ExpandingView(
         }
     }
 
-    // OnAppear equivalent
     LaunchedEffect(Unit) {
         if (dimMode is DimMode.Duration) {
             currentDimSpec = snap()
@@ -384,7 +412,6 @@ fun ExpandingView(
         }
     }
 
-    // Alarm state change
     LaunchedEffect(isAlarmActive.value) {
         if (isAlarmActive.value) {
             preAlarmDimOpacity = animatedDimOpacity
@@ -403,7 +430,6 @@ fun ExpandingView(
         }
     }
 
-    // Room change trigger
     LaunchedEffect(roomChangeTrigger) {
         currentFlashSpec = snap()
         flashTarget = 0.8f
@@ -420,7 +446,6 @@ fun ExpandingView(
         dimKey += 1
     }
 
-    // Sun button sequence
     LaunchedEffect(sunTrigger) {
         if (sunTrigger > 0) {
             currentFlashSpec = snap()
@@ -439,11 +464,10 @@ fun ExpandingView(
         }
     }
 
-    // Nights button sequence
     LaunchedEffect(nightsTrigger) {
         if (nightsTrigger > 0) {
-            dimSeconds = 3.0 // Ensure 3-second duration
-            targetBackgroundColor = Color.Black // Animate to black
+            dimSeconds = 3.0
+            targetBackgroundColor = Color.Black
             currentDimSpec = snap()
             dimTarget = 0f
             dimKey += 1
