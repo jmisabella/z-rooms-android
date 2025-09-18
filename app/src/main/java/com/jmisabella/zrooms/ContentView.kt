@@ -10,7 +10,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -259,8 +258,6 @@ fun ContentView() {
                         .height(300.dp)
                         .align(Alignment.BottomCenter)
                         .windowInsetsPadding(WindowInsets.navigationBars)
-                        .background(Color.White.copy(alpha = 0.3f)) // Semi-transparent for testing
-                        .border(2.dp, Color.Red) // Red border for testing
                         .pointerInput(Unit) {
                             detectDragGestures(
                                 onDragStart = { offset ->
@@ -554,35 +551,36 @@ fun ContentView() {
 //                modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 40.dp)
 //            )
 //
-//            // Swipe area for main screen
-//            Box(
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .height(100.dp)
-//                    .align(Alignment.BottomCenter)
-//                    .windowInsetsPadding(WindowInsets.navigationBars)
-//                    .background(Color.White.copy(alpha = 0.3f)) // Semi-transparent for testing
-//                    .border(2.dp, Color.Red) // Red border for testing
-//                    .pointerInput(selectedItem == null) {
-//                        detectDragGestures(
-//                            onDragStart = { offset ->
-//                                println("Swipe area drag started at offset: $offset, showingAlarmSelection=$showingAlarmSelection, selectedItem=$selectedItem")
-//                            },
-//                            onDragEnd = {
-//                                println("Swipe area drag ended, showingAlarmSelection=$showingAlarmSelection")
-//                            },
-//                            onDragCancel = {
-//                                println("Swipe area drag cancelled, showingAlarmSelection=$showingAlarmSelection")
-//                            }
-//                        ) { _, dragAmount ->
-//                            println("Swipe area drag detected, dragAmount=$dragAmount, showingAlarmSelection=$showingAlarmSelection, selectedItem=$selectedItem")
-//                            if (dragAmount.y < -10 && selectedItem == null && !showingAlarmSelection) {
-//                                println("Swipe up detected in swipe area, setting showingAlarmSelection to true")
-//                                showingAlarmSelection = true
+//            if (selectedItem == null) {
+//                Box(
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .height(300.dp)
+//                        .align(Alignment.BottomCenter)
+//                        .windowInsetsPadding(WindowInsets.navigationBars)
+//                        .background(Color.White.copy(alpha = 0.3f)) // Semi-transparent for testing
+//                        .border(2.dp, Color.Red) // Red border for testing
+//                        .pointerInput(Unit) {
+//                            detectDragGestures(
+//                                onDragStart = { offset ->
+//                                    println("Swipe area drag started at offset: $offset, showingAlarmSelection=$showingAlarmSelection, selectedItem=$selectedItem")
+//                                },
+//                                onDragEnd = {
+//                                    println("Swipe area drag ended, showingAlarmSelection=$showingAlarmSelection")
+//                                },
+//                                onDragCancel = {
+//                                    println("Swipe area drag cancelled, showingAlarmSelection=$showingAlarmSelection")
+//                                }
+//                            ) { _, dragAmount ->
+//                                println("Swipe area drag detected, dragAmount=$dragAmount, showingAlarmSelection=$showingAlarmSelection, selectedItem=$selectedItem")
+//                                if (dragAmount.y < -10 && !showingAlarmSelection) {
+//                                    println("Swipe up detected in swipe area, setting showingAlarmSelection to true")
+//                                    showingAlarmSelection = true
+//                                }
 //                            }
 //                        }
-//                    }
-//            )
+//                )
+//            }
 //        }
 //    }
 //
