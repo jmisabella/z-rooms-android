@@ -140,12 +140,19 @@ fun AlarmSelectionView(
         LaunchedEffect(Unit) {
             println("AlarmSelectionView composed, showing sheet")
             sheetState.show()
+            // Play preview for pre-selected alarm index when sheet is shown
+            selectedAlarmIndex?.let { index ->
+                if (index >= 0) {
+                    println("Playing preview for pre-selected alarm index: $index")
+                    audioService?.playPreview(index)
+                }
+            }
         }
     }
 
     LaunchedEffect(selectedAlarmIndex) {
         println("selectedAlarmIndex changed to: $selectedAlarmIndex")
-        if (selectedAlarmIndex != null) {
+        if (selectedAlarmIndex != null && sheetState.currentValue != ModalBottomSheetValue.Hidden) {
             audioService?.playPreview(selectedAlarmIndex)
         }
     }
@@ -164,7 +171,6 @@ fun AlarmSelectionView(
 //
 //import androidx.compose.foundation.background
 //import androidx.compose.foundation.border
-//import androidx.compose.foundation.clickable
 //import androidx.compose.foundation.layout.Arrangement
 //import androidx.compose.foundation.layout.Box
 //import androidx.compose.foundation.layout.PaddingValues
@@ -193,6 +199,8 @@ fun AlarmSelectionView(
 //import androidx.compose.ui.platform.LocalContext
 //import androidx.compose.ui.unit.dp
 //import androidx.compose.ui.unit.sp
+//import androidx.compose.ui.input.pointer.pointerInput
+//import androidx.compose.foundation.gestures.detectTapGestures
 //import kotlin.math.abs
 //
 //@Composable
@@ -209,12 +217,13 @@ fun AlarmSelectionView(
 //    val sheetState = rememberModalBottomSheetState(
 //        initialValue = ModalBottomSheetValue.Hidden,
 //        confirmValueChange = { newValue ->
+//            println("confirmValueChange called, newValue=$newValue")
 //            if (newValue == ModalBottomSheetValue.Hidden) {
 //                println("AlarmSelectionView dismissed via confirmValueChange, calling onDismiss")
 //                audioService?.stopPreview()
 //                onDismiss()
 //            }
-//            true
+//            true // Allow all state changes
 //        }
 //    )
 //
@@ -271,14 +280,16 @@ fun AlarmSelectionView(
 //                                    Color.White,
 //                                    RoundedCornerShape(8.dp)
 //                                )
-//                                .clickable {
-//                                    println("Alarm tile clicked, index=$index, isSelected=$isSelected")
-//                                    if (isSelected) {
-//                                        onSelect(null)
-//                                        audioService?.stopPreview()
-//                                    } else {
-//                                        onSelect(index)
-//                                        audioService?.playPreview(index)
+//                                .pointerInput(Unit) {
+//                                    detectTapGestures { offset ->
+//                                        println("Alarm tile tapped at offset: $offset, index=$index, isSelected=$isSelected")
+//                                        if (isSelected) {
+//                                            onSelect(null)
+//                                            audioService?.stopPreview()
+//                                        } else {
+//                                            onSelect(index)
+//                                            audioService?.playPreview(index)
+//                                        }
 //                                    }
 //                                }
 //                        )
@@ -308,9 +319,9 @@ fun AlarmSelectionView(
 //        }
 //    }
 //
-//    LaunchedEffect(sheetState.isVisible) {
-//        println("sheetState.isVisible changed to: ${sheetState.isVisible}")
-//        if (!sheetState.isVisible) {
+//    LaunchedEffect(sheetState.currentValue) {
+//        println("sheetState.currentValue changed to: ${sheetState.currentValue}")
+//        if (sheetState.currentValue == ModalBottomSheetValue.Hidden) {
 //            println("Sheet hidden, calling onDismiss")
 //            audioService?.stopPreview()
 //            onDismiss()

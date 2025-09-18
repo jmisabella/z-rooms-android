@@ -149,10 +149,20 @@ fun ContentView() {
 
     LaunchedEffect(sheetState.currentValue) {
         println("sheetState.currentValue changed to: ${sheetState.currentValue}")
-        if (sheetState.currentValue == ModalBottomSheetValue.Hidden && showingAlarmSelection) {
-            println("Sheet hidden, resetting showingAlarmSelection to false")
+        if (sheetState.currentValue == ModalBottomSheetValue.Hidden) {
+            println("Sheet hidden, calling onDismiss")
             showingAlarmSelection = false
             audioService?.stopPreview()
+        } else if (sheetState.currentValue != ModalBottomSheetValue.Hidden && selectedAlarmIndex >= 0) {
+            println("Sheet shown, playing preview for pre-selected alarm index: $selectedAlarmIndex")
+            audioService?.playPreview(selectedAlarmIndex)
+        }
+    }
+
+    LaunchedEffect(selectedAlarmIndex) {
+        println("selectedAlarmIndex changed to: $selectedAlarmIndex")
+        if (selectedAlarmIndex >= 0 && sheetState.currentValue != ModalBottomSheetValue.Hidden) {
+            audioService?.playPreview(selectedAlarmIndex)
         }
     }
 
@@ -371,6 +381,7 @@ fun ContentView() {
 //import androidx.compose.material.ModalBottomSheetValue
 //import androidx.compose.material.rememberModalBottomSheetState
 //import kotlinx.coroutines.launch
+//import kotlin.math.min
 //
 //private val SelectedItemSaver: Saver<SelectedItem?, Any> = Saver(
 //    save = { it?.id },
@@ -415,7 +426,6 @@ fun ContentView() {
 //
 //    val files = (1..30).map { "ambient_%02d".format(it) }
 //    val context = LocalContext.current
-////    var selectedItem by remember { mutableStateOf<SelectedItem?>(null) }
 //    var selectedItem by rememberSaveable(stateSaver = SelectedItemSaver) { mutableStateOf<SelectedItem?>(null) }
 //    var durationMinutes by remember { mutableStateOf(PreferenceManager.getDefaultSharedPreferences(context).getFloat("durationMinutes", 0f).toDouble()) }
 //    var isAlarmEnabled by remember { mutableStateOf(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("isAlarmEnabled", false)) }
@@ -436,13 +446,7 @@ fun ContentView() {
 //        }
 //    }
 //
-////    DisposableEffect(Unit) {
-////        context.bindService(Intent(context, AudioService::class.java), connection, Context.BIND_AUTO_CREATE)
-////        onDispose { context.unbindService(connection) }
-////    }
-//
 //    DisposableEffect(Unit) {
-//        // Start the service explicitly to make it "started" and prevent destruction on unbind (e.g., during rotation)
 //        val serviceIntent = Intent(context, AudioService::class.java)
 //        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 //            context.startForegroundService(serviceIntent)
@@ -450,12 +454,10 @@ fun ContentView() {
 //            context.startService(serviceIntent)
 //        }
 //
-//        // Now bind as before
 //        context.bindService(serviceIntent, connection, Context.BIND_AUTO_CREATE)
 //
 //        onDispose {
 //            context.unbindService(connection)
-//            // Do NOT call stopService here; let it persist until explicitly stopped (e.g., when audio ends)
 //        }
 //    }
 //
@@ -467,10 +469,10 @@ fun ContentView() {
 //    val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
 //    val sheetState = rememberModalBottomSheetState(
 //        initialValue = ModalBottomSheetValue.Hidden,
-//        skipHalfExpanded = isLandscape,  // Force full expansion in landscape
+//        skipHalfExpanded = isLandscape,
 //        confirmValueChange = { newValue ->
 //            println("confirmValueChange called, newValue=$newValue")
-//            true // Allow all state changes
+//            true
 //        }
 //    )
 //
@@ -479,6 +481,7 @@ fun ContentView() {
 //        if (sheetState.currentValue == ModalBottomSheetValue.Hidden && showingAlarmSelection) {
 //            println("Sheet hidden, resetting showingAlarmSelection to false")
 //            showingAlarmSelection = false
+//            audioService?.stopPreview()
 //        }
 //    }
 //
@@ -491,10 +494,6 @@ fun ContentView() {
 //                    println("Alarm selected, index=$index")
 //                    selectedAlarmIndex = index ?: -1
 //                    PreferenceManager.getDefaultSharedPreferences(context).edit().putInt("selectedAlarmIndex", selectedAlarmIndex).apply()
-//                    coroutineScope.launch {
-//                        println("Hiding sheet after selection")
-//                        sheetState.hide()
-//                    }
 //                },
 //                files = files,
 //                audioService = audioService,
@@ -646,5 +645,4 @@ fun ContentView() {
 //        }
 //    }
 //}
-
 
