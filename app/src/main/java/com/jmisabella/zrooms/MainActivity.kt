@@ -1,5 +1,6 @@
 package com.jmisabella.zrooms
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -28,6 +29,12 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        val serviceIntent = Intent(this, AudioService::class.java)
+        stopService(serviceIntent)
     }
 }
 
