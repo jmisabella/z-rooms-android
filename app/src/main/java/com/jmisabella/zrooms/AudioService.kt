@@ -1,5 +1,7 @@
 package com.jmisabella.zrooms
 
+import java.util.Timer
+import java.util.TimerTask
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -20,11 +22,13 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
 import androidx.core.app.NotificationCompat
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.audio.AudioAttributes as ExoAudioAttributes
-import java.util.Timer
+//import java.util.Timer
+//import java.util.TimerTask
 import kotlin.concurrent.timer
 
 class AudioService : Service() {
@@ -44,6 +48,11 @@ class AudioService : Service() {
     private lateinit var audioManager: AudioManager
     private var audioFocusChangeListener: AudioManager.OnAudioFocusChangeListener? = null
     private var audioFocusRequest: AudioFocusRequest? = null
+    private var shouldStartPreview = false
+    private var isTransitioning = false
+    private var currentAmbientFade: Runnable? = null
+    private var currentAlarmFade: Runnable? = null
+    private var currentPreviewFade: Runnable? = null
 
     companion object {
         const val CHANNEL_ID = "audio_service_channel"
@@ -53,6 +62,8 @@ class AudioService : Service() {
     inner class AudioBinder : Binder() {
         fun getService(): AudioService = this@AudioService
     }
+
+    fun isReady(): Boolean = !isTransitioning
 
     private val playbackAudioAttributes = ExoAudioAttributes.Builder()
         .setUsage(com.google.android.exoplayer2.C.USAGE_MEDIA)
@@ -130,11 +141,16 @@ class AudioService : Service() {
         previewPlayer?.release()
         stopTimer?.cancel()
         alarmTimer?.cancel()
+        currentAmbientFade?.let { mainHandler.removeCallbacks(it) }
+        currentAlarmFade?.let { mainHandler.removeCallbacks(it) }
+        currentPreviewFade?.let { mainHandler.removeCallbacks(it) }
         super.onDestroy()
     }
 
     fun playAmbient(index: Int, durationMinutes: Double, isAlarmEnabled: Boolean, selectedAlarmIndex: Int?) {
-        val fileRes = getAmbientResource(index) ?: return
+        if (isTransitioning) return
+        isTransitioning = true
+        val fileRes = getAmbientResource(index) ?: run { isTransitioning = false; return }
 
         stopAll {
             ambientPlayer = ExoPlayer.Builder(this@AudioService).build().apply {
@@ -144,37 +160,89 @@ class AudioService : Service() {
                 repeatMode = Player.REPEAT_MODE_ONE
                 prepare()
                 volume = 0f
+                val fadeListener = object : Player.Listener {
+                    override fun onPlaybackStateChanged(state: Int) {
+                        if (state == Player.STATE_READY) {
+                            play()
+                            fadeAmbientVolume(1f, 2000L) {
+                                isTransitioning = false
+                            }
+                            removeListener(this)
+                        }
+                    }
+                }
+                addListener(fadeListener)
             }
             ambientVolume = 0f
 
             if (!requestAudioFocus()) {
                 ambientPlayer?.release()
                 ambientPlayer = null
+                isTransitioning = false
                 return@stopAll
             }
 
-            ambientPlayer?.play()
-            fadeAmbientVolume(1f, 2000L)
-            currentAmbientFile = "ambient_$index"
+            currentAmbientFile = "ambient_${index + 1}"
 
-            if (durationMinutes > 0) {
-                val seconds = (durationMinutes * 60).toLong() * 1000
-                stopTimer = timer(initialDelay = seconds, period = seconds) {
-                    fadeAmbientVolume(0f, 2000L) {
-                        if (isAlarmEnabled) {
-                            startAlarm(selectedAlarmIndex)
+            updateTimer(durationMinutes, isAlarmEnabled, selectedAlarmIndex)
+        }
+    }
+
+
+    fun updateTimer(durationMinutes: Double, isAlarmEnabled: Boolean, selectedAlarmIndex: Int?) {
+        stopTimer?.cancel()
+        stopTimer = null
+
+        if (durationMinutes > 0) {
+            val delayMillis = (durationMinutes * 60 * 1000).toLong()
+            val capturedIsAlarmEnabled = isAlarmEnabled
+            val capturedSelectedAlarmIndex = selectedAlarmIndex
+            val timer = Timer()
+            timer.schedule(object : TimerTask() {
+                override fun run() {
+                    mainHandler.post {
+                        stopAll {
+                            if (capturedIsAlarmEnabled && capturedSelectedAlarmIndex != null) {
+                                startAlarm(capturedSelectedAlarmIndex)
+                            }
                         }
                     }
                 }
-            }
+            }, delayMillis)
+            stopTimer = timer
         }
     }
+
+//    fun updateTimer(durationMinutes: Double, isAlarmEnabled: Boolean, selectedAlarmIndex: Int?) {
+//        stopTimer?.cancel()
+//        stopTimer = null
+//
+//        if (ambientPlayer == null || durationMinutes <= 0) return
+//
+//        val durationMillis = (durationMinutes * 60 * 1000).toLong()
+//        stopTimer = Timer()
+//        stopTimer?.schedule(object : TimerTask() {
+//            override fun run() {
+//                if (isAlarmEnabled) {
+//                    startAlarm(selectedAlarmIndex)
+//                }
+//                fadeAmbientVolume(0f, 2000L) {
+//                    ambientPlayer?.stop()
+//                    ambientPlayer?.release()
+//                    ambientPlayer = null
+//                    ambientVolume = 0f
+//                }
+//            }
+//        }, durationMillis)
+//    }
 
     fun playPreview(index: Int) {
         val fileRes = getAmbientResource(index) ?: return
 
         stopPreview(restoreAmbient = false) {
+            shouldStartPreview = true
             fadeAmbientVolume(0f, 1000L) {
+                if (!shouldStartPreview) return@fadeAmbientVolume
                 previewPlayer = ExoPlayer.Builder(this@AudioService).build().apply {
                     setAudioAttributes(playbackAudioAttributes, false)
                     val mediaItem = MediaItem.fromUri(Uri.parse("android.resource://${packageName}/$fileRes"))
@@ -182,40 +250,33 @@ class AudioService : Service() {
                     repeatMode = Player.REPEAT_MODE_OFF
                     prepare()
                     volume = 0f
+                    val fadeListener = object : Player.Listener {
+                        override fun onPlaybackStateChanged(state: Int) {
+                            if (state == Player.STATE_READY) {
+                                play()
+                                fadePreviewVolume(1f, 1000L)
+                                removeListener(this)
+                            }
+                        }
+                    }
+                    addListener(fadeListener)
                 }
                 previewVolume = 0f
-
-                if (!requestAudioFocus()) {
-                    previewPlayer?.release()
-                    previewPlayer = null
-                    return@fadeAmbientVolume
-                }
-
-                previewPlayer?.play()
-                fadePreviewVolume(0.5f, 1000L)
             }
         }
     }
 
-    fun stopPreview(restoreAmbient: Boolean = true, onCompleted: () -> Unit = {}) {
-        if (previewPlayer == null) {
-            onCompleted()
-            return
-        }
-
+    fun stopPreview(restoreAmbient: Boolean = true, completion: () -> Unit = {}) {
+        shouldStartPreview = false
         fadePreviewVolume(0f, 1000L) {
             previewPlayer?.stop()
             previewPlayer?.release()
             previewPlayer = null
             previewVolume = 0f
-
             if (restoreAmbient && ambientPlayer != null) {
-                fadeAmbientVolume(1f, 1000L) {
-                    onCompleted()
-                }
-            } else {
-                onCompleted()
+                fadeAmbientVolume(1f, 1000L)
             }
+            completion()
         }
     }
 
@@ -236,6 +297,12 @@ class AudioService : Service() {
             @Suppress("DEPRECATION")
             audioFocusChangeListener?.let { audioManager.abandonAudioFocus(it) }
         }
+
+        // Cancel current fades
+        currentAmbientFade?.let { mainHandler.removeCallbacks(it) }
+        currentPreviewFade?.let { mainHandler.removeCallbacks(it) }
+        currentAmbientFade = null
+        currentPreviewFade = null
 
         // Quick fade for ambient
         fadeAmbientVolume(0f, 200L) {
@@ -261,44 +328,14 @@ class AudioService : Service() {
         stopTimer = null
     }
 
-//    fun stopAll(completion: () -> Unit = {}) {
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//            audioFocusRequest?.let { audioManager.abandonAudioFocusRequest(it) }
-//            audioFocusRequest = null
-//        } else {
-//            @Suppress("DEPRECATION")
-//            audioFocusChangeListener?.let { audioManager.abandonAudioFocus(it) }
-//        }
-//
-//        // Instantly stop ambient
-//        ambientPlayer?.volume = 0f
-//        ambientPlayer?.stop()
-//        ambientPlayer?.release()
-//        ambientPlayer = null
-//        ambientVolume = 0f
-//
-//        // Instantly stop alarm
-//        stopAlarm()
-//
-//        // Instantly stop preview
-//        previewPlayer?.volume = 0f
-//        previewPlayer?.stop()
-//        previewPlayer?.release()
-//        previewPlayer = null
-//        previewVolume = 0f
-//
-//        stopTimer?.cancel()
-//        stopTimer = null
-//
-//        completion()
-//    }
-
     fun fadeAmbientVolume(target: Float, duration: Long, completion: () -> Unit = {}) {
+        currentAmbientFade?.let { mainHandler.removeCallbacks(it) }
         fadeVolume(ambientPlayer, ambientVolume, target, duration, { vol -> setAmbientVolume(vol) }, completion)
     }
 
     private fun startAlarm(selectedAlarmIndex: Int?) {
         isAlarmActive = true
+        LocalBroadcastManager.getInstance(this).sendBroadcast(Intent("com.jmisabella.zrooms.ALARM_STARTED"))
         val alarmRes = getAlarmResource(selectedAlarmIndex)
         alarmPlayer = ExoPlayer.Builder(this@AudioService).build().apply {
             setAudioAttributes(playbackAudioAttributes, false)
@@ -307,10 +344,18 @@ class AudioService : Service() {
             repeatMode = Player.REPEAT_MODE_ONE
             prepare()
             volume = 0f
+            val fadeListener = object : Player.Listener {
+                override fun onPlaybackStateChanged(state: Int) {
+                    if (state == Player.STATE_READY) {
+                        play()
+                        fadeAlarmVolume(1f, 500L)
+                        removeListener(this)
+                    }
+                }
+            }
+            addListener(fadeListener)
         }
         alarmVolume = 0f
-        alarmPlayer?.play()
-        fadeVolume(alarmPlayer, alarmVolume, 1f, 500L, { vol -> setAlarmVolume(vol) })
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             val vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
@@ -337,7 +382,8 @@ class AudioService : Service() {
 
     fun stopAlarm() {
         if (isAlarmActive) {
-            fadeVolume(alarmPlayer, alarmVolume, 0f, 2000L, { vol -> setAlarmVolume(vol) }) {
+            currentAlarmFade?.let { mainHandler.removeCallbacks(it) }
+            fadeAlarmVolume(0f, 2000L) {
                 alarmPlayer?.stop()
                 alarmPlayer?.release()
                 alarmPlayer = null
@@ -347,7 +393,13 @@ class AudioService : Service() {
             alarmTimer = null
             hapticGenerator = null
             isAlarmActive = false
+            LocalBroadcastManager.getInstance(this).sendBroadcast(Intent("com.jmisabella.zrooms.ALARM_STOPPED"))
         }
+    }
+
+    fun fadeAlarmVolume(target: Float, duration: Long, completion: () -> Unit = {}) {
+        currentAlarmFade?.let { mainHandler.removeCallbacks(it) }
+        fadeVolume(alarmPlayer, alarmVolume, target, duration, { vol -> setAlarmVolume(vol) }, completion)
     }
 
     private fun fadeVolume(
@@ -372,12 +424,22 @@ class AudioService : Service() {
                 if (currentStep >= steps) {
                     setVol(target)
                     completion()
+                    when (player) {
+                        ambientPlayer -> currentAmbientFade = null
+                        alarmPlayer -> currentAlarmFade = null
+                        previewPlayer -> currentPreviewFade = null
+                    }
                     return
                 }
                 setVol(startVolume + stepChange * currentStep)
                 currentStep++
                 mainHandler.postDelayed(this, stepDuration)
             }
+        }
+        when (player) {
+            ambientPlayer -> currentAmbientFade = runnable
+            alarmPlayer -> currentAlarmFade = runnable
+            previewPlayer -> currentPreviewFade = runnable
         }
         mainHandler.post(runnable)
     }
