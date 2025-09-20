@@ -241,7 +241,7 @@ fun ContentView() {
 
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(5),
-                    contentPadding = PaddingValues(20.dp),
+                    contentPadding = PaddingValues(top = 80.dp, start = 20.dp, end = 20.dp, bottom = 20.dp),
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                     modifier = Modifier
