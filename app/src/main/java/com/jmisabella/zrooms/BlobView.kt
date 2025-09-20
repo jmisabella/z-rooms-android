@@ -37,7 +37,7 @@ fun BlobView(
     val blobSize: Dp = 250.dp
     val blurRadius: Dp = 80.dp
     val amplitude = 300f
-    val speed = 0.6f
+    val speed = 0.6f // Increased from 0.6f to make blobs move faster
     val opacity = 0.5f
     val hueVariation = 0.12f
     val satVariation = 0.4f
@@ -83,3 +83,4 @@ fun BlobView(
             .blur(radius = blurRadius)
     )
 }
+
