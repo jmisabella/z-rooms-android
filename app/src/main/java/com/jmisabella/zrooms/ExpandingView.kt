@@ -15,6 +15,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -81,7 +82,8 @@ fun ExpandingView(
     changeRoom: (Int) -> Boolean,
     currentIndex: Int,
     maxIndex: Int,
-    selectAlarm: () -> Unit
+    selectAlarm: () -> Unit,
+    audioService: AudioService? = null
 ) {
     val context = LocalContext.current
     val defaultDimDurationSeconds = 180.0 // 3 minutes for room entry
@@ -250,10 +252,69 @@ fun ExpandingView(
                             println("ExpandingView swipe area drag detected, dragAmount=$dragAmount, dragOffset=$dragOffset")
                         }
                     )
+                }
+                .pointerInput(Unit) {  // <-- Add this new pointerInput for taps
+                    detectTapGestures { offset ->
+                        println("Tap detected in ExpandingView at offset: $offset")
+                        if (isAlarmActive.value) {
+                            // Stop alarm without exiting the room
+                            audioService?.stopAll()  // Or audioService?.stopAlarm() if you implement a specific method
+                            isAlarmActive.value = false
+                        } else {
+                            // Exit the room
+                            dismiss()
+                        }
+                    }
                 },
             verticalArrangement = Arrangement.SpaceBetween,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+
+//        Column(
+//            modifier = Modifier
+//                .fillMaxSize()
+//                .windowInsetsPadding(WindowInsets.statusBars)
+//                .windowInsetsPadding(WindowInsets.navigationBars)
+//                .pointerInput(Unit) {
+//                    detectDragGestures(
+//                        onDragStart = { offset ->
+//                            println("ExpandingView swipe area drag started at offset: $offset")
+//                            dragOffset = Offset.Zero
+//                        },
+//                        onDragEnd = {
+//                            println("ExpandingView swipe area drag ended, dragOffset=$dragOffset")
+//                            val dx = dragOffset.x
+//                            val dy = dragOffset.y
+//                            if (abs(dx) > abs(dy)) {
+//                                val direction = if (dx > swipeThresholdPx) -1 else if (dx < -swipeThresholdPx) 1 else 0
+//                                if (direction != 0 && changeRoom(direction)) {
+//                                    roomChangeTrigger++
+//                                }
+//                            } else {
+//                                if (dy < -swipeThresholdPx) {
+//                                    println("Swipe up detected in ExpandingView swipe area")
+//                                    selectAlarm()
+//                                } else if (dy > swipeThresholdPx) {
+//                                    println("Swipe down detected in ExpandingView swipe area")
+//                                    dismiss()
+//                                }
+//                            }
+//                            dragOffset = Offset.Zero
+//                        },
+//                        onDragCancel = {
+//                            println("ExpandingView swipe area drag cancelled")
+//                            dragOffset = Offset.Zero
+//                        },
+//                        onDrag = { change, dragAmount ->
+//                            change.consume()
+//                            dragOffset += dragAmount
+//                            println("ExpandingView swipe area drag detected, dragAmount=$dragAmount, dragOffset=$dragOffset")
+//                        }
+//                    )
+//                },
+//            verticalArrangement = Arrangement.SpaceBetween,
+//            horizontalAlignment = Alignment.CenterHorizontally
+//        ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.padding(top = 40.dp)

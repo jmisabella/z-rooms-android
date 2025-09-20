@@ -309,7 +309,8 @@ fun ContentView() {
                         selectAlarm = {
                             println("selectAlarm called from ExpandingView, setting showingAlarmSelection to true")
                             showingAlarmSelection = true
-                        }
+                        },
+                        audioService = audioService
                     )
                 }
             }
