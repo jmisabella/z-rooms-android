@@ -1,6 +1,7 @@
 package com.jmisabella.zrooms
 
 import android.content.Context
+import android.widget.NumberPicker
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.LinearEasing
@@ -12,6 +13,7 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -29,13 +31,12 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.Button
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Alarm
-import androidx.compose.material.icons.outlined.AlarmOn
-import androidx.compose.material.icons.outlined.Brightness7
+import androidx.compose.material.icons.filled.WbSunny
+import androidx.compose.material.icons.filled.Alarm
+import androidx.compose.material.icons.filled.AlarmOn
 import androidx.compose.material.icons.outlined.NightsStay
 import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.runtime.Composable
@@ -54,8 +55,10 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.preference.PreferenceManager
 import java.util.Calendar
@@ -63,6 +66,9 @@ import java.util.Date
 import kotlin.math.max
 import kotlin.math.min
 import kotlinx.coroutines.delay
+import android.text.format.DateFormat
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.draw.alpha
 
 @Composable
 fun ExpandingView(
@@ -82,7 +88,22 @@ fun ExpandingView(
 
     var showLabel by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
-    var tempWakeTime by remember { mutableStateOf(Date()) }
+    var showAlarmStateLabel by remember { mutableStateOf(false) }
+    var tempWakeTime by remember {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        val now = Date()
+        val savedTime = prefs.getLong("lastWakeTime", 0L)
+        if (savedTime != 0L) {
+            mutableStateOf(Date(savedTime))
+        } else if (durationMinutes.value == 0.0) {
+            val calendar = Calendar.getInstance()
+            calendar.time = now
+            calendar.add(Calendar.HOUR_OF_DAY, 8)
+            mutableStateOf(calendar.time)
+        } else {
+            mutableStateOf(Date(now.time + (durationMinutes.value * 60 * 1000).toLong()))
+        }
+    }
     var dimMode by remember { mutableStateOf<DimMode>(DimMode.Duration(defaultDimDurationSeconds)) }
     var roomChangeTrigger by remember { mutableIntStateOf(0) }
     var dragOffset by remember { mutableStateOf(Offset.Zero) }
@@ -126,6 +147,26 @@ fun ExpandingView(
     var sunTrigger by remember { mutableIntStateOf(0) }
     var nightsTrigger by remember { mutableIntStateOf(0) }
 
+    // Alarm state background color
+    val alarmButtonBackground by animateColorAsState(
+        targetValue = if (isAlarmEnabled.value) Color(0xFF4CAF50) else Color(0xFF616161),
+        animationSpec = tween(durationMillis = 300),
+        label = "alarmButtonBackground"
+    )
+
+    val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+
+    LaunchedEffect(durationMinutes.value) {
+        if (durationMinutes.value > 0) {
+            val now = Date()
+            tempWakeTime = Date(now.time + (durationMinutes.value * 60 * 1000).toLong())
+            prefs.edit()
+                .putLong("lastWakeTime", tempWakeTime.time)
+                .putFloat("durationMinutes", durationMinutes.value.toFloat())
+                .apply()
+        }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -154,196 +195,13 @@ fun ExpandingView(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = 100.dp), // Reserve space for swipe area
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            CustomSlider(
-                value = durationMinutes,
-                minValue = 0.0,
-                maxValue = 1440.0,
-                step = 1.0,
-                onEditingChanged = { editing -> showLabel = editing },
-                modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars)
-            )
-
-            if (showLabel) {
-                val text = when {
-                    durationMinutes.value == 0.0 -> "infinite"
-                    durationMinutes.value < 60 -> {
-                        val minutes = durationMinutes.value.toInt()
-                        "$minutes minute${if (minutes == 1) "" else "s"}"
-                    }
-                    else -> {
-                        val hours = (durationMinutes.value / 60).toInt()
-                        val minutes = (durationMinutes.value % 60).toInt()
-                        if (minutes == 0) {
-                            "$hours hour${if (hours == 1) "" else "s"}"
-                        } else {
-                            "$hours hour${if (hours == 1) "" else "s"}, $minutes minute${if (minutes == 1) "" else "s"}"
-                        }
-                    }
-                }
-                Text(
-                    text = text,
-                    fontSize = 24.sp,
-                    color = Color.White,
-                    modifier = Modifier
-                        .background(Color.Black.copy(alpha = 0.5f))
-                        .padding(8.dp)
-                )
-            }
-
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-                    .pointerInput(Unit) {
-                        detectDragGestures(
-                            onDragStart = {
-                                dragOffset = Offset.Zero
-                                println("ExpandingView upper swipe area drag started at offset: $it")
-                            },
-                            onDragEnd = {
-                                println("ExpandingView upper swipe area drag ended, dragOffset=$dragOffset")
-                                if (dragOffset.y < -50) { // Swipe up
-                                    println("Swipe up detected in ExpandingView upper swipe area")
-                                    selectAlarm()
-                                } else if (dragOffset.y > 50) { // Swipe down
-                                    println("Swipe down detected in ExpandingView upper swipe area")
-                                    dismiss()
-                                } else if (dragOffset.x < -50) { // Swipe left
-                                    changeRoom(1)
-                                } else if (dragOffset.x > 50) { // Swipe right
-                                    changeRoom(-1)
-                                }
-                                dragOffset = Offset.Zero
-                            },
-                            onDragCancel = {
-                                println("ExpandingView upper swipe area drag cancelled")
-                                dragOffset = Offset.Zero
-                            },
-                            onDrag = { change, dragAmount ->
-                                change.consume()
-                                dragOffset += dragAmount
-                                println("ExpandingView upper swipe area drag detected, dragAmount=$dragAmount, dragOffset=$dragOffset")
-                            }
-                        )
-                    }
-            )
-
-            Text(
-                text = "room ${currentIndex + 1}",
-                fontSize = 14.sp,
-                color = if (currentIndex + 1 <= 5 || currentIndex + 1 > 25) Color(0xFFB3B3B3) else Color(0xFF4D4D4D),
-                modifier = Modifier.padding(bottom = 20.dp)
-            )
-
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(40.dp),
-                modifier = Modifier.padding(bottom = 20.dp)
-            ) {
-                Button(
-                    onClick = {
-                        dimMode = DimMode.Duration(defaultDimDurationSeconds)
-                        targetBackgroundColor = color
-                        sunTrigger += 1
-                    },
-                    shape = CircleShape
-                ) {
-                    Icon(
-                        Icons.Outlined.Brightness7,
-                        contentDescription = null,
-                        tint = Color(0xFFB3B3B3),
-                        modifier = Modifier
-                            .width(34.dp)
-                            .height(34.dp)
-                    )
-                }
-
-                Button(
-                    onClick = {
-                        dimMode = DimMode.Duration(3.0)
-                        nightsTrigger += 1
-                    },
-                    shape = CircleShape
-                ) {
-                    Icon(
-                        Icons.Outlined.NightsStay,
-                        contentDescription = null,
-                        tint = Color(0xFFB3B3B3),
-                        modifier = Modifier
-                            .width(34.dp)
-                            .height(34.dp)
-                    )
-                }
-
-                Button(
-                    onClick = {
-                        if (durationMinutes.value > 0) {
-                            isAlarmEnabled.value = !isAlarmEnabled.value
-                            PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean("isAlarmEnabled", isAlarmEnabled.value).apply()
-                            if (isAlarmEnabled.value) {
-                                selectAlarm()
-                            }
-                        }
-                    },
-                    enabled = durationMinutes.value > 0,
-                    shape = CircleShape
-                ) {
-                    Icon(
-                        if (isAlarmEnabled.value) Icons.Outlined.AlarmOn else Icons.Outlined.Alarm,
-                        contentDescription = null,
-                        tint = Color(0xFFB3B3B3),
-                        modifier = Modifier
-                            .width(34.dp)
-                            .height(34.dp)
-                    )
-                }
-
-                Button(
-                    onClick = {
-                        val now = Date()
-                        val savedTime = PreferenceManager.getDefaultSharedPreferences(context)
-                            .getLong("lastWakeTime", 0L)
-                            .let { if (it > 0) Date(it) else null }
-                        tempWakeTime = when {
-                            savedTime != null -> savedTime
-                            durationMinutes.value == 0.0 -> Calendar.getInstance().apply {
-                                time = now
-                                add(Calendar.HOUR_OF_DAY, 8)
-                            }.time
-                            else -> Date(now.time + (durationMinutes.value * 60 * 1000).toLong())
-                        }
-                        showTimePicker = true
-                    },
-                    enabled = durationMinutes.value > 0 || isAlarmEnabled.value,
-                    shape = CircleShape
-                ) {
-                    Icon(
-                        Icons.Outlined.Schedule,
-                        contentDescription = null,
-                        tint = Color(0xFFB3B3B3),
-                        modifier = Modifier
-                            .width(34.dp)
-                            .height(34.dp)
-                    )
-                }
-            }
-        }
-
-        // Swipe area
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(100.dp)
-                .align(Alignment.BottomCenter)
+                .windowInsetsPadding(WindowInsets.statusBars)
                 .windowInsetsPadding(WindowInsets.navigationBars)
                 .pointerInput(Unit) {
                     detectDragGestures(
-                        onDragStart = {
+                        onDragStart = { offset ->
+                            println("ExpandingView swipe area drag started at offset: $offset")
                             dragOffset = Offset.Zero
-                            println("ExpandingView swipe area drag started at offset: $it")
                         },
                         onDragEnd = {
                             println("ExpandingView swipe area drag ended, dragOffset=$dragOffset")
@@ -370,62 +228,273 @@ fun ExpandingView(
                             println("ExpandingView swipe area drag detected, dragAmount=$dragAmount, dragOffset=$dragOffset")
                         }
                     )
-                }
-        )
-
-        if (showTimePicker) {
-            Dialog(onDismissRequest = { showTimePicker = false }) {
-                Column(
+                },
+            verticalArrangement = Arrangement.SpaceBetween,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.padding(top = 40.dp)
+            ) {
+                CustomSlider(
+                    value = durationMinutes,
+                    minValue = 0.0,
+                    maxValue = 1440.0,
+                    step = 1.0,
+                    onEditingChanged = { editing ->
+                        showLabel = editing
+                    },
                     modifier = Modifier
-                        .background(Color.White)
-                        .padding(20.dp),
-                    verticalArrangement = Arrangement.spacedBy(20.dp)
-                ) {
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp)
+                )
+                if (showLabel) {
+                    Spacer(Modifier.height(8.dp))
                     Text(
-                        text = "Select Wake Time (Implement TimePicker here; this is a placeholder)",
-                        color = Color.Black,
-                        fontSize = 16.sp
+                        text = formatDuration(durationMinutes.value),
+                        color = Color.White,
+                        fontSize = 18.sp,
+                        modifier = Modifier
+                            .background(Color.Black.copy(alpha = 0.5f))
+                            .padding(8.dp)
                     )
-                    Button(
-                        onClick = {
-                            val now = Date()
-                            val calendar = Calendar.getInstance()
-                            calendar.time = tempWakeTime
-                            val components = calendar.get(Calendar.HOUR_OF_DAY) to calendar.get(Calendar.MINUTE)
-                            var wakeDate = calendar.apply {
-                                set(Calendar.HOUR_OF_DAY, components.first)
-                                set(Calendar.MINUTE, components.second)
-                                set(Calendar.SECOND, 0)
-                            }.time
+                }
+            }
 
-                            if (wakeDate <= now) {
-                                wakeDate = Calendar.getInstance().apply {
-                                    time = wakeDate
-                                    add(Calendar.DAY_OF_MONTH, 1)
-                                }.time
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                // Alarm state label
+                if (showAlarmStateLabel) {
+                    Text(
+                        text = if (isAlarmEnabled.value) "Alarm Enabled" else "Alarm Disabled",
+                        color = Color.White,
+                        fontSize = 16.sp,
+                        modifier = Modifier
+                            .background(Color.Black.copy(alpha = 0.7f))
+                            .padding(8.dp)
+                            .align(Alignment.CenterHorizontally)
+                    )
+                }
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 40.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .clickable {
+                                sunTrigger++
+                                dimMode = DimMode.Duration(dimSeconds)
                             }
+                            .background(Color.Black.copy(alpha = 0.5f), CircleShape)
+                            .padding(12.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            Icons.Filled.WbSunny,
+                            contentDescription = "Brighten Screen",
+                            tint = Color(0xFFFFCA28),
+                            modifier = Modifier.size(28.dp)
+                        )
+                    }
 
-                            val durationSeconds = (wakeDate.time - now.time) / 1000.0
-                            durationMinutes.value = max(1.0, min(1440.0, durationSeconds / 60))
-                            PreferenceManager.getDefaultSharedPreferences(context)
-                                .edit()
-                                .putLong("lastWakeTime", tempWakeTime.time)
-                                .apply()
+                    Spacer(Modifier.width(40.dp))
 
-                            if (!isAlarmEnabled.value) {
-                                isAlarmEnabled.value = true
+                    Box(
+                        modifier = Modifier
+                            .clickable {
+                                nightsTrigger++
+                                dimMode = DimMode.Duration(dimSeconds)
+                            }
+                            .background(Color.Black.copy(alpha = 0.5f), CircleShape)
+                            .padding(12.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            Icons.Outlined.NightsStay,
+                            contentDescription = "Dim Screen",
+                            tint = Color(0xFF64B5F6), // Moon blue
+                            modifier = Modifier.size(28.dp)
+                        )
+                    }
+
+                    Spacer(Modifier.width(40.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .clickable {
+                                isAlarmEnabled.value = !isAlarmEnabled.value
+                                showAlarmStateLabel = true
                                 PreferenceManager.getDefaultSharedPreferences(context)
                                     .edit()
-                                    .putBoolean("isAlarmEnabled", true)
+                                    .putBoolean("isAlarmEnabled", isAlarmEnabled.value)
                                     .apply()
-                                selectAlarm()
+                                if (isAlarmEnabled.value && durationMinutes.value == 0.0) {
+                                    showTimePicker = true
+                                }
                             }
-
-                            showTimePicker = false
-                        }
+                            .background(alarmButtonBackground, CircleShape)
+                            .padding(12.dp),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Text("Set", color = Color.White)
+                        Icon(
+                            if (isAlarmEnabled.value) Icons.Filled.AlarmOn else Icons.Filled.Alarm,
+                            contentDescription = if (isAlarmEnabled.value) "Alarm Enabled" else "Alarm Disabled",
+                            tint = if (isAlarmEnabled.value) Color.White else Color(0xFFB3B3B3),
+                            modifier = Modifier.size(28.dp)
+                        )
                     }
+
+                    Spacer(Modifier.width(40.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .clickable(enabled = durationMinutes.value != 0.0 || isAlarmEnabled.value) {
+                                showTimePicker = true
+                            }
+                            .background(Color.Black.copy(alpha = 0.5f), CircleShape)
+                            .padding(12.dp)
+                            .alpha(if (durationMinutes.value == 0.0 && !isAlarmEnabled.value) 0.5f else 1f),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            Icons.Outlined.Schedule,
+                            contentDescription = "Set Timer",
+                            tint = Color(0xFFFFA726), // Warm orange
+                            modifier = Modifier.size(28.dp)
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    // Hide alarm state label after 2 seconds
+    LaunchedEffect(showAlarmStateLabel) {
+        if (showAlarmStateLabel) {
+            delay(2000)
+            showAlarmStateLabel = false
+        }
+    }
+
+    if (showTimePicker) {
+        Dialog(onDismissRequest = { showTimePicker = false }) {
+            Column(
+                modifier = Modifier
+                    .background(Color.White)
+                    .padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(20.dp)
+            ) {
+                val calendar = Calendar.getInstance()
+                calendar.time = tempWakeTime
+                val is24Hour = DateFormat.is24HourFormat(context)
+                var hour by remember { mutableIntStateOf(if (is24Hour) calendar.get(Calendar.HOUR_OF_DAY) else calendar.get(Calendar.HOUR)) }
+                var minute by remember { mutableIntStateOf(calendar.get(Calendar.MINUTE)) }
+                var amPm by remember { mutableIntStateOf(if (calendar.get(Calendar.AM_PM) == Calendar.AM) 0 else 1) }
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(150.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    AndroidView(
+                        factory = { ctx ->
+                            NumberPicker(ctx).apply {
+                                minValue = if (is24Hour) 0 else 1
+                                maxValue = if (is24Hour) 23 else 12
+                                value = hour
+                                setOnValueChangedListener { _, _, newVal -> hour = newVal }
+                            }
+                        },
+                        modifier = Modifier.width(80.dp)
+                    )
+
+                    Text(":", fontSize = 24.sp, modifier = Modifier.padding(horizontal = 8.dp))
+
+                    AndroidView(
+                        factory = { ctx ->
+                            NumberPicker(ctx).apply {
+                                minValue = 0
+                                maxValue = 59
+                                value = minute
+                                setFormatter { value -> String.format("%02d", value) }
+                                setOnValueChangedListener { _, _, newVal -> minute = newVal }
+                            }
+                        },
+                        modifier = Modifier.width(80.dp)
+                    )
+
+                    if (!is24Hour) {
+                        Spacer(Modifier.width(16.dp))
+                        AndroidView(
+                            factory = { ctx ->
+                                NumberPicker(ctx).apply {
+                                    minValue = 0
+                                    maxValue = 1
+                                    displayedValues = arrayOf("AM", "PM")
+                                    value = amPm
+                                    setOnValueChangedListener { _, _, newVal -> amPm = newVal }
+                                }
+                            },
+                            modifier = Modifier.width(100.dp)
+                        )
+                    }
+                }
+
+                androidx.compose.material.Button(
+                    onClick = {
+                        val now = Date()
+                        val calendar = Calendar.getInstance()
+                        var selectedHour = hour
+                        if (!is24Hour) {
+                            if (amPm == 1 && selectedHour < 12) selectedHour += 12
+                            if (amPm == 0 && selectedHour == 12) selectedHour = 0
+                        }
+                        var wakeDate = calendar.apply {
+                            time = now
+                            set(Calendar.HOUR_OF_DAY, selectedHour)
+                            set(Calendar.MINUTE, minute)
+                            set(Calendar.SECOND, 0)
+                        }.time
+
+                        if (wakeDate <= now) {
+                            wakeDate = Calendar.getInstance().apply {
+                                time = wakeDate
+                                add(Calendar.DAY_OF_MONTH, 1)
+                            }.time
+                        }
+
+                        val durationSeconds = (wakeDate.time - now.time) / 1000.0
+                        durationMinutes.value = max(1.0, min(1440.0, durationSeconds / 60))
+
+                        val saveCalendar = Calendar.getInstance()
+                        saveCalendar.set(Calendar.HOUR_OF_DAY, selectedHour)
+                        saveCalendar.set(Calendar.MINUTE, minute)
+                        tempWakeTime = saveCalendar.time
+
+                        PreferenceManager.getDefaultSharedPreferences(context)
+                            .edit()
+                            .putLong("lastWakeTime", tempWakeTime.time)
+                            .putFloat("durationMinutes", durationMinutes.value.toFloat())
+                            .apply()
+
+                        if (!isAlarmEnabled.value) {
+                            isAlarmEnabled.value = true
+                            PreferenceManager.getDefaultSharedPreferences(context)
+                                .edit()
+                                .putBoolean("isAlarmEnabled", true)
+                                .apply()
+                            selectAlarm()
+                        }
+
+                        showTimePicker = false
+                    }
+                ) {
+                    Text("Set", color = Color.White)
                 }
             }
         }
@@ -510,9 +579,17 @@ fun ExpandingView(
     }
 }
 
+fun formatDuration(minutes: Double): String {
+    if (minutes == 0.0) return "Infinite"
+    val hours = (minutes / 60).toInt()
+    val mins = (minutes % 60).toInt()
+    return if (hours > 0) "${hours}h ${mins}m" else "${mins}m"
+}
+
 //package com.jmisabella.zrooms
 //
 //import android.content.Context
+//import android.widget.NumberPicker
 //import androidx.compose.animation.animateColorAsState
 //import androidx.compose.animation.core.FiniteAnimationSpec
 //import androidx.compose.animation.core.LinearEasing
@@ -524,7 +601,7 @@ fun ExpandingView(
 //import androidx.compose.animation.core.snap
 //import androidx.compose.animation.core.tween
 //import androidx.compose.foundation.background
-//import androidx.compose.foundation.border
+//import androidx.compose.foundation.clickable
 //import androidx.compose.foundation.gestures.detectDragGestures
 //import androidx.compose.foundation.gestures.detectTapGestures
 //import androidx.compose.foundation.layout.Arrangement
@@ -542,13 +619,12 @@ fun ExpandingView(
 //import androidx.compose.foundation.layout.statusBars
 //import androidx.compose.foundation.layout.windowInsetsPadding
 //import androidx.compose.foundation.shape.CircleShape
-//import androidx.compose.material.Button
 //import androidx.compose.material.Icon
 //import androidx.compose.material.Text
 //import androidx.compose.material.icons.Icons
-//import androidx.compose.material.icons.outlined.Alarm
-//import androidx.compose.material.icons.outlined.AlarmOn
-//import androidx.compose.material.icons.outlined.Brightness7
+//import androidx.compose.material.icons.filled.WbSunny
+//import androidx.compose.material.icons.filled.Alarm
+//import androidx.compose.material.icons.filled.AlarmOn
 //import androidx.compose.material.icons.outlined.NightsStay
 //import androidx.compose.material.icons.outlined.Schedule
 //import androidx.compose.runtime.Composable
@@ -567,8 +643,10 @@ fun ExpandingView(
 //import androidx.compose.ui.graphics.Color
 //import androidx.compose.ui.input.pointer.pointerInput
 //import androidx.compose.ui.platform.LocalContext
+//import androidx.compose.ui.platform.LocalDensity
 //import androidx.compose.ui.unit.dp
 //import androidx.compose.ui.unit.sp
+//import androidx.compose.ui.viewinterop.AndroidView
 //import androidx.compose.ui.window.Dialog
 //import androidx.preference.PreferenceManager
 //import java.util.Calendar
@@ -576,6 +654,9 @@ fun ExpandingView(
 //import kotlin.math.max
 //import kotlin.math.min
 //import kotlinx.coroutines.delay
+//import android.text.format.DateFormat
+//import androidx.compose.foundation.layout.size
+//import androidx.compose.ui.draw.alpha
 //
 //@Composable
 //fun ExpandingView(
@@ -595,7 +676,22 @@ fun ExpandingView(
 //
 //    var showLabel by remember { mutableStateOf(false) }
 //    var showTimePicker by remember { mutableStateOf(false) }
-//    var tempWakeTime by remember { mutableStateOf(Date()) }
+//    var showAlarmStateLabel by remember { mutableStateOf(false) }
+//    var tempWakeTime by remember {
+//        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+//        val now = Date()
+//        val savedTime = prefs.getLong("lastWakeTime", 0L)
+//        if (savedTime != 0L) {
+//            mutableStateOf(Date(savedTime))
+//        } else if (durationMinutes.value == 0.0) {
+//            val calendar = Calendar.getInstance()
+//            calendar.time = now
+//            calendar.add(Calendar.HOUR_OF_DAY, 8)
+//            mutableStateOf(calendar.time)
+//        } else {
+//            mutableStateOf(Date(now.time + (durationMinutes.value * 60 * 1000).toLong()))
+//        }
+//    }
 //    var dimMode by remember { mutableStateOf<DimMode>(DimMode.Duration(defaultDimDurationSeconds)) }
 //    var roomChangeTrigger by remember { mutableIntStateOf(0) }
 //    var dragOffset by remember { mutableStateOf(Offset.Zero) }
@@ -639,6 +735,26 @@ fun ExpandingView(
 //    var sunTrigger by remember { mutableIntStateOf(0) }
 //    var nightsTrigger by remember { mutableIntStateOf(0) }
 //
+//    // Alarm state background color
+//    val alarmButtonBackground by animateColorAsState(
+//        targetValue = if (isAlarmEnabled.value) Color(0xFF4CAF50) else Color(0xFF616161),
+//        animationSpec = tween(durationMillis = 300),
+//        label = "alarmButtonBackground"
+//    )
+//
+//    val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+//
+//    LaunchedEffect(durationMinutes.value) {
+//        if (durationMinutes.value > 0) {
+//            val now = Date()
+//            tempWakeTime = Date(now.time + (durationMinutes.value * 60 * 1000).toLong())
+//            prefs.edit()
+//                .putLong("lastWakeTime", tempWakeTime.time)
+//                .putFloat("durationMinutes", durationMinutes.value.toFloat())
+//                .apply()
+//        }
+//    }
+//
 //    Box(
 //        modifier = Modifier
 //            .fillMaxSize()
@@ -667,198 +783,13 @@ fun ExpandingView(
 //        Column(
 //            modifier = Modifier
 //                .fillMaxSize()
-//                .padding(bottom = 100.dp), // Reserve space for swipe area
-//            verticalArrangement = Arrangement.Center,
-//            horizontalAlignment = Alignment.CenterHorizontally
-//        ) {
-//            CustomSlider(
-//                value = durationMinutes,
-//                minValue = 0.0,
-//                maxValue = 1440.0,
-//                step = 1.0,
-//                onEditingChanged = { editing -> showLabel = editing },
-//                modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars)
-//            )
-//
-//            if (showLabel) {
-//                val text = when {
-//                    durationMinutes.value == 0.0 -> "infinite"
-//                    durationMinutes.value < 60 -> {
-//                        val minutes = durationMinutes.value.toInt()
-//                        "$minutes minute${if (minutes == 1) "" else "s"}"
-//                    }
-//                    else -> {
-//                        val hours = (durationMinutes.value / 60).toInt()
-//                        val minutes = (durationMinutes.value % 60).toInt()
-//                        if (minutes == 0) {
-//                            "$hours hour${if (hours == 1) "" else "s"}"
-//                        } else {
-//                            "$hours hour${if (hours == 1) "" else "s"}, $minutes minute${if (minutes == 1) "" else "s"}"
-//                        }
-//                    }
-//                }
-//                Text(
-//                    text = text,
-//                    fontSize = 24.sp,
-//                    color = Color.White,
-//                    modifier = Modifier
-//                        .background(Color.Black.copy(alpha = 0.5f))
-//                        .padding(8.dp)
-//                )
-//            }
-//
-//            Box(
-//                modifier = Modifier
-//                    .weight(1f)
-//                    .fillMaxWidth()
-//                    .pointerInput(Unit) {
-//                        detectDragGestures(
-//                            onDragStart = {
-//                                dragOffset = Offset.Zero
-//                                println("ExpandingView upper swipe area drag started at offset: $it")
-//                            },
-//                            onDragEnd = {
-//                                println("ExpandingView upper swipe area drag ended, dragOffset=$dragOffset")
-//                                if (dragOffset.y < -50) { // Swipe up
-//                                    println("Swipe up detected in ExpandingView upper swipe area")
-//                                    selectAlarm()
-//                                } else if (dragOffset.y > 50) { // Swipe down
-//                                    println("Swipe down detected in ExpandingView upper swipe area")
-//                                    dismiss()
-//                                } else if (dragOffset.x < -50) { // Swipe left
-//                                    changeRoom(1)
-//                                } else if (dragOffset.x > 50) { // Swipe right
-//                                    changeRoom(-1)
-//                                }
-//                                dragOffset = Offset.Zero
-//                            },
-//                            onDragCancel = {
-//                                println("ExpandingView upper swipe area drag cancelled")
-//                                dragOffset = Offset.Zero
-//                            },
-//                            onDrag = { change, dragAmount ->
-//                                change.consume()
-//                                dragOffset += dragAmount
-//                                println("ExpandingView upper swipe area drag detected, dragAmount=$dragAmount, dragOffset=$dragOffset")
-//                            }
-//                        )
-//                    }
-//            )
-//
-//            Text(
-//                text = "room ${currentIndex + 1}",
-//                fontSize = 14.sp,
-//                color = if (currentIndex + 1 <= 5 || currentIndex + 1 > 25) Color(0xFFB3B3B3) else Color(0xFF4D4D4D),
-//                modifier = Modifier.padding(bottom = 20.dp)
-//            )
-//
-//            Row(
-//                horizontalArrangement = Arrangement.spacedBy(40.dp),
-//                modifier = Modifier.padding(bottom = 20.dp)
-//            ) {
-//                Button(
-//                    onClick = {
-//                        dimMode = DimMode.Duration(defaultDimDurationSeconds)
-//                        targetBackgroundColor = color
-//                        sunTrigger += 1
-//                    },
-//                    shape = CircleShape
-//                ) {
-//                    Icon(
-//                        Icons.Outlined.Brightness7,
-//                        contentDescription = null,
-//                        tint = Color(0xFFB3B3B3),
-//                        modifier = Modifier
-//                            .width(34.dp)
-//                            .height(34.dp)
-//                    )
-//                }
-//
-//                Button(
-//                    onClick = {
-//                        dimMode = DimMode.Duration(3.0)
-//                        nightsTrigger += 1
-//                    },
-//                    shape = CircleShape
-//                ) {
-//                    Icon(
-//                        Icons.Outlined.NightsStay,
-//                        contentDescription = null,
-//                        tint = Color(0xFFB3B3B3),
-//                        modifier = Modifier
-//                            .width(34.dp)
-//                            .height(34.dp)
-//                    )
-//                }
-//
-//                Button(
-//                    onClick = {
-//                        if (durationMinutes.value > 0) {
-//                            isAlarmEnabled.value = !isAlarmEnabled.value
-//                            PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean("isAlarmEnabled", isAlarmEnabled.value).apply()
-//                            if (isAlarmEnabled.value) {
-//                                selectAlarm()
-//                            }
-//                        }
-//                    },
-//                    enabled = durationMinutes.value > 0,
-//                    shape = CircleShape
-//                ) {
-//                    Icon(
-//                        if (isAlarmEnabled.value) Icons.Outlined.AlarmOn else Icons.Outlined.Alarm,
-//                        contentDescription = null,
-//                        tint = Color(0xFFB3B3B3),
-//                        modifier = Modifier
-//                            .width(34.dp)
-//                            .height(34.dp)
-//                    )
-//                }
-//
-//                Button(
-//                    onClick = {
-//                        val now = Date()
-//                        val savedTime = PreferenceManager.getDefaultSharedPreferences(context)
-//                            .getLong("lastWakeTime", 0L)
-//                            .let { if (it > 0) Date(it) else null }
-//                        tempWakeTime = when {
-//                            savedTime != null -> savedTime
-//                            durationMinutes.value == 0.0 -> Calendar.getInstance().apply {
-//                                time = now
-//                                add(Calendar.HOUR_OF_DAY, 8)
-//                            }.time
-//                            else -> Date(now.time + (durationMinutes.value * 60 * 1000).toLong())
-//                        }
-//                        showTimePicker = true
-//                    },
-//                    enabled = durationMinutes.value > 0 || isAlarmEnabled.value,
-//                    shape = CircleShape
-//                ) {
-//                    Icon(
-//                        Icons.Outlined.Schedule,
-//                        contentDescription = null,
-//                        tint = Color(0xFFB3B3B3),
-//                        modifier = Modifier
-//                            .width(34.dp)
-//                            .height(34.dp)
-//                    )
-//                }
-//            }
-//        }
-//
-//        // Swipe area
-//        Box(
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .height(100.dp)
-//                .align(Alignment.BottomCenter)
+//                .windowInsetsPadding(WindowInsets.statusBars)
 //                .windowInsetsPadding(WindowInsets.navigationBars)
-//                .background(Color.White.copy(alpha = 0.3f)) // For testing
-//                .border(2.dp, Color.Red) // For testing
 //                .pointerInput(Unit) {
 //                    detectDragGestures(
-//                        onDragStart = {
+//                        onDragStart = { offset ->
+//                            println("ExpandingView swipe area drag started at offset: $offset")
 //                            dragOffset = Offset.Zero
-//                            println("ExpandingView swipe area drag started at offset: $it")
 //                        },
 //                        onDragEnd = {
 //                            println("ExpandingView swipe area drag ended, dragOffset=$dragOffset")
@@ -885,62 +816,271 @@ fun ExpandingView(
 //                            println("ExpandingView swipe area drag detected, dragAmount=$dragAmount, dragOffset=$dragOffset")
 //                        }
 //                    )
-//                }
-//        )
-//
-//        if (showTimePicker) {
-//            Dialog(onDismissRequest = { showTimePicker = false }) {
-//                Column(
+//                },
+//            verticalArrangement = Arrangement.SpaceBetween,
+//            horizontalAlignment = Alignment.CenterHorizontally
+//        ) {
+//            Column(
+//                horizontalAlignment = Alignment.CenterHorizontally,
+//                modifier = Modifier.padding(top = 40.dp)
+//            ) {
+//                Text(
+//                    text = formatDuration(durationMinutes.value),
+//                    color = Color.White,
+//                    fontSize = 18.sp,
 //                    modifier = Modifier
-//                        .background(Color.White)
-//                        .padding(20.dp),
-//                    verticalArrangement = Arrangement.spacedBy(20.dp)
-//                ) {
+//                        .background(Color.Black.copy(alpha = 0.5f))
+//                        .padding(8.dp)
+//                )
+//                Spacer(Modifier.height(8.dp))
+//                CustomSlider(
+//                    value = durationMinutes,
+//                    minValue = 0.0,
+//                    maxValue = 1440.0,
+//                    step = 1.0,
+//                    onEditingChanged = { editing ->
+//                        showLabel = editing
+//                    },
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .padding(horizontal = 20.dp)
+//                )
+//            }
+//
+//            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+//                // Alarm state label
+//                if (showAlarmStateLabel) {
 //                    Text(
-//                        text = "Select Wake Time (Implement TimePicker here; this is a placeholder)",
-//                        color = Color.Black,
-//                        fontSize = 16.sp
+//                        text = if (isAlarmEnabled.value) "Alarm Enabled" else "Alarm Disabled",
+//                        color = Color.White,
+//                        fontSize = 16.sp,
+//                        modifier = Modifier
+//                            .background(Color.Black.copy(alpha = 0.7f))
+//                            .padding(8.dp)
+//                            .align(Alignment.CenterHorizontally)
 //                    )
-//                    Button(
-//                        onClick = {
-//                            val now = Date()
-//                            val calendar = Calendar.getInstance()
-//                            calendar.time = tempWakeTime
-//                            val components = calendar.get(Calendar.HOUR_OF_DAY) to calendar.get(Calendar.MINUTE)
-//                            var wakeDate = calendar.apply {
-//                                set(Calendar.HOUR_OF_DAY, components.first)
-//                                set(Calendar.MINUTE, components.second)
-//                                set(Calendar.SECOND, 0)
-//                            }.time
+//                }
 //
-//                            if (wakeDate <= now) {
-//                                wakeDate = Calendar.getInstance().apply {
-//                                    time = wakeDate
-//                                    add(Calendar.DAY_OF_MONTH, 1)
-//                                }.time
+//                Row(
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .padding(bottom = 40.dp),
+//                    horizontalArrangement = Arrangement.Center,
+//                    verticalAlignment = Alignment.CenterVertically
+//                ) {
+//                    Box(
+//                        modifier = Modifier
+//                            .clickable {
+//                                sunTrigger++
+//                                dimMode = DimMode.Duration(dimSeconds)
 //                            }
+//                            .background(Color.Black.copy(alpha = 0.5f), CircleShape)
+//                            .padding(12.dp),
+//                        contentAlignment = Alignment.Center
+//                    ) {
+//                        Icon(
+//                            Icons.Filled.WbSunny,
+//                            contentDescription = "Brighten Screen",
+//                            tint = Color(0xFFFFCA28),
+//                            modifier = Modifier.size(28.dp)
+//                        )
+//                    }
 //
-//                            val durationSeconds = (wakeDate.time - now.time) / 1000.0
-//                            durationMinutes.value = max(1.0, min(1440.0, durationSeconds / 60))
-//                            PreferenceManager.getDefaultSharedPreferences(context)
-//                                .edit()
-//                                .putLong("lastWakeTime", tempWakeTime.time)
-//                                .apply()
+//                    Spacer(Modifier.width(40.dp))
 //
-//                            if (!isAlarmEnabled.value) {
-//                                isAlarmEnabled.value = true
+//                    Box(
+//                        modifier = Modifier
+//                            .clickable {
+//                                nightsTrigger++
+//                                dimMode = DimMode.Duration(dimSeconds)
+//                            }
+//                            .background(Color.Black.copy(alpha = 0.5f), CircleShape)
+//                            .padding(12.dp),
+//                        contentAlignment = Alignment.Center
+//                    ) {
+//                        Icon(
+//                            Icons.Outlined.NightsStay,
+//                            contentDescription = "Dim Screen",
+//                            tint = Color(0xFF64B5F6), // Moon blue
+//                            modifier = Modifier.size(28.dp)
+//                        )
+//                    }
+//
+//                    Spacer(Modifier.width(40.dp))
+//
+//                    Box(
+//                        modifier = Modifier
+//                            .clickable {
+//                                isAlarmEnabled.value = !isAlarmEnabled.value
+//                                showAlarmStateLabel = true
 //                                PreferenceManager.getDefaultSharedPreferences(context)
 //                                    .edit()
-//                                    .putBoolean("isAlarmEnabled", true)
+//                                    .putBoolean("isAlarmEnabled", isAlarmEnabled.value)
 //                                    .apply()
-//                                selectAlarm()
+//                                if (isAlarmEnabled.value && durationMinutes.value == 0.0) {
+//                                    showTimePicker = true
+//                                }
 //                            }
-//
-//                            showTimePicker = false
-//                        }
+//                            .background(alarmButtonBackground, CircleShape)
+//                            .padding(12.dp),
+//                        contentAlignment = Alignment.Center
 //                    ) {
-//                        Text("Set", color = Color.White)
+//                        Icon(
+//                            if (isAlarmEnabled.value) Icons.Filled.AlarmOn else Icons.Filled.Alarm,
+//                            contentDescription = if (isAlarmEnabled.value) "Alarm Enabled" else "Alarm Disabled",
+//                            tint = if (isAlarmEnabled.value) Color.White else Color(0xFFB3B3B3),
+//                            modifier = Modifier.size(28.dp)
+//                        )
 //                    }
+//
+//                    Spacer(Modifier.width(40.dp))
+//
+//                    Box(
+//                        modifier = Modifier
+//                            .clickable(enabled = durationMinutes.value != 0.0 || isAlarmEnabled.value) {
+//                                showTimePicker = true
+//                            }
+//                            .background(Color.Black.copy(alpha = 0.5f), CircleShape)
+//                            .padding(12.dp)
+//                            .alpha(if (durationMinutes.value == 0.0 && !isAlarmEnabled.value) 0.5f else 1f),
+//                        contentAlignment = Alignment.Center
+//                    ) {
+//                        Icon(
+//                            Icons.Outlined.Schedule,
+//                            contentDescription = "Set Timer",
+//                            tint = Color(0xFFFFA726), // Warm orange
+//                            modifier = Modifier.size(28.dp)
+//                        )
+//                    }
+//                }
+//            }
+//        }
+//    }
+//
+//    // Hide alarm state label after 2 seconds
+//    LaunchedEffect(showAlarmStateLabel) {
+//        if (showAlarmStateLabel) {
+//            delay(2000)
+//            showAlarmStateLabel = false
+//        }
+//    }
+//
+//    if (showTimePicker) {
+//        Dialog(onDismissRequest = { showTimePicker = false }) {
+//            Column(
+//                modifier = Modifier
+//                    .background(Color.White)
+//                    .padding(20.dp),
+//                verticalArrangement = Arrangement.spacedBy(20.dp)
+//            ) {
+//                val calendar = Calendar.getInstance()
+//                calendar.time = tempWakeTime
+//                val is24Hour = DateFormat.is24HourFormat(context)
+//                var hour by remember { mutableIntStateOf(if (is24Hour) calendar.get(Calendar.HOUR_OF_DAY) else calendar.get(Calendar.HOUR)) }
+//                var minute by remember { mutableIntStateOf(calendar.get(Calendar.MINUTE)) }
+//                var amPm by remember { mutableIntStateOf(if (calendar.get(Calendar.AM_PM) == Calendar.AM) 0 else 1) }
+//
+//                Row(
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .height(150.dp),
+//                    horizontalArrangement = Arrangement.Center,
+//                    verticalAlignment = Alignment.CenterVertically
+//                ) {
+//                    AndroidView(
+//                        factory = { ctx ->
+//                            NumberPicker(ctx).apply {
+//                                minValue = if (is24Hour) 0 else 1
+//                                maxValue = if (is24Hour) 23 else 12
+//                                value = hour
+//                                setOnValueChangedListener { _, _, newVal -> hour = newVal }
+//                            }
+//                        },
+//                        modifier = Modifier.width(80.dp)
+//                    )
+//
+//                    Text(":", fontSize = 24.sp, modifier = Modifier.padding(horizontal = 8.dp))
+//
+//                    AndroidView(
+//                        factory = { ctx ->
+//                            NumberPicker(ctx).apply {
+//                                minValue = 0
+//                                maxValue = 59
+//                                value = minute
+//                                setFormatter { value -> String.format("%02d", value) }
+//                                setOnValueChangedListener { _, _, newVal -> minute = newVal }
+//                            }
+//                        },
+//                        modifier = Modifier.width(80.dp)
+//                    )
+//
+//                    if (!is24Hour) {
+//                        Spacer(Modifier.width(16.dp))
+//                        AndroidView(
+//                            factory = { ctx ->
+//                                NumberPicker(ctx).apply {
+//                                    minValue = 0
+//                                    maxValue = 1
+//                                    displayedValues = arrayOf("AM", "PM")
+//                                    value = amPm
+//                                    setOnValueChangedListener { _, _, newVal -> amPm = newVal }
+//                                }
+//                            },
+//                            modifier = Modifier.width(100.dp)
+//                        )
+//                    }
+//                }
+//
+//                androidx.compose.material.Button(
+//                    onClick = {
+//                        val now = Date()
+//                        val calendar = Calendar.getInstance()
+//                        var selectedHour = hour
+//                        if (!is24Hour) {
+//                            if (amPm == 1 && selectedHour < 12) selectedHour += 12
+//                            if (amPm == 0 && selectedHour == 12) selectedHour = 0
+//                        }
+//                        var wakeDate = calendar.apply {
+//                            time = now
+//                            set(Calendar.HOUR_OF_DAY, selectedHour)
+//                            set(Calendar.MINUTE, minute)
+//                            set(Calendar.SECOND, 0)
+//                        }.time
+//
+//                        if (wakeDate <= now) {
+//                            wakeDate = Calendar.getInstance().apply {
+//                                time = wakeDate
+//                                add(Calendar.DAY_OF_MONTH, 1)
+//                            }.time
+//                        }
+//
+//                        val durationSeconds = (wakeDate.time - now.time) / 1000.0
+//                        durationMinutes.value = max(1.0, min(1440.0, durationSeconds / 60))
+//
+//                        val saveCalendar = Calendar.getInstance()
+//                        saveCalendar.set(Calendar.HOUR_OF_DAY, selectedHour)
+//                        saveCalendar.set(Calendar.MINUTE, minute)
+//                        tempWakeTime = saveCalendar.time
+//
+//                        PreferenceManager.getDefaultSharedPreferences(context)
+//                            .edit()
+//                            .putLong("lastWakeTime", tempWakeTime.time)
+//                            .putFloat("durationMinutes", durationMinutes.value.toFloat())
+//                            .apply()
+//
+//                        if (!isAlarmEnabled.value) {
+//                            isAlarmEnabled.value = true
+//                            PreferenceManager.getDefaultSharedPreferences(context)
+//                                .edit()
+//                                .putBoolean("isAlarmEnabled", true)
+//                                .apply()
+//                            selectAlarm()
+//                        }
+//
+//                        showTimePicker = false
+//                    }
+//                ) {
+//                    Text("Set", color = Color.White)
 //                }
 //            }
 //        }
@@ -1023,5 +1163,12 @@ fun ExpandingView(
 //            dimKey += 1
 //        }
 //    }
+//}
+//
+//fun formatDuration(minutes: Double): String {
+//    if (minutes == 0.0) return "Infinite"
+//    val hours = (minutes / 60).toInt()
+//    val mins = (minutes % 60).toInt()
+//    return if (hours > 0) "${hours}h ${mins}m" else "${mins}m"
 //}
 

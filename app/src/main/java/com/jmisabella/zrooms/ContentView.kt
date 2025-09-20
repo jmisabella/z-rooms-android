@@ -53,6 +53,10 @@ import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.rememberModalBottomSheetState
 import kotlinx.coroutines.launch
 import kotlin.math.min
+import androidx.localbroadcastmanager.content.LocalBroadcastManager // Added for broadcast receiver
+import android.content.BroadcastReceiver
+import android.content.IntentFilter
+import androidx.compose.runtime.mutableIntStateOf
 
 private val SelectedItemSaver: Saver<SelectedItem?, Any> = Saver(
     save = { it?.id },
@@ -98,10 +102,14 @@ fun ContentView() {
     val files = (1..30).map { "ambient_%02d".format(it) }
     val context = LocalContext.current
     var selectedItem by rememberSaveable(stateSaver = SelectedItemSaver) { mutableStateOf<SelectedItem?>(null) }
-    var durationMinutes by remember { mutableStateOf(PreferenceManager.getDefaultSharedPreferences(context).getFloat("durationMinutes", 0f).toDouble()) }
-    var isAlarmEnabled by remember { mutableStateOf(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("isAlarmEnabled", false)) }
-    var isAlarmActive by remember { mutableStateOf(false) }
-    var selectedAlarmIndex by remember { mutableStateOf(PreferenceManager.getDefaultSharedPreferences(context).getInt("selectedAlarmIndex", -1)) }
+    val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+    val durationState = remember { mutableStateOf(prefs.getFloat("durationMinutes", 0f).toDouble()) }
+    var durationMinutes by durationState
+    val alarmEnabledState = remember { mutableStateOf(prefs.getBoolean("isAlarmEnabled", false)) }
+    var isAlarmEnabled by alarmEnabledState
+    val alarmActiveState = remember { mutableStateOf(false) }
+    var isAlarmActive by alarmActiveState
+    var selectedAlarmIndex by remember { mutableIntStateOf(prefs.getInt("selectedAlarmIndex", -1)) }
     var showingAlarmSelection by remember { mutableStateOf(false) }
 
     var audioService by remember { mutableStateOf<AudioService?>(null) }
@@ -117,6 +125,10 @@ fun ContentView() {
         }
     }
 
+    LaunchedEffect(durationMinutes, isAlarmEnabled, selectedAlarmIndex) {
+        audioService?.updateTimer(durationMinutes, isAlarmEnabled, selectedAlarmIndex.takeIf { it >= 0 })
+    }
+
     DisposableEffect(Unit) {
         val serviceIntent = Intent(context, AudioService::class.java)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -129,6 +141,28 @@ fun ContentView() {
 
         onDispose {
             context.unbindService(connection)
+        }
+    }
+
+    // Added: Broadcast receiver for alarm start/stop from service
+    DisposableEffect(Unit) {
+        val broadcastManager = LocalBroadcastManager.getInstance(context)
+        val alarmReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                when (intent?.action) {
+                    "com.jmisabella.zrooms.ALARM_STARTED" -> isAlarmActive = true
+                    "com.jmisabella.zrooms.ALARM_STOPPED" -> isAlarmActive = false
+                }
+            }
+        }
+        val filter = IntentFilter().apply {
+            addAction("com.jmisabella.zrooms.ALARM_STARTED")
+            addAction("com.jmisabella.zrooms.ALARM_STOPPED")
+        }
+        broadcastManager.registerReceiver(alarmReceiver, filter)
+
+        onDispose {
+            broadcastManager.unregisterReceiver(alarmReceiver)
         }
     }
 
@@ -250,9 +284,9 @@ fun ContentView() {
                             isAlarmActive = false
                             audioService?.stopAll()
                         },
-                        durationMinutes = mutableStateOf(durationMinutes),
-                        isAlarmActive = mutableStateOf(isAlarmActive),
-                        isAlarmEnabled = mutableStateOf(isAlarmEnabled),
+                        durationMinutes = durationState,  // Fixed: Pass shared state
+                        isAlarmActive = alarmActiveState,  // Fixed: Pass shared state
+                        isAlarmEnabled = alarmEnabledState,  // Fixed: Pass shared state
                         changeRoom = { direction ->
                             val currentIndex = selected.id
                             var newIndex = currentIndex + direction
@@ -446,6 +480,10 @@ fun ContentView() {
 //        }
 //    }
 //
+//    LaunchedEffect(durationMinutes, isAlarmEnabled, selectedAlarmIndex) {
+//        audioService?.updateTimer(durationMinutes, isAlarmEnabled, selectedAlarmIndex)
+//    }
+//
 //    DisposableEffect(Unit) {
 //        val serviceIntent = Intent(context, AudioService::class.java)
 //        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -478,10 +516,20 @@ fun ContentView() {
 //
 //    LaunchedEffect(sheetState.currentValue) {
 //        println("sheetState.currentValue changed to: ${sheetState.currentValue}")
-//        if (sheetState.currentValue == ModalBottomSheetValue.Hidden && showingAlarmSelection) {
-//            println("Sheet hidden, resetting showingAlarmSelection to false")
+//        if (sheetState.currentValue == ModalBottomSheetValue.Hidden) {
+//            println("Sheet hidden, calling onDismiss")
 //            showingAlarmSelection = false
 //            audioService?.stopPreview()
+//        } else if (sheetState.currentValue != ModalBottomSheetValue.Hidden && selectedAlarmIndex >= 0) {
+//            println("Sheet shown, playing preview for pre-selected alarm index: $selectedAlarmIndex")
+//            audioService?.playPreview(selectedAlarmIndex)
+//        }
+//    }
+//
+//    LaunchedEffect(selectedAlarmIndex) {
+//        println("selectedAlarmIndex changed to: $selectedAlarmIndex")
+//        if (selectedAlarmIndex >= 0 && sheetState.currentValue != ModalBottomSheetValue.Hidden) {
+//            audioService?.playPreview(selectedAlarmIndex)
 //        }
 //    }
 //
@@ -645,4 +693,5 @@ fun ContentView() {
 //        }
 //    }
 //}
+
 
