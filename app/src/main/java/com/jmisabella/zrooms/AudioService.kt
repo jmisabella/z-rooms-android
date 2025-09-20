@@ -1,5 +1,7 @@
 package com.jmisabella.zrooms
 
+import java.util.Timer
+import java.util.TimerTask
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -25,8 +27,8 @@ import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.audio.AudioAttributes as ExoAudioAttributes
-import java.util.Timer
-import java.util.TimerTask
+//import java.util.Timer
+//import java.util.TimerTask
 import kotlin.concurrent.timer
 
 class AudioService : Service() {
@@ -186,28 +188,53 @@ class AudioService : Service() {
         }
     }
 
+
     fun updateTimer(durationMinutes: Double, isAlarmEnabled: Boolean, selectedAlarmIndex: Int?) {
         stopTimer?.cancel()
         stopTimer = null
 
-        if (ambientPlayer == null || durationMinutes <= 0) return
-
-        val durationMillis = (durationMinutes * 60 * 1000).toLong()
-        stopTimer = Timer()
-        stopTimer?.schedule(object : TimerTask() {
-            override fun run() {
-                if (isAlarmEnabled) {
-                    startAlarm(selectedAlarmIndex)
+        if (durationMinutes > 0) {
+            val delayMillis = (durationMinutes * 60 * 1000).toLong()
+            val capturedIsAlarmEnabled = isAlarmEnabled
+            val capturedSelectedAlarmIndex = selectedAlarmIndex
+            val timer = Timer()
+            timer.schedule(object : TimerTask() {
+                override fun run() {
+                    mainHandler.post {
+                        stopAll {
+                            if (capturedIsAlarmEnabled && capturedSelectedAlarmIndex != null) {
+                                startAlarm(capturedSelectedAlarmIndex)
+                            }
+                        }
+                    }
                 }
-                fadeAmbientVolume(0f, 2000L) {
-                    ambientPlayer?.stop()
-                    ambientPlayer?.release()
-                    ambientPlayer = null
-                    ambientVolume = 0f
-                }
-            }
-        }, durationMillis)
+            }, delayMillis)
+            stopTimer = timer
+        }
     }
+
+//    fun updateTimer(durationMinutes: Double, isAlarmEnabled: Boolean, selectedAlarmIndex: Int?) {
+//        stopTimer?.cancel()
+//        stopTimer = null
+//
+//        if (ambientPlayer == null || durationMinutes <= 0) return
+//
+//        val durationMillis = (durationMinutes * 60 * 1000).toLong()
+//        stopTimer = Timer()
+//        stopTimer?.schedule(object : TimerTask() {
+//            override fun run() {
+//                if (isAlarmEnabled) {
+//                    startAlarm(selectedAlarmIndex)
+//                }
+//                fadeAmbientVolume(0f, 2000L) {
+//                    ambientPlayer?.stop()
+//                    ambientPlayer?.release()
+//                    ambientPlayer = null
+//                    ambientVolume = 0f
+//                }
+//            }
+//        }, durationMillis)
+//    }
 
     fun playPreview(index: Int) {
         val fileRes = getAmbientResource(index) ?: return
