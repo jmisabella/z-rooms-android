@@ -53,7 +53,7 @@ import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.rememberModalBottomSheetState
 import kotlinx.coroutines.launch
 import kotlin.math.min
-import androidx.localbroadcastmanager.content.LocalBroadcastManager // Added for broadcast receiver
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import android.content.BroadcastReceiver
 import android.content.IntentFilter
 import androidx.compose.runtime.mutableIntStateOf
@@ -144,7 +144,6 @@ fun ContentView() {
         }
     }
 
-    // Added: Broadcast receiver for alarm start/stop from service
     DisposableEffect(Unit) {
         val broadcastManager = LocalBroadcastManager.getInstance(context)
         val alarmReceiver = object : BroadcastReceiver() {
@@ -267,6 +266,7 @@ fun ContentView() {
                 }
             }
 
+
             AnimatedVisibility(
                 visible = selectedItem != null,
                 enter = fadeIn(animationSpec = tween(300)),
@@ -284,18 +284,24 @@ fun ContentView() {
                             isAlarmActive = false
                             audioService?.stopAll()
                         },
-                        durationMinutes = durationState,  // Fixed: Pass shared state
-                        isAlarmActive = alarmActiveState,  // Fixed: Pass shared state
-                        isAlarmEnabled = alarmEnabledState,  // Fixed: Pass shared state
+                        durationMinutes = durationState,
+                        isAlarmActive = alarmActiveState,
+                        isAlarmEnabled = alarmEnabledState,
                         changeRoom = { direction ->
-                            val currentIndex = selected.id
-                            var newIndex = currentIndex + direction
-                            while (newIndex in 0 until files.size && files[newIndex].isEmpty()) {
-                                newIndex += direction
-                            }
-                            if (newIndex in 0 until files.size) {
-                                selectedItem = SelectedItem(newIndex)
-                                audioService?.playAmbient(newIndex, durationMinutes, isAlarmEnabled, selectedAlarmIndex.takeIf { it >= 0 })
+                            if (selectedItem == null) {
+                                println("No selected item, cannot change room")
+                                false
+                            } else {
+                                val currentIndex = selectedItem!!.id
+                                val newIndex = currentIndex + direction
+                                if (newIndex in 0 until files.size && audioService?.isReady() == true) {
+                                    selectedItem = SelectedItem(newIndex)
+                                    audioService?.playAmbient(newIndex, durationMinutes, isAlarmEnabled, selectedAlarmIndex.takeIf { it >= 0 })
+                                    true
+                                } else {
+                                    println("Invalid new index: $newIndex or audioService not ready")
+                                    false
+                                }
                             }
                         },
                         currentIndex = selected.id,
@@ -416,6 +422,10 @@ fun ContentView() {
 //import androidx.compose.material.rememberModalBottomSheetState
 //import kotlinx.coroutines.launch
 //import kotlin.math.min
+//import androidx.localbroadcastmanager.content.LocalBroadcastManager
+//import android.content.BroadcastReceiver
+//import android.content.IntentFilter
+//import androidx.compose.runtime.mutableIntStateOf
 //
 //private val SelectedItemSaver: Saver<SelectedItem?, Any> = Saver(
 //    save = { it?.id },
@@ -461,10 +471,14 @@ fun ContentView() {
 //    val files = (1..30).map { "ambient_%02d".format(it) }
 //    val context = LocalContext.current
 //    var selectedItem by rememberSaveable(stateSaver = SelectedItemSaver) { mutableStateOf<SelectedItem?>(null) }
-//    var durationMinutes by remember { mutableStateOf(PreferenceManager.getDefaultSharedPreferences(context).getFloat("durationMinutes", 0f).toDouble()) }
-//    var isAlarmEnabled by remember { mutableStateOf(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("isAlarmEnabled", false)) }
-//    var isAlarmActive by remember { mutableStateOf(false) }
-//    var selectedAlarmIndex by remember { mutableStateOf(PreferenceManager.getDefaultSharedPreferences(context).getInt("selectedAlarmIndex", -1)) }
+//    val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+//    val durationState = remember { mutableStateOf(prefs.getFloat("durationMinutes", 0f).toDouble()) }
+//    var durationMinutes by durationState
+//    val alarmEnabledState = remember { mutableStateOf(prefs.getBoolean("isAlarmEnabled", false)) }
+//    var isAlarmEnabled by alarmEnabledState
+//    val alarmActiveState = remember { mutableStateOf(false) }
+//    var isAlarmActive by alarmActiveState
+//    var selectedAlarmIndex by remember { mutableIntStateOf(prefs.getInt("selectedAlarmIndex", -1)) }
 //    var showingAlarmSelection by remember { mutableStateOf(false) }
 //
 //    var audioService by remember { mutableStateOf<AudioService?>(null) }
@@ -481,7 +495,7 @@ fun ContentView() {
 //    }
 //
 //    LaunchedEffect(durationMinutes, isAlarmEnabled, selectedAlarmIndex) {
-//        audioService?.updateTimer(durationMinutes, isAlarmEnabled, selectedAlarmIndex)
+//        audioService?.updateTimer(durationMinutes, isAlarmEnabled, selectedAlarmIndex.takeIf { it >= 0 })
 //    }
 //
 //    DisposableEffect(Unit) {
@@ -496,6 +510,27 @@ fun ContentView() {
 //
 //        onDispose {
 //            context.unbindService(connection)
+//        }
+//    }
+//
+//    DisposableEffect(Unit) {
+//        val broadcastManager = LocalBroadcastManager.getInstance(context)
+//        val alarmReceiver = object : BroadcastReceiver() {
+//            override fun onReceive(context: Context?, intent: Intent?) {
+//                when (intent?.action) {
+//                    "com.jmisabella.zrooms.ALARM_STARTED" -> isAlarmActive = true
+//                    "com.jmisabella.zrooms.ALARM_STOPPED" -> isAlarmActive = false
+//                }
+//            }
+//        }
+//        val filter = IntentFilter().apply {
+//            addAction("com.jmisabella.zrooms.ALARM_STARTED")
+//            addAction("com.jmisabella.zrooms.ALARM_STOPPED")
+//        }
+//        broadcastManager.registerReceiver(alarmReceiver, filter)
+//
+//        onDispose {
+//            broadcastManager.unregisterReceiver(alarmReceiver)
 //        }
 //    }
 //
@@ -617,18 +652,20 @@ fun ContentView() {
 //                            isAlarmActive = false
 //                            audioService?.stopAll()
 //                        },
-//                        durationMinutes = mutableStateOf(durationMinutes),
-//                        isAlarmActive = mutableStateOf(isAlarmActive),
-//                        isAlarmEnabled = mutableStateOf(isAlarmEnabled),
+//                        durationMinutes = durationState,
+//                        isAlarmActive = alarmActiveState,
+//                        isAlarmEnabled = alarmEnabledState,
 //                        changeRoom = { direction ->
 //                            val currentIndex = selected.id
-//                            var newIndex = currentIndex + direction
-//                            while (newIndex in 0 until files.size && files[newIndex].isEmpty()) {
-//                                newIndex += direction
-//                            }
-//                            if (newIndex in 0 until files.size) {
+//                            println("CURRENT INDEX: " + currentIndex.toString())
+//                            val newIndex = currentIndex + direction
+//                            println("NEW INDEX: " + newIndex.toString())
+//                            if (newIndex in 0 until files.size && audioService?.isReady() == true) {
 //                                selectedItem = SelectedItem(newIndex)
 //                                audioService?.playAmbient(newIndex, durationMinutes, isAlarmEnabled, selectedAlarmIndex.takeIf { it >= 0 })
+//                                true
+//                            } else {
+//                                false
 //                            }
 //                        },
 //                        currentIndex = selected.id,
@@ -693,5 +730,4 @@ fun ContentView() {
 //        }
 //    }
 //}
-
 

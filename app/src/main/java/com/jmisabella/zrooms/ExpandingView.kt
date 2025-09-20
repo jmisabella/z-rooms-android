@@ -15,7 +15,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -48,7 +47,6 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -68,7 +66,9 @@ import kotlin.math.min
 import kotlinx.coroutines.delay
 import android.text.format.DateFormat
 import androidx.compose.foundation.layout.size
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.alpha
+import kotlin.math.abs
 
 @Composable
 fun ExpandingView(
@@ -77,7 +77,7 @@ fun ExpandingView(
     durationMinutes: MutableState<Double>,
     isAlarmActive: MutableState<Boolean>,
     isAlarmEnabled: MutableState<Boolean>,
-    changeRoom: (Int) -> Unit,
+    changeRoom: (Int) -> Boolean,
     currentIndex: Int,
     maxIndex: Int,
     selectAlarm: () -> Unit
@@ -108,7 +108,6 @@ fun ExpandingView(
     var roomChangeTrigger by remember { mutableIntStateOf(0) }
     var dragOffset by remember { mutableStateOf(Offset.Zero) }
 
-    // Animation states
     var dimTarget by remember { mutableFloatStateOf(0f) }
     var dimSeconds by remember { mutableDoubleStateOf(defaultDimDurationSeconds) }
     var dimKey by remember { mutableIntStateOf(0) }
@@ -121,15 +120,13 @@ fun ExpandingView(
     var currentFlashSpec by remember { mutableStateOf<FiniteAnimationSpec<Float>>(snap()) }
     val animatedFlashOpacity by animateFloatAsState(flashTarget, currentFlashSpec, label = "flash")
 
-    // Background color animation
     var targetBackgroundColor by remember { mutableStateOf(color) }
     val animatedBackgroundColor by animateColorAsState(
         targetValue = targetBackgroundColor,
-        animationSpec = tween(durationMillis = (dimSeconds * 1000).toInt(), easing = LinearEasing),
+        animationSpec = tween(durationMillis = 300, easing = LinearEasing),
         label = "backgroundColor"
     )
 
-    // Alarm animation
     val infiniteTransition = rememberInfiniteTransition(label = "alarm")
     var isAlarmAnimating by remember { mutableStateOf(false) }
     var preAlarmDimOpacity by remember { mutableFloatStateOf(animatedDimOpacity) }
@@ -147,7 +144,6 @@ fun ExpandingView(
     var sunTrigger by remember { mutableIntStateOf(0) }
     var nightsTrigger by remember { mutableIntStateOf(0) }
 
-    // Alarm state background color
     val alarmButtonBackground by animateColorAsState(
         targetValue = if (isAlarmEnabled.value) Color(0xFF4CAF50) else Color(0xFF616161),
         animationSpec = tween(durationMillis = 300),
@@ -167,16 +163,24 @@ fun ExpandingView(
         }
     }
 
+    LaunchedEffect(color) {
+        targetBackgroundColor = color
+    }
+
+    val density = LocalDensity.current
+    val swipeThresholdPx = with(density) { 50.dp.toPx() }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .pointerInput(Unit) {
-                detectTapGestures { dismiss() }
-            }
     ) {
-        // Background and overlays
         Box(Modifier.fillMaxSize()) {
             BreathingBackground(color = animatedBackgroundColor)
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = animatedDimOpacity))
+            )
             if (isAlarmActive.value) {
                 Box(
                     Modifier
@@ -191,7 +195,6 @@ fun ExpandingView(
             )
         }
 
-        // Main content
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -205,16 +208,21 @@ fun ExpandingView(
                         },
                         onDragEnd = {
                             println("ExpandingView swipe area drag ended, dragOffset=$dragOffset")
-                            if (dragOffset.y < -50) { // Swipe up
-                                println("Swipe up detected in ExpandingView swipe area")
-                                selectAlarm()
-                            } else if (dragOffset.y > 50) { // Swipe down
-                                println("Swipe down detected in ExpandingView swipe area")
-                                dismiss()
-                            } else if (dragOffset.x < -50) { // Swipe left
-                                changeRoom(1)
-                            } else if (dragOffset.x > 50) { // Swipe right
-                                changeRoom(-1)
+                            val dx = dragOffset.x
+                            val dy = dragOffset.y
+                            if (abs(dx) > abs(dy)) {
+                                val direction = if (dx > swipeThresholdPx) -1 else if (dx < -swipeThresholdPx) 1 else 0
+                                if (direction != 0 && changeRoom(direction)) {
+                                    roomChangeTrigger++
+                                }
+                            } else {
+                                if (dy < -swipeThresholdPx) {
+                                    println("Swipe up detected in ExpandingView swipe area")
+                                    selectAlarm()
+                                } else if (dy > swipeThresholdPx) {
+                                    println("Swipe down detected in ExpandingView swipe area")
+                                    dismiss()
+                                }
                             }
                             dragOffset = Offset.Zero
                         },
@@ -262,7 +270,6 @@ fun ExpandingView(
             }
 
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                // Alarm state label
                 if (showAlarmStateLabel) {
                     Text(
                         text = if (isAlarmEnabled.value) "Alarm Enabled" else "Alarm Disabled",
@@ -274,6 +281,14 @@ fun ExpandingView(
                             .align(Alignment.CenterHorizontally)
                     )
                 }
+
+                Text(
+                    text = "room ${currentIndex + 1}",
+                    color = if (isLight(color)) Color.Black else Color.White,
+                    fontSize = 16.sp,
+                    modifier = Modifier
+                        .padding(bottom = 8.dp)
+                )
 
                 Row(
                     modifier = Modifier
@@ -315,7 +330,7 @@ fun ExpandingView(
                         Icon(
                             Icons.Outlined.NightsStay,
                             contentDescription = "Dim Screen",
-                            tint = Color(0xFF64B5F6), // Moon blue
+                            tint = Color(0xFF64B5F6),
                             modifier = Modifier.size(28.dp)
                         )
                     }
@@ -362,7 +377,7 @@ fun ExpandingView(
                         Icon(
                             Icons.Outlined.Schedule,
                             contentDescription = "Set Timer",
-                            tint = Color(0xFFFFA726), // Warm orange
+                            tint = Color(0xFFFFA726),
                             modifier = Modifier.size(28.dp)
                         )
                     }
@@ -371,7 +386,6 @@ fun ExpandingView(
         }
     }
 
-    // Hide alarm state label after 2 seconds
     LaunchedEffect(showAlarmStateLabel) {
         if (showAlarmStateLabel) {
             delay(2000)
@@ -531,19 +545,21 @@ fun ExpandingView(
     }
 
     LaunchedEffect(roomChangeTrigger) {
-        currentFlashSpec = snap()
-        flashTarget = 0.8f
-        currentDimSpec = snap()
-        dimTarget = 0f
-        flashKey += 1
-        dimKey += 1
-        delay(1)
-        currentFlashSpec = tween(durationMillis = 500, easing = LinearEasing)
-        flashTarget = 0f
-        currentDimSpec = tween(durationMillis = (dimSeconds * 1000).toInt(), easing = LinearEasing)
-        dimTarget = 1f
-        flashKey += 1
-        dimKey += 1
+        if (roomChangeTrigger > 0) {
+            currentFlashSpec = snap()
+            flashTarget = 0.8f
+            currentDimSpec = snap()
+            dimTarget = 0f
+            flashKey += 1
+            dimKey += 1
+            delay(1)
+            currentFlashSpec = tween(durationMillis = 500, easing = LinearEasing)
+            flashTarget = 0f
+            currentDimSpec = tween(durationMillis = (dimSeconds * 1000).toInt(), easing = LinearEasing)
+            dimTarget = 1f
+            flashKey += 1
+            dimKey += 1
+        }
     }
 
     LaunchedEffect(sunTrigger) {
@@ -566,13 +582,7 @@ fun ExpandingView(
 
     LaunchedEffect(nightsTrigger) {
         if (nightsTrigger > 0) {
-            dimSeconds = 3.0
-            targetBackgroundColor = Color.Black
-            currentDimSpec = snap()
-            dimTarget = 0f
-            dimKey += 1
-            delay(1)
-            currentDimSpec = tween(durationMillis = (dimSeconds * 1000).toInt(), easing = LinearEasing)
+            currentDimSpec = tween(durationMillis = 3000, easing = LinearEasing)
             dimTarget = 1f
             dimKey += 1
         }
@@ -584,6 +594,11 @@ fun formatDuration(minutes: Double): String {
     val hours = (minutes / 60).toInt()
     val mins = (minutes % 60).toInt()
     return if (hours > 0) "${hours}h ${mins}m" else "${mins}m"
+}
+
+fun isLight(color: Color): Boolean {
+    val luminance = 0.299f * color.red + 0.587f * color.green + 0.114f * color.blue
+    return luminance > 0.5f
 }
 
 //package com.jmisabella.zrooms
@@ -603,7 +618,6 @@ fun formatDuration(minutes: Double): String {
 //import androidx.compose.foundation.background
 //import androidx.compose.foundation.clickable
 //import androidx.compose.foundation.gestures.detectDragGestures
-//import androidx.compose.foundation.gestures.detectTapGestures
 //import androidx.compose.foundation.layout.Arrangement
 //import androidx.compose.foundation.layout.Box
 //import androidx.compose.foundation.layout.Column
@@ -636,7 +650,6 @@ fun formatDuration(minutes: Double): String {
 //import androidx.compose.runtime.mutableIntStateOf
 //import androidx.compose.runtime.mutableStateOf
 //import androidx.compose.runtime.remember
-//import androidx.compose.runtime.setValue
 //import androidx.compose.ui.Alignment
 //import androidx.compose.ui.Modifier
 //import androidx.compose.ui.geometry.Offset
@@ -656,7 +669,9 @@ fun formatDuration(minutes: Double): String {
 //import kotlinx.coroutines.delay
 //import android.text.format.DateFormat
 //import androidx.compose.foundation.layout.size
+//import androidx.compose.runtime.setValue
 //import androidx.compose.ui.draw.alpha
+//import kotlin.math.abs
 //
 //@Composable
 //fun ExpandingView(
@@ -713,7 +728,7 @@ fun formatDuration(minutes: Double): String {
 //    var targetBackgroundColor by remember { mutableStateOf(color) }
 //    val animatedBackgroundColor by animateColorAsState(
 //        targetValue = targetBackgroundColor,
-//        animationSpec = tween(durationMillis = (dimSeconds * 1000).toInt(), easing = LinearEasing),
+//        animationSpec = tween(durationMillis = 300, easing = LinearEasing),
 //        label = "backgroundColor"
 //    )
 //
@@ -755,16 +770,25 @@ fun formatDuration(minutes: Double): String {
 //        }
 //    }
 //
+//    LaunchedEffect(color) {
+//        targetBackgroundColor = color
+//    }
+//
+//    val density = LocalDensity.current
+//    val swipeThresholdPx = with(density) { 50.dp.toPx() }
+//
 //    Box(
 //        modifier = Modifier
 //            .fillMaxSize()
-//            .pointerInput(Unit) {
-//                detectTapGestures { dismiss() }
-//            }
 //    ) {
 //        // Background and overlays
 //        Box(Modifier.fillMaxSize()) {
 //            BreathingBackground(color = animatedBackgroundColor)
+//            Box(
+//                Modifier
+//                    .fillMaxSize()
+//                    .background(Color.Black.copy(alpha = animatedDimOpacity))
+//            )
 //            if (isAlarmActive.value) {
 //                Box(
 //                    Modifier
@@ -793,16 +817,30 @@ fun formatDuration(minutes: Double): String {
 //                        },
 //                        onDragEnd = {
 //                            println("ExpandingView swipe area drag ended, dragOffset=$dragOffset")
-//                            if (dragOffset.y < -50) { // Swipe up
-//                                println("Swipe up detected in ExpandingView swipe area")
-//                                selectAlarm()
-//                            } else if (dragOffset.y > 50) { // Swipe down
-//                                println("Swipe down detected in ExpandingView swipe area")
-//                                dismiss()
-//                            } else if (dragOffset.x < -50) { // Swipe left
-//                                changeRoom(1)
-//                            } else if (dragOffset.x > 50) { // Swipe right
-//                                changeRoom(-1)
+//                            val dx = dragOffset.x
+//                            val dy = dragOffset.y
+//                            if (abs(dx) > abs(dy)) {
+//                                // Horizontal swipe dominant
+//                                if (dx > swipeThresholdPx) {
+//                                    // Finger moved right: go to previous room (lower number, "left" in grid)
+//                                    changeRoom(-1)
+//                                    roomChangeTrigger++
+//                                } else if (dx < -swipeThresholdPx) {
+//                                    // Finger moved left: go to next room (higher number, "right" in grid)
+//                                    changeRoom(1)
+//                                    roomChangeTrigger++
+//                                }
+//                            } else {
+//                                // Vertical swipe dominant
+//                                if (dy < -swipeThresholdPx) {
+//                                    // Swipe up
+//                                    println("Swipe up detected in ExpandingView swipe area")
+//                                    selectAlarm()
+//                                } else if (dy > swipeThresholdPx) {
+//                                    // Swipe down
+//                                    println("Swipe down detected in ExpandingView swipe area")
+//                                    dismiss()
+//                                }
 //                            }
 //                            dragOffset = Offset.Zero
 //                        },
@@ -824,15 +862,6 @@ fun formatDuration(minutes: Double): String {
 //                horizontalAlignment = Alignment.CenterHorizontally,
 //                modifier = Modifier.padding(top = 40.dp)
 //            ) {
-//                Text(
-//                    text = formatDuration(durationMinutes.value),
-//                    color = Color.White,
-//                    fontSize = 18.sp,
-//                    modifier = Modifier
-//                        .background(Color.Black.copy(alpha = 0.5f))
-//                        .padding(8.dp)
-//                )
-//                Spacer(Modifier.height(8.dp))
 //                CustomSlider(
 //                    value = durationMinutes,
 //                    minValue = 0.0,
@@ -845,6 +874,17 @@ fun formatDuration(minutes: Double): String {
 //                        .fillMaxWidth()
 //                        .padding(horizontal = 20.dp)
 //                )
+//                if (showLabel) {
+//                    Spacer(Modifier.height(8.dp))
+//                    Text(
+//                        text = formatDuration(durationMinutes.value),
+//                        color = Color.White,
+//                        fontSize = 18.sp,
+//                        modifier = Modifier
+//                            .background(Color.Black.copy(alpha = 0.5f))
+//                            .padding(8.dp)
+//                    )
+//                }
 //            }
 //
 //            Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -860,6 +900,14 @@ fun formatDuration(minutes: Double): String {
 //                            .align(Alignment.CenterHorizontally)
 //                    )
 //                }
+//
+//                Text(
+//                    text = "room ${currentIndex + 1}",
+//                    color = if (isLight(color)) Color.Black else Color.White,
+//                    fontSize = 16.sp,
+//                    modifier = Modifier
+//                        .padding(bottom = 8.dp)
+//                )
 //
 //                Row(
 //                    modifier = Modifier
@@ -1117,19 +1165,21 @@ fun formatDuration(minutes: Double): String {
 //    }
 //
 //    LaunchedEffect(roomChangeTrigger) {
-//        currentFlashSpec = snap()
-//        flashTarget = 0.8f
-//        currentDimSpec = snap()
-//        dimTarget = 0f
-//        flashKey += 1
-//        dimKey += 1
-//        delay(1)
-//        currentFlashSpec = tween(durationMillis = 500, easing = LinearEasing)
-//        flashTarget = 0f
-//        currentDimSpec = tween(durationMillis = (dimSeconds * 1000).toInt(), easing = LinearEasing)
-//        dimTarget = 1f
-//        flashKey += 1
-//        dimKey += 1
+//        if (roomChangeTrigger > 0) {
+//            currentFlashSpec = snap()
+//            flashTarget = 0.8f
+//            currentDimSpec = snap()
+//            dimTarget = 0f
+//            flashKey += 1
+//            dimKey += 1
+//            delay(1)
+//            currentFlashSpec = tween(durationMillis = 500, easing = LinearEasing)
+//            flashTarget = 0f
+//            currentDimSpec = tween(durationMillis = (dimSeconds * 1000).toInt(), easing = LinearEasing)
+//            dimTarget = 1f
+//            flashKey += 1
+//            dimKey += 1
+//        }
 //    }
 //
 //    LaunchedEffect(sunTrigger) {
@@ -1152,13 +1202,7 @@ fun formatDuration(minutes: Double): String {
 //
 //    LaunchedEffect(nightsTrigger) {
 //        if (nightsTrigger > 0) {
-//            dimSeconds = 3.0
-//            targetBackgroundColor = Color.Black
-//            currentDimSpec = snap()
-//            dimTarget = 0f
-//            dimKey += 1
-//            delay(1)
-//            currentDimSpec = tween(durationMillis = (dimSeconds * 1000).toInt(), easing = LinearEasing)
+//            currentDimSpec = tween(durationMillis = 3000, easing = LinearEasing)
 //            dimTarget = 1f
 //            dimKey += 1
 //        }
@@ -1170,5 +1214,10 @@ fun formatDuration(minutes: Double): String {
 //    val hours = (minutes / 60).toInt()
 //    val mins = (minutes % 60).toInt()
 //    return if (hours > 0) "${hours}h ${mins}m" else "${mins}m"
+//}
+//
+//fun isLight(color: Color): Boolean {
+//    val luminance = color.red * 0.299f + color.green * 0.587f + color.blue * 0.114f
+//    return luminance > 0.5f
 //}
 
