@@ -1,3 +1,4 @@
+
 package com.jmisabella.zrooms
 
 import android.content.Context
@@ -402,32 +403,32 @@ fun ExpandingView(
                         )
                     }
 
-                    Spacer(Modifier.width(40.dp))
-
-                    Box(
-                        modifier = Modifier
-                            .clickable {
-                                isAlarmEnabled.value = !isAlarmEnabled.value
-                                showAlarmStateLabel = true
-                                PreferenceManager.getDefaultSharedPreferences(context)
-                                    .edit()
-                                    .putBoolean("isAlarmEnabled", isAlarmEnabled.value)
-                                    .apply()
-                                if (isAlarmEnabled.value && durationMinutes.value == 0.0) {
-                                    showTimePicker = true
-                                }
-                            }
-                            .background(alarmButtonBackground, CircleShape)
-                            .padding(12.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            if (isAlarmEnabled.value) Icons.Filled.AlarmOn else Icons.Filled.Alarm,
-                            contentDescription = if (isAlarmEnabled.value) "Alarm Enabled" else "Alarm Disabled",
-                            tint = if (isAlarmEnabled.value) Color.White else Color(0xFFB3B3B3),
-                            modifier = Modifier.size(28.dp)
-                        )
-                    }
+//                    Spacer(Modifier.width(40.dp))
+//
+//                    Box(
+//                        modifier = Modifier
+//                            .clickable {
+//                                isAlarmEnabled.value = !isAlarmEnabled.value
+//                                showAlarmStateLabel = true
+//                                PreferenceManager.getDefaultSharedPreferences(context)
+//                                    .edit()
+//                                    .putBoolean("isAlarmEnabled", isAlarmEnabled.value)
+//                                    .apply()
+//                                if (isAlarmEnabled.value && durationMinutes.value == 0.0) {
+//                                    showTimePicker = true
+//                                }
+//                            }
+//                            .background(alarmButtonBackground, CircleShape)
+//                            .padding(12.dp),
+//                        contentAlignment = Alignment.Center
+//                    ) {
+//                        Icon(
+//                            if (isAlarmEnabled.value) Icons.Filled.AlarmOn else Icons.Filled.Alarm,
+//                            contentDescription = if (isAlarmEnabled.value) "Alarm Enabled" else "Alarm Disabled",
+//                            tint = if (isAlarmEnabled.value) Color.White else Color(0xFFB3B3B3),
+//                            modifier = Modifier.size(28.dp)
+//                        )
+//                    }
 
                     Spacer(Modifier.width(40.dp))
 
@@ -674,5 +675,3 @@ fun isLight(color: Color): Boolean {
     val luminance = color.red * 0.299f + color.green * 0.587f + color.blue * 0.114f
     return luminance > 0.5f
 }
-
-
