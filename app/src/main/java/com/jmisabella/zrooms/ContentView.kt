@@ -110,7 +110,8 @@ fun ContentView() {
     val prefs = PreferenceManager.getDefaultSharedPreferences(context)
     val durationState = remember { mutableStateOf(prefs.getFloat("durationMinutes", 0f).toDouble()) }
     var durationMinutes by durationState
-    val alarmEnabledState = remember { mutableStateOf(prefs.getBoolean("isAlarmEnabled", false)) }
+    //val alarmEnabledState = remember { mutableStateOf(prefs.getBoolean("isAlarmEnabled", false)) }
+    val alarmEnabledState = remember { mutableStateOf(prefs.getBoolean("isAlarmEnabled", true)) }
     var isAlarmEnabled by alarmEnabledState
     val alarmActiveState = remember { mutableStateOf(false) }
     var isAlarmActive by alarmActiveState
