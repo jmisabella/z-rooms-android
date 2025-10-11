@@ -24,7 +24,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.layout.Column
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -56,7 +61,9 @@ import kotlin.math.min
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import android.content.BroadcastReceiver
 import android.content.IntentFilter
+import androidx.compose.material.Text
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.ui.text.font.FontWeight
 
 private val SelectedItemSaver: Saver<SelectedItem?, Any> = Saver(
     save = { it?.id },
@@ -184,6 +191,7 @@ fun ContentView() {
 
     val coroutineScope = rememberCoroutineScope()
     val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
+    val bottomLabelPadding = if (isLandscape) 40.dp else 60.dp
     val sheetState = rememberModalBottomSheetState(
         initialValue = ModalBottomSheetValue.Hidden,
         skipHalfExpanded = isLandscape,
@@ -333,12 +341,41 @@ fun ContentView() {
                 }
             }
 
-            androidx.compose.material.Text(
-                text = "z rooms",
-                fontSize = 14.sp,
-                color = Color(0xFFB3B3B3),
-                modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 40.dp)
-            )
+//            androidx.compose.material.Text(
+//                text = "z rooms",
+//                fontSize = 16.sp,
+//                fontWeight = FontWeight.Bold,
+//                color = Color(0xFFB3B3B3),
+//                modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 40.dp)
+//            )
+            Column(
+                modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = bottomLabelPadding),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "z rooms",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFFB3B3B3)
+                )
+                Spacer(modifier = Modifier.height(4.dp)) // Use Spacer for 4.dp gap
+                if (selectedItem == null) {
+                    Text(
+                        text = buildAnnotatedString {
+                            append("swipe ")
+                            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                append("up")
+                            }
+                            append(" from any screen for ")
+                            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                append("waking rooms")
+                            }
+                        },
+                        fontSize = 12.sp,
+                        color = Color(0xFFB3B3B3)
+                    )
+                }
+            }
 
             if (selectedItem == null) {
                 Box(
