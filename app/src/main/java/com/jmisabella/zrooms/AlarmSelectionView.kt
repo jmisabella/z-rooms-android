@@ -54,14 +54,12 @@ fun AlarmSelectionView(
                 audioService?.stopPreview()
                 onDismiss()
             }
-            true // Allow all state changes
+            true
         }
     )
 
-    // Force recomposition with a unique key
     var recompositionKey by remember { mutableStateOf(0L) }
 
-    // Define alarmColorFor before usage
     fun alarmColorFor(row: Int, col: Int, isSelected: Boolean): Color {
         if (row < 2) {
             val diag = (row.toFloat() + col.toFloat()) / 8f
@@ -76,14 +74,25 @@ fun AlarmSelectionView(
             val saturation = 0.8f
             val brightness = if (isSelected) 0.9f else 0.9f * 0.5f
             return hsvToColor(hue, saturation, brightness)
-        } else {
+        } else if (row == 2) {
             val progress = col.toFloat() / 4f
             val startHue = 0.666f  // Deep blue
-            var endHue = 0.833f    // Deep purple
+            val endHue = 0.833f    // Deep purple
             val hue = startHue + (endHue - startHue) * progress
             val saturation = 0.8f
             val brightness = if (isSelected) 0.6f else 0.6f * 0.5f
             return hsvToColor(hue, saturation, brightness)
+        } else {
+            // New row (row 3): White to soft yellow
+            val progress = col.toFloat() / 4f
+            val hue = 0.166f // Fixed yellow hue
+            val startSat = 0.0f // White
+            val endSat = 0.3f // Soft yellow
+            val sat = startSat + (endSat - startSat) * progress
+            val startBright = if (isSelected) 1.0f else 0.5f
+            val endBright = if (isSelected) 0.9f else 0.45f
+            val bright = startBright - (startBright - endBright) * progress
+            return hsvToColor(hue, sat, bright)
         }
     }
 
@@ -98,7 +107,7 @@ fun AlarmSelectionView(
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                     modifier = Modifier.fillMaxSize(),
                     content = {
-                        val alarmIndices = (20 until 30) + (15 until 20)
+                        val alarmIndices = (20 until 30) + (15 until 20) + (30 until 35) // Updated to include 30-34
                         itemsIndexed(alarmIndices, key = { _, index -> "$index-$selectedAlarmIndex-$recompositionKey" }) { i, index ->
                             val row = i / 5
                             val col = i % 5
@@ -122,12 +131,12 @@ fun AlarmSelectionView(
                                                 onSelect(null)
                                                 audioService?.stopPreview()
                                                 println("stopPreview called for index=$index")
-                                                recompositionKey = System.currentTimeMillis() // Trigger recomposition
+                                                recompositionKey = System.currentTimeMillis()
                                             } else {
                                                 println("Selecting alarm tile: index=$index")
                                                 onSelect(index)
                                                 audioService?.playPreview(index)
-                                                recompositionKey = System.currentTimeMillis() // Trigger recomposition
+                                                recompositionKey = System.currentTimeMillis()
                                             }
                                         }
                                     }
@@ -149,7 +158,6 @@ fun AlarmSelectionView(
         LaunchedEffect(Unit) {
             println("AlarmSelectionView composed, showing sheet, selectedAlarmIndex=$selectedAlarmIndex")
             sheetState.show()
-            // Play preview for pre-selected alarm index when sheet is shown
             selectedAlarmIndex?.let { index ->
                 if (index >= 0) {
                     println("Playing preview for pre-selected alarm index: $index")
@@ -229,6 +237,9 @@ fun AlarmSelectionView(
 //        }
 //    )
 //
+//    // Force recomposition with a unique key
+//    var recompositionKey by remember { mutableStateOf(0L) }
+//
 //    // Define alarmColorFor before usage
 //    fun alarmColorFor(row: Int, col: Int, isSelected: Boolean): Color {
 //        if (row < 2) {
@@ -247,7 +258,7 @@ fun AlarmSelectionView(
 //        } else {
 //            val progress = col.toFloat() / 4f
 //            val startHue = 0.666f  // Deep blue
-//            val endHue = 0.833f    // Deep purple
+//            var endHue = 0.833f    // Deep purple
 //            val hue = startHue + (endHue - startHue) * progress
 //            val saturation = 0.8f
 //            val brightness = if (isSelected) 0.6f else 0.6f * 0.5f
@@ -264,39 +275,45 @@ fun AlarmSelectionView(
 //                    contentPadding = PaddingValues(20.dp),
 //                    horizontalArrangement = Arrangement.spacedBy(10.dp),
 //                    verticalArrangement = Arrangement.spacedBy(10.dp),
-//                    modifier = Modifier.fillMaxSize()
-//                ) {
-//                    val alarmIndices = (20 until 30) + (15 until 20)
-//                    itemsIndexed(alarmIndices) { i, index ->
-//                        val row = i / 5
-//                        val col = i % 5
-//                        val isSelected = selectedAlarmIndex == index
-//                        val color = alarmColorFor(row, col, isSelected)
+//                    modifier = Modifier.fillMaxSize(),
+//                    content = {
+//                        val alarmIndices = (20 until 30) + (15 until 20)
+//                        itemsIndexed(alarmIndices, key = { _, index -> "$index-$selectedAlarmIndex-$recompositionKey" }) { i, index ->
+//                            val row = i / 5
+//                            val col = i % 5
+//                            val isSelected = selectedAlarmIndex == index
+//                            val color = alarmColorFor(row, col, isSelected)
 //
-//                        Box(
-//                            Modifier
-//                                .aspectRatio(1f)
-//                                .background(color, RoundedCornerShape(8.dp))
-//                                .border(
-//                                    if (isSelected) 4.dp else 0.dp,
-//                                    Color.White,
-//                                    RoundedCornerShape(8.dp)
-//                                )
-//                                .pointerInput(Unit) {
-//                                    detectTapGestures { offset ->
-//                                        println("Alarm tile tapped at offset: $offset, index=$index, isSelected=$isSelected")
-//                                        if (isSelected) {
-//                                            onSelect(null)
-//                                            audioService?.stopPreview()
-//                                        } else {
-//                                            onSelect(index)
-//                                            audioService?.playPreview(index)
+//                            Box(
+//                                Modifier
+//                                    .aspectRatio(1f)
+//                                    .background(color, RoundedCornerShape(8.dp))
+//                                    .border(
+//                                        if (isSelected) 4.dp else 0.dp,
+//                                        Color.White,
+//                                        RoundedCornerShape(8.dp)
+//                                    )
+//                                    .pointerInput(index, selectedAlarmIndex) {
+//                                        detectTapGestures { offset ->
+//                                            println("Alarm tile tapped: index=$index, isSelected=$isSelected, selectedAlarmIndex=$selectedAlarmIndex, offset=$offset, recompositionKey=$recompositionKey")
+//                                            if (isSelected) {
+//                                                println("Deselecting alarm tile: index=$index")
+//                                                onSelect(null)
+//                                                audioService?.stopPreview()
+//                                                println("stopPreview called for index=$index")
+//                                                recompositionKey = System.currentTimeMillis() // Trigger recomposition
+//                                            } else {
+//                                                println("Selecting alarm tile: index=$index")
+//                                                onSelect(index)
+//                                                audioService?.playPreview(index)
+//                                                recompositionKey = System.currentTimeMillis() // Trigger recomposition
+//                                            }
 //                                        }
 //                                    }
-//                                }
-//                        )
+//                            )
+//                        }
 //                    }
-//                }
+//                )
 //                Text(
 //                    text = "waking rooms",
 //                    fontSize = 14.sp,
@@ -309,7 +326,7 @@ fun AlarmSelectionView(
 //        }
 //    ) {
 //        LaunchedEffect(Unit) {
-//            println("AlarmSelectionView composed, showing sheet")
+//            println("AlarmSelectionView composed, showing sheet, selectedAlarmIndex=$selectedAlarmIndex")
 //            sheetState.show()
 //            // Play preview for pre-selected alarm index when sheet is shown
 //            selectedAlarmIndex?.let { index ->
@@ -318,13 +335,6 @@ fun AlarmSelectionView(
 //                    audioService?.playPreview(index)
 //                }
 //            }
-//        }
-//    }
-//
-//    LaunchedEffect(selectedAlarmIndex) {
-//        println("selectedAlarmIndex changed to: $selectedAlarmIndex")
-//        if (selectedAlarmIndex != null && sheetState.currentValue != ModalBottomSheetValue.Hidden) {
-//            audioService?.playPreview(selectedAlarmIndex)
 //        }
 //    }
 //
@@ -337,4 +347,5 @@ fun AlarmSelectionView(
 //        }
 //    }
 //}
-
+//
+//

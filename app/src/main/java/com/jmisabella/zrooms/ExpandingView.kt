@@ -222,6 +222,15 @@ fun ExpandingView(
     val density = LocalDensity.current
     val swipeThresholdPx = with(density) { 50.dp.toPx() }
 
+    // Dictionary to map room indices (30-34) to custom titles
+    val customRoomTitles = mapOf(
+        30 to "Satie: Trois Gymnopédies: No. 1, Lent et douloureux",
+        31 to "Bach: Two-Part Invention No. 6 in E Major, BWV 777",
+        32 to "Chopin: Prelude No. 21 in B-flat Major, Op. 28",
+        33 to "Chopin: Prelude No. 2 in A Minor, Op. 28, Lento",
+        34 to "Bach: Goldberg Variations: Variation 21, BWV 988"
+    )
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -349,9 +358,9 @@ fun ExpandingView(
                 }
 
                 Text(
-                    text = "room ${currentIndex + 1}",
+                    text = customRoomTitles[currentIndex] ?: "room ${currentIndex + 1}",
                     color = if (isLight(color)) Color.Black else Color.White,
-                    fontSize = 16.sp,
+                    fontSize = if (customRoomTitles.containsKey(currentIndex)) 12.sp else 16.sp,
                     modifier = Modifier
                         .padding(bottom = 8.dp)
                 )

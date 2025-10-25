@@ -11,9 +11,9 @@ android {
 
     defaultConfig {
         applicationId = "com.jmisabella.zrooms"
-        minSdk = 21 // Or raise to 28 like Mazer for simplicity
+        minSdk = 21
         targetSdk = 36
-        versionCode = 2
+        versionCode = 9
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
