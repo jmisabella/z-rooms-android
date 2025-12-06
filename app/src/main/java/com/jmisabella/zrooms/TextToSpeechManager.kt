@@ -24,7 +24,7 @@ class TextToSpeechManager(private val context: Context) {
     var isPlayingMeditation by mutableStateOf(false)
         private set
 
-    var audioBalance by mutableStateOf(-1.0) // -1.0 (all ambient) to 1.0 (no ambient)
+    var ambientVolume by mutableStateOf(0.6f) // 0.0 (silent) to 0.6 (full ambient)
         private set
 
     private var tts: TextToSpeech? = null
@@ -40,16 +40,9 @@ class TextToSpeechManager(private val context: Context) {
     companion object {
         private const val MEDITATION_SPEECH_RATE = 0.50f // Calm, slow rate (increased from 0.33 by ~20%)
         private const val MEDITATION_PITCH = 0.75f // Lower pitch for calmer voice (decreased from 0.9)
-        // const val VOICE_VOLUME = 0.10f // Reduced voice volume (decreased from 0.15 by ~33%)
-        const val VOICE_VOLUME = 0.05f // Reduced voice volume (decreased from 0.15 by ~33%)
+        const val VOICE_VOLUME = 0.05f // Voice volume (fixed, cannot be changed dynamically)
+        const val MAX_AMBIENT_VOLUME = 0.6f // Maximum ambient volume
     }
-
-    // Computed ambient volume based on balance
-    val ambientVolume: Float
-        get() {
-            val normalizedBalance = (audioBalance + 1.0) / 2.0
-            return ((1.0 - normalizedBalance) * 0.6).toFloat()
-        }
 
     init {
         tts = TextToSpeech(context) { status ->
@@ -75,12 +68,8 @@ class TextToSpeechManager(private val context: Context) {
         }
     }
 
-    fun updateAudioBalance(newBalance: Double) {
-        audioBalance = newBalance
-        updateVolumesFromBalance()
-    }
-
-    fun updateVolumesFromBalance() {
+    fun updateAmbientVolume(newVolume: Float) {
+        ambientVolume = newVolume.coerceIn(0f, MAX_AMBIENT_VOLUME)
         onAmbientVolumeChanged?.invoke(ambientVolume)
     }
 

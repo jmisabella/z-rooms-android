@@ -140,7 +140,8 @@ fun ExpandingView(
         ttsManager.onAmbientVolumeChanged = { volume ->
             audioService?.setAmbientVolume(volume)
         }
-        ttsManager.updateVolumesFromBalance()
+        // Set initial ambient volume
+        audioService?.setAmbientVolume(ttsManager.ambientVolume)
 
         onDispose {
             ttsManager.stopSpeaking()
@@ -153,9 +154,18 @@ fun ExpandingView(
         isMeditationPlaying = ttsManager.isPlayingMeditation
     }
 
+    // Ambient volume state (0.0 to 0.6)
+    val ambientVolumeState = remember { mutableStateOf(ttsManager.ambientVolume.toDouble()) }
+
+    // Update TTS manager and ambient volume when slider changes
+    LaunchedEffect(ambientVolumeState.value) {
+        ttsManager.updateAmbientVolume(ambientVolumeState.value.toFloat())
+    }
+
     val defaultDimDurationSeconds = 600.0 // 10 minutes for room entry
 
     var showLabel by remember { mutableStateOf(false) }
+    var showBalanceLabel by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
     var showAlarmStateLabel by remember { mutableStateOf(false) }
     var tempWakeTime by remember {
@@ -367,6 +377,35 @@ fun ExpandingView(
                     Spacer(Modifier.height(8.dp))
                     Text(
                         text = formatDuration(durationMinutes.value),
+                        color = Color.White,
+                        fontSize = 18.sp,
+                        modifier = Modifier
+                            .background(Color.Black.copy(alpha = 0.5f))
+                            .padding(8.dp)
+                    )
+                }
+
+                Spacer(Modifier.height(8.dp))
+
+                // Ambient volume slider (0.0 = silent, 0.6 = full)
+                CustomSlider(
+                    value = ambientVolumeState,
+                    minValue = 0.0,
+                    maxValue = 0.6,
+                    step = 0.01,
+                    onEditingChanged = { editing ->
+                        showBalanceLabel = editing
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp)
+                )
+
+                if (showBalanceLabel) {
+                    Spacer(Modifier.height(8.dp))
+                    val ambientPercent = ((ambientVolumeState.value / 0.6) * 100).toInt()
+                    Text(
+                        text = "ambient $ambientPercent%",
                         color = Color.White,
                         fontSize = 18.sp,
                         modifier = Modifier
