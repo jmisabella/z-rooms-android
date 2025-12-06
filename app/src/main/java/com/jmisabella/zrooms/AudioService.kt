@@ -420,7 +420,7 @@ class AudioService : Service() {
         mainHandler.post(runnable)
     }
 
-    private fun setAmbientVolume(vol: Float) {
+    fun setAmbientVolume(vol: Float) {
         ambientPlayer?.volume = vol
         ambientVolume = vol
     }
