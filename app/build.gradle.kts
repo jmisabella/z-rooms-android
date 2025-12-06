@@ -13,7 +13,7 @@ android {
         applicationId = "com.jmisabella.zrooms"
         minSdk = 21
         targetSdk = 36
-        versionCode = 9
+        versionCode = 16
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

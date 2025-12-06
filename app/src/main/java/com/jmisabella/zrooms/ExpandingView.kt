@@ -226,9 +226,10 @@ fun ExpandingView(
     val customRoomTitles = mapOf(
         30 to "Satie: Trois Gymnopédies: No. 1, Lent et douloureux",
         31 to "Bach: Two-Part Invention No. 6 in E Major, BWV 777",
-        32 to "Chopin: Prelude No. 21 in B-flat Major, Op. 28",
-        33 to "Chopin: Prelude No. 2 in A Minor, Op. 28, Lento",
-        34 to "Bach: Goldberg Variations: Variation 21, BWV 988"
+        32 to "Chopin: Prelude No. 2 in A minor, Op. 28, Lento",
+//        33 to "Ravel: Piano Concerto in G Major, M. 83 – II. Adagio assai",
+        33 to "Bach: Goldberg Variation 15, BWV 988",
+        34 to "Schubert: Sonata No. 6 in E minor, II. Allegretto (excerpt)"
     )
 
     Box(
