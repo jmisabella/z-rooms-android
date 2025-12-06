@@ -27,8 +27,6 @@ import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.audio.AudioAttributes as ExoAudioAttributes
-//import java.util.Timer
-//import java.util.TimerTask
 import kotlin.concurrent.timer
 
 class AudioService : Service() {
@@ -93,13 +91,10 @@ class AudioService : Service() {
         }
         return result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED
     }
-
     override fun onBind(intent: Intent?): IBinder = binder
-
     override fun onCreate() {
         super.onCreate()
         createNotificationChannel()
-
         audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
         audioFocusChangeListener = AudioManager.OnAudioFocusChangeListener { focusChange ->
             when (focusChange) {
@@ -119,7 +114,6 @@ class AudioService : Service() {
                 }
             }
         }
-
         val notification = buildNotification()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             startForeground(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK)
@@ -127,7 +121,6 @@ class AudioService : Service() {
             startForeground(NOTIFICATION_ID, notification)
         }
     }
-
     override fun onDestroy() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             audioFocusRequest?.let { audioManager.abandonAudioFocusRequest(it) }
@@ -146,12 +139,10 @@ class AudioService : Service() {
         currentPreviewFade?.let { mainHandler.removeCallbacks(it) }
         super.onDestroy()
     }
-
     fun playAmbient(index: Int, durationMinutes: Double, isAlarmEnabled: Boolean, selectedAlarmIndex: Int?) {
         if (isTransitioning) return
         isTransitioning = true
         val fileRes = getAmbientResource(index) ?: run { isTransitioning = false; return }
-
         stopAll {
             ambientPlayer = ExoPlayer.Builder(this@AudioService).build().apply {
                 setAudioAttributes(playbackAudioAttributes, false)
@@ -164,9 +155,7 @@ class AudioService : Service() {
                     override fun onPlaybackStateChanged(state: Int) {
                         if (state == Player.STATE_READY) {
                             play()
-                            fadeAmbientVolume(1f, 2000L) {
-                                isTransitioning = false
-                            }
+                            fadeAmbientVolume(1f, 2000L)
                             removeListener(this)
                         }
                     }
@@ -174,25 +163,20 @@ class AudioService : Service() {
                 addListener(fadeListener)
             }
             ambientVolume = 0f
-
             if (!requestAudioFocus()) {
                 ambientPlayer?.release()
                 ambientPlayer = null
                 isTransitioning = false
                 return@stopAll
             }
-
             currentAmbientFile = "ambient_${index + 1}"
-
             updateTimer(durationMinutes, isAlarmEnabled, selectedAlarmIndex)
+            isTransitioning = false
         }
     }
-
-
     fun updateTimer(durationMinutes: Double, isAlarmEnabled: Boolean, selectedAlarmIndex: Int?) {
         stopTimer?.cancel()
         stopTimer = null
-
         if (durationMinutes > 0) {
             val delayMillis = (durationMinutes * 60 * 1000).toLong()
             val capturedIsAlarmEnabled = isAlarmEnabled
@@ -212,33 +196,8 @@ class AudioService : Service() {
             stopTimer = timer
         }
     }
-
-//    fun updateTimer(durationMinutes: Double, isAlarmEnabled: Boolean, selectedAlarmIndex: Int?) {
-//        stopTimer?.cancel()
-//        stopTimer = null
-//
-//        if (ambientPlayer == null || durationMinutes <= 0) return
-//
-//        val durationMillis = (durationMinutes * 60 * 1000).toLong()
-//        stopTimer = Timer()
-//        stopTimer?.schedule(object : TimerTask() {
-//            override fun run() {
-//                if (isAlarmEnabled) {
-//                    startAlarm(selectedAlarmIndex)
-//                }
-//                fadeAmbientVolume(0f, 2000L) {
-//                    ambientPlayer?.stop()
-//                    ambientPlayer?.release()
-//                    ambientPlayer = null
-//                    ambientVolume = 0f
-//                }
-//            }
-//        }, durationMillis)
-//    }
-
     fun playPreview(index: Int) {
         val fileRes = getAmbientResource(index) ?: return
-
         stopPreview(restoreAmbient = false) {
             shouldStartPreview = true
             fadeAmbientVolume(0f, 1000L) {
@@ -265,7 +224,6 @@ class AudioService : Service() {
             }
         }
     }
-
     fun stopPreview(restoreAmbient: Boolean = true, completion: () -> Unit = {}) {
         shouldStartPreview = false
         fadePreviewVolume(0f, 1000L) {
@@ -297,43 +255,82 @@ class AudioService : Service() {
             @Suppress("DEPRECATION")
             audioFocusChangeListener?.let { audioManager.abandonAudioFocus(it) }
         }
-
         // Cancel current fades
         currentAmbientFade?.let { mainHandler.removeCallbacks(it) }
+        currentAlarmFade?.let { mainHandler.removeCallbacks(it) }
         currentPreviewFade?.let { mainHandler.removeCallbacks(it) }
         currentAmbientFade = null
+        currentAlarmFade = null
         currentPreviewFade = null
-
-        // Quick fade for ambient
-        fadeAmbientVolume(0f, 200L) {
-            ambientPlayer?.stop()
-            ambientPlayer?.release()
-            ambientPlayer = null
-            ambientVolume = 0f
+        var pending = 0
+        if (ambientPlayer != null) pending++
+        if (previewPlayer != null) pending++
+        if (isAlarmActive) pending++
+        if (pending == 0) {
+            isTransitioning = false
             completion()
+            return
         }
-
-        // Quick fade for preview
-        fadePreviewVolume(0f, 200L) {
-            previewPlayer?.stop()
-            previewPlayer?.release()
-            previewPlayer = null
-            previewVolume = 0f
+        val done = {
+            pending--
+            if (pending == 0) {
+                isTransitioning = false
+                completion()
+            }
         }
-
-        // Stop alarm instantly
-        stopAlarm()
-
+        if (ambientPlayer != null) {
+            fadeAmbientVolume(0f, 200L) {
+                ambientPlayer?.stop()
+                ambientPlayer?.release()
+                ambientPlayer = null
+                ambientVolume = 0f
+                done()
+            }
+        } else {
+// If no ambient, but counted? No, if null, not incremented
+        }
+        if (previewPlayer != null) {
+            fadePreviewVolume(0f, 200L) {
+                previewPlayer?.stop()
+                previewPlayer?.release()
+                previewPlayer = null
+                previewVolume = 0f
+                done()
+            }
+        }
+        if (isAlarmActive) {
+            fadeAlarmVolume(0f, 2000L) {
+                alarmPlayer?.stop()
+                alarmPlayer?.release()
+                alarmPlayer = null
+                alarmVolume = 0f
+                alarmTimer?.cancel()
+                alarmTimer = null
+                hapticGenerator = null
+                isAlarmActive = false
+                LocalBroadcastManager.getInstance(this).sendBroadcast(Intent("com.jmisabella.zrooms.ALARM_STOPPED"))
+                done()
+            }
+        }
         stopTimer?.cancel()
         stopTimer = null
     }
 
     fun fadeAmbientVolume(target: Float, duration: Long, completion: () -> Unit = {}) {
-        currentAmbientFade?.let { mainHandler.removeCallbacks(it) }
         fadeVolume(ambientPlayer, ambientVolume, target, duration, { vol -> setAmbientVolume(vol) }, completion)
     }
 
     private fun startAlarm(selectedAlarmIndex: Int?) {
+        if (selectedAlarmIndex == null || selectedAlarmIndex == -1) {
+            // No alarm: Just fade ambient out
+            fadeAmbientVolume(0f, 2000L) {
+                ambientPlayer?.stop()
+                ambientPlayer?.release()
+                ambientPlayer = null
+                ambientVolume = 0f
+            }
+            return
+        }
         isAlarmActive = true
         LocalBroadcastManager.getInstance(this).sendBroadcast(Intent("com.jmisabella.zrooms.ALARM_STARTED"))
         val alarmRes = getAlarmResource(selectedAlarmIndex)
@@ -356,7 +353,6 @@ class AudioService : Service() {
             addListener(fadeListener)
         }
         alarmVolume = 0f
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             val vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
             hapticGenerator = vibratorManager.defaultVibrator
@@ -365,7 +361,6 @@ class AudioService : Service() {
             hapticGenerator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
         }
         hapticGenerator?.vibrate(VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE))
-
         var interval: Long = 1000L
         alarmPlayer?.addListener(object : Player.Listener {
             override fun onPlaybackStateChanged(playbackState: Int) {
@@ -380,25 +375,7 @@ class AudioService : Service() {
         })
     }
 
-    fun stopAlarm() {
-        if (isAlarmActive) {
-            currentAlarmFade?.let { mainHandler.removeCallbacks(it) }
-            fadeAlarmVolume(0f, 2000L) {
-                alarmPlayer?.stop()
-                alarmPlayer?.release()
-                alarmPlayer = null
-                alarmVolume = 0f
-            }
-            alarmTimer?.cancel()
-            alarmTimer = null
-            hapticGenerator = null
-            isAlarmActive = false
-            LocalBroadcastManager.getInstance(this).sendBroadcast(Intent("com.jmisabella.zrooms.ALARM_STOPPED"))
-        }
-    }
-
     fun fadeAlarmVolume(target: Float, duration: Long, completion: () -> Unit = {}) {
-        currentAlarmFade?.let { mainHandler.removeCallbacks(it) }
         fadeVolume(alarmPlayer, alarmVolume, target, duration, { vol -> setAlarmVolume(vol) }, completion)
     }
 
@@ -418,7 +395,6 @@ class AudioService : Service() {
         val stepDuration = duration / steps
         val stepChange = (target - startVolume) / steps.toFloat()
         var currentStep = 0
-
         val runnable = object : Runnable {
             override fun run() {
                 if (currentStep >= steps) {
@@ -487,4 +463,5 @@ class AudioService : Service() {
         }
     }
 }
+
 

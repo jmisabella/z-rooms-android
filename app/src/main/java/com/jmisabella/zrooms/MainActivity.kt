@@ -33,8 +33,10 @@ class MainActivity : ComponentActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        val serviceIntent = Intent(this, AudioService::class.java)
-        stopService(serviceIntent)
+        if (!isChangingConfigurations) {
+            val serviceIntent = Intent(this, AudioService::class.java)
+            stopService(serviceIntent)
+        }
     }
 }
 

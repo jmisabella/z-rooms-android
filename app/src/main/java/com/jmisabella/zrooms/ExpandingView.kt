@@ -72,6 +72,27 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.toArgb
 import kotlin.math.abs
 
+private fun updateDurationToRemaining(
+    context: Context,
+    durationMinutes: MutableState<Double>,
+    isAlarmEnabled: MutableState<Boolean>
+) {
+    val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+    if (prefs.contains("lastWakeTime")) {
+        val wakeTime = prefs.getLong("lastWakeTime", 0L)
+        val now = System.currentTimeMillis()
+        val remainingMillis = wakeTime - now
+        if (remainingMillis > 0) {
+            durationMinutes.value = min(1440.0, max(0.0, remainingMillis / 60000.0))
+        } else {
+            durationMinutes.value = 0.0
+            isAlarmEnabled.value = false
+            prefs.edit().putBoolean("isAlarmEnabled", false).apply()
+        }
+        prefs.edit().putFloat("durationMinutes", durationMinutes.value.toFloat()).apply()
+    }
+}
+
 @Composable
 fun ExpandingView(
     color: Color,
@@ -86,6 +107,21 @@ fun ExpandingView(
     audioService: AudioService? = null
 ) {
     val context = LocalContext.current
+    // Update on room entry
+    LaunchedEffect(Unit) {
+        if (isAlarmEnabled.value) {
+            updateDurationToRemaining(context, durationMinutes, isAlarmEnabled)
+        }
+    }
+
+    // Periodic update every 60 seconds while enabled
+    LaunchedEffect(isAlarmEnabled.value) {
+        while (isAlarmEnabled.value) {
+            updateDurationToRemaining(context, durationMinutes, isAlarmEnabled)
+            delay(60000L)
+        }
+    }
+
     val defaultDimDurationSeconds = 180.0 // 3 minutes for room entry
 
     var showLabel by remember { mutableStateOf(false) }
@@ -186,6 +222,16 @@ fun ExpandingView(
     val density = LocalDensity.current
     val swipeThresholdPx = with(density) { 50.dp.toPx() }
 
+    // Dictionary to map room indices (30-34) to custom titles
+    val customRoomTitles = mapOf(
+        30 to "Satie: Trois Gymnopédies: No. 1, Lent et douloureux",
+        31 to "Bach: Two-Part Invention No. 6 in E Major, BWV 777",
+        32 to "Chopin: Prelude No. 2 in A minor, Op. 28, Lento",
+//        33 to "Ravel: Piano Concerto in G Major, M. 83 – II. Adagio assai",
+        33 to "Bach: Goldberg Variation 15, BWV 988",
+        34 to "Schubert: Sonata No. 6 in E minor, II. Allegretto (excerpt)"
+    )
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -270,51 +316,6 @@ fun ExpandingView(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-//        Column(
-//            modifier = Modifier
-//                .fillMaxSize()
-//                .windowInsetsPadding(WindowInsets.statusBars)
-//                .windowInsetsPadding(WindowInsets.navigationBars)
-//                .pointerInput(Unit) {
-//                    detectDragGestures(
-//                        onDragStart = { offset ->
-//                            println("ExpandingView swipe area drag started at offset: $offset")
-//                            dragOffset = Offset.Zero
-//                        },
-//                        onDragEnd = {
-//                            println("ExpandingView swipe area drag ended, dragOffset=$dragOffset")
-//                            val dx = dragOffset.x
-//                            val dy = dragOffset.y
-//                            if (abs(dx) > abs(dy)) {
-//                                val direction = if (dx > swipeThresholdPx) -1 else if (dx < -swipeThresholdPx) 1 else 0
-//                                if (direction != 0 && changeRoom(direction)) {
-//                                    roomChangeTrigger++
-//                                }
-//                            } else {
-//                                if (dy < -swipeThresholdPx) {
-//                                    println("Swipe up detected in ExpandingView swipe area")
-//                                    selectAlarm()
-//                                } else if (dy > swipeThresholdPx) {
-//                                    println("Swipe down detected in ExpandingView swipe area")
-//                                    dismiss()
-//                                }
-//                            }
-//                            dragOffset = Offset.Zero
-//                        },
-//                        onDragCancel = {
-//                            println("ExpandingView swipe area drag cancelled")
-//                            dragOffset = Offset.Zero
-//                        },
-//                        onDrag = { change, dragAmount ->
-//                            change.consume()
-//                            dragOffset += dragAmount
-//                            println("ExpandingView swipe area drag detected, dragAmount=$dragAmount, dragOffset=$dragOffset")
-//                        }
-//                    )
-//                },
-//            verticalArrangement = Arrangement.SpaceBetween,
-//            horizontalAlignment = Alignment.CenterHorizontally
-//        ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.padding(top = 40.dp)
@@ -358,9 +359,9 @@ fun ExpandingView(
                 }
 
                 Text(
-                    text = "room ${currentIndex + 1}",
+                    text = customRoomTitles[currentIndex] ?: "room ${currentIndex + 1}",
                     color = if (isLight(color)) Color.Black else Color.White,
-                    fontSize = 16.sp,
+                    fontSize = if (customRoomTitles.containsKey(currentIndex)) 12.sp else 16.sp,
                     modifier = Modifier
                         .padding(bottom = 8.dp)
                 )
@@ -411,43 +412,42 @@ fun ExpandingView(
                         )
                     }
 
+//                    Spacer(Modifier.width(40.dp))
+//
+//                    Box(
+//                        modifier = Modifier
+//                            .clickable {
+//                                isAlarmEnabled.value = !isAlarmEnabled.value
+//                                showAlarmStateLabel = true
+//                                PreferenceManager.getDefaultSharedPreferences(context)
+//                                    .edit()
+//                                    .putBoolean("isAlarmEnabled", isAlarmEnabled.value)
+//                                    .apply()
+//                                if (isAlarmEnabled.value && durationMinutes.value == 0.0) {
+//                                    showTimePicker = true
+//                                }
+//                            }
+//                            .background(alarmButtonBackground, CircleShape)
+//                            .padding(12.dp),
+//                        contentAlignment = Alignment.Center
+//                    ) {
+//                        Icon(
+//                            if (isAlarmEnabled.value) Icons.Filled.AlarmOn else Icons.Filled.Alarm,
+//                            contentDescription = if (isAlarmEnabled.value) "Alarm Enabled" else "Alarm Disabled",
+//                            tint = if (isAlarmEnabled.value) Color.White else Color(0xFFB3B3B3),
+//                            modifier = Modifier.size(28.dp)
+//                        )
+//                    }
+
                     Spacer(Modifier.width(40.dp))
 
                     Box(
                         modifier = Modifier
                             .clickable {
-                                isAlarmEnabled.value = !isAlarmEnabled.value
-                                showAlarmStateLabel = true
-                                PreferenceManager.getDefaultSharedPreferences(context)
-                                    .edit()
-                                    .putBoolean("isAlarmEnabled", isAlarmEnabled.value)
-                                    .apply()
-                                if (isAlarmEnabled.value && durationMinutes.value == 0.0) {
-                                    showTimePicker = true
-                                }
-                            }
-                            .background(alarmButtonBackground, CircleShape)
-                            .padding(12.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            if (isAlarmEnabled.value) Icons.Filled.AlarmOn else Icons.Filled.Alarm,
-                            contentDescription = if (isAlarmEnabled.value) "Alarm Enabled" else "Alarm Disabled",
-                            tint = if (isAlarmEnabled.value) Color.White else Color(0xFFB3B3B3),
-                            modifier = Modifier.size(28.dp)
-                        )
-                    }
-
-                    Spacer(Modifier.width(40.dp))
-
-                    Box(
-                        modifier = Modifier
-                            .clickable(enabled = durationMinutes.value != 0.0 || isAlarmEnabled.value) {
                                 showTimePicker = true
                             }
                             .background(Color.Black.copy(alpha = 0.5f), CircleShape)
-                            .padding(12.dp)
-                            .alpha(if (durationMinutes.value == 0.0 && !isAlarmEnabled.value) 0.5f else 1f),
+                            .padding(12.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
@@ -574,14 +574,11 @@ fun ExpandingView(
                         val durationSeconds = (wakeDate.time - now.time) / 1000.0
                         durationMinutes.value = max(1.0, min(1440.0, durationSeconds / 60))
 
-                        val saveCalendar = Calendar.getInstance()
-                        saveCalendar.set(Calendar.HOUR_OF_DAY, selectedHour)
-                        saveCalendar.set(Calendar.MINUTE, minute)
-                        tempWakeTime = saveCalendar.time
+                        tempWakeTime = wakeDate
 
                         PreferenceManager.getDefaultSharedPreferences(context)
                             .edit()
-                            .putLong("lastWakeTime", tempWakeTime.time)
+                            .putLong("lastWakeTime", wakeDate.time)
                             .putFloat("durationMinutes", durationMinutes.value.toFloat())
                             .apply()
 
@@ -687,6 +684,7 @@ fun isLight(color: Color): Boolean {
     return luminance > 0.5f
 }
 
+//
 //package com.jmisabella.zrooms
 //
 //import android.content.Context
@@ -704,6 +702,7 @@ fun isLight(color: Color): Boolean {
 //import androidx.compose.foundation.background
 //import androidx.compose.foundation.clickable
 //import androidx.compose.foundation.gestures.detectDragGestures
+//import androidx.compose.foundation.gestures.detectTapGestures
 //import androidx.compose.foundation.layout.Arrangement
 //import androidx.compose.foundation.layout.Box
 //import androidx.compose.foundation.layout.Column
@@ -760,6 +759,27 @@ fun isLight(color: Color): Boolean {
 //import androidx.compose.ui.graphics.toArgb
 //import kotlin.math.abs
 //
+//private fun updateDurationToRemaining(
+//    context: Context,
+//    durationMinutes: MutableState<Double>,
+//    isAlarmEnabled: MutableState<Boolean>
+//) {
+//    val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+//    if (prefs.contains("lastWakeTime")) {
+//        val wakeTime = prefs.getLong("lastWakeTime", 0L)
+//        val now = System.currentTimeMillis()
+//        val remainingMillis = wakeTime - now
+//        if (remainingMillis > 0) {
+//            durationMinutes.value = min(1440.0, max(0.0, remainingMillis / 60000.0))
+//        } else {
+//            durationMinutes.value = 0.0
+//            isAlarmEnabled.value = false
+//            prefs.edit().putBoolean("isAlarmEnabled", false).apply()
+//        }
+//        prefs.edit().putFloat("durationMinutes", durationMinutes.value.toFloat()).apply()
+//    }
+//}
+//
 //@Composable
 //fun ExpandingView(
 //    color: Color,
@@ -770,9 +790,25 @@ fun isLight(color: Color): Boolean {
 //    changeRoom: (Int) -> Boolean,
 //    currentIndex: Int,
 //    maxIndex: Int,
-//    selectAlarm: () -> Unit
+//    selectAlarm: () -> Unit,
+//    audioService: AudioService? = null
 //) {
 //    val context = LocalContext.current
+//    // Update on room entry
+//    LaunchedEffect(Unit) {
+//        if (isAlarmEnabled.value) {
+//            updateDurationToRemaining(context, durationMinutes, isAlarmEnabled)
+//        }
+//    }
+//
+//    // Periodic update every 60 seconds while enabled
+//    LaunchedEffect(isAlarmEnabled.value) {
+//        while (isAlarmEnabled.value) {
+//            updateDurationToRemaining(context, durationMinutes, isAlarmEnabled)
+//            delay(60000L)
+//        }
+//    }
+//
 //    val defaultDimDurationSeconds = 180.0 // 3 minutes for room entry
 //
 //    var showLabel by remember { mutableStateOf(false) }
@@ -939,10 +975,24 @@ fun isLight(color: Color): Boolean {
 //                            println("ExpandingView swipe area drag detected, dragAmount=$dragAmount, dragOffset=$dragOffset")
 //                        }
 //                    )
+//                }
+//                .pointerInput(Unit) {  // <-- Add this new pointerInput for taps
+//                    detectTapGestures { offset ->
+//                        println("Tap detected in ExpandingView at offset: $offset")
+//                        if (isAlarmActive.value) {
+//                            // Stop alarm without exiting the room
+//                            audioService?.stopAll()  // Or audioService?.stopAlarm() if you implement a specific method
+//                            isAlarmActive.value = false
+//                        } else {
+//                            // Exit the room
+//                            dismiss()
+//                        }
+//                    }
 //                },
 //            verticalArrangement = Arrangement.SpaceBetween,
 //            horizontalAlignment = Alignment.CenterHorizontally
 //        ) {
+//
 //            Column(
 //                horizontalAlignment = Alignment.CenterHorizontally,
 //                modifier = Modifier.padding(top = 40.dp)
@@ -1043,33 +1093,6 @@ fun isLight(color: Color): Boolean {
 //
 //                    Box(
 //                        modifier = Modifier
-//                            .clickable {
-//                                isAlarmEnabled.value = !isAlarmEnabled.value
-//                                showAlarmStateLabel = true
-//                                PreferenceManager.getDefaultSharedPreferences(context)
-//                                    .edit()
-//                                    .putBoolean("isAlarmEnabled", isAlarmEnabled.value)
-//                                    .apply()
-//                                if (isAlarmEnabled.value && durationMinutes.value == 0.0) {
-//                                    showTimePicker = true
-//                                }
-//                            }
-//                            .background(alarmButtonBackground, CircleShape)
-//                            .padding(12.dp),
-//                        contentAlignment = Alignment.Center
-//                    ) {
-//                        Icon(
-//                            if (isAlarmEnabled.value) Icons.Filled.AlarmOn else Icons.Filled.Alarm,
-//                            contentDescription = if (isAlarmEnabled.value) "Alarm Enabled" else "Alarm Disabled",
-//                            tint = if (isAlarmEnabled.value) Color.White else Color(0xFFB3B3B3),
-//                            modifier = Modifier.size(28.dp)
-//                        )
-//                    }
-//
-//                    Spacer(Modifier.width(40.dp))
-//
-//                    Box(
-//                        modifier = Modifier
 //                            .clickable(enabled = durationMinutes.value != 0.0 || isAlarmEnabled.value) {
 //                                showTimePicker = true
 //                            }
@@ -1103,9 +1126,9 @@ fun isLight(color: Color): Boolean {
 //            Column(
 //                modifier = Modifier
 //                    .background(Color(0xFF212121)) // Dark background
-//                    .width(280.dp) // Reduced width
-//                    .padding(16.dp), // Reduced padding
-//                verticalArrangement = Arrangement.spacedBy(12.dp) // Reduced spacing
+//                    .width(300.dp) // Slightly increased width
+//                    .padding(16.dp), // Maintained padding
+//                verticalArrangement = Arrangement.spacedBy(12.dp)
 //            ) {
 //                val calendar = Calendar.getInstance()
 //                calendar.time = tempWakeTime
@@ -1117,7 +1140,7 @@ fun isLight(color: Color): Boolean {
 //                Row(
 //                    modifier = Modifier
 //                        .fillMaxWidth()
-//                        .height(120.dp), // Reduced height
+//                        .height(120.dp), // Maintained height
 //                    horizontalArrangement = Arrangement.Center,
 //                    verticalAlignment = Alignment.CenterVertically
 //                ) {
@@ -1129,17 +1152,17 @@ fun isLight(color: Color): Boolean {
 //                                value = hour
 //                                setOnValueChangedListener { _, _, newVal -> hour = newVal }
 //                                setTextColor(Color.White.toArgb()) // White text for contrast
-//                                textSize = 20f // Slightly larger text for readability
+//                                textSize = 28f // Increased text size
 //                            }
 //                        },
-//                        modifier = Modifier.width(70.dp) // Reduced width
+//                        modifier = Modifier.width(80.dp) // Slightly increased width
 //                    )
 //
 //                    Text(
 //                        text = ":",
-//                        fontSize = 20.sp, // Slightly smaller colon
+//                        fontSize = 24.sp, // Increased colon size for balance
 //                        color = Color.White, // White for contrast
-//                        modifier = Modifier.padding(horizontal = 6.dp) // Reduced padding
+//                        modifier = Modifier.padding(horizontal = 8.dp)
 //                    )
 //
 //                    AndroidView(
@@ -1151,14 +1174,14 @@ fun isLight(color: Color): Boolean {
 //                                setFormatter { value -> String.format("%02d", value) }
 //                                setOnValueChangedListener { _, _, newVal -> minute = newVal }
 //                                setTextColor(Color.White.toArgb()) // White text for contrast
-//                                textSize = 20f // Slightly larger text for readability
+//                                textSize = 28f // Increased text size
 //                            }
 //                        },
-//                        modifier = Modifier.width(70.dp) // Reduced width
+//                        modifier = Modifier.width(80.dp) // Slightly increased width
 //                    )
 //
 //                    if (!is24Hour) {
-//                        Spacer(Modifier.width(12.dp)) // Reduced spacing
+//                        Spacer(Modifier.width(12.dp))
 //                        AndroidView(
 //                            factory = { ctx ->
 //                                NumberPicker(ctx).apply {
@@ -1168,10 +1191,10 @@ fun isLight(color: Color): Boolean {
 //                                    value = amPm
 //                                    setOnValueChangedListener { _, _, newVal -> amPm = newVal }
 //                                    setTextColor(Color.White.toArgb()) // White text for contrast
-//                                    textSize = 20f // Slightly larger text for readability
+//                                    textSize = 28f // Increased text size
 //                                }
 //                            },
-//                            modifier = Modifier.width(80.dp) // Slightly reduced width
+//                            modifier = Modifier.width(90.dp) // Slightly increased width
 //                        )
 //                    }
 //                }
@@ -1202,14 +1225,11 @@ fun isLight(color: Color): Boolean {
 //                        val durationSeconds = (wakeDate.time - now.time) / 1000.0
 //                        durationMinutes.value = max(1.0, min(1440.0, durationSeconds / 60))
 //
-//                        val saveCalendar = Calendar.getInstance()
-//                        saveCalendar.set(Calendar.HOUR_OF_DAY, selectedHour)
-//                        saveCalendar.set(Calendar.MINUTE, minute)
-//                        tempWakeTime = saveCalendar.time
+//                        tempWakeTime = wakeDate
 //
 //                        PreferenceManager.getDefaultSharedPreferences(context)
 //                            .edit()
-//                            .putLong("lastWakeTime", tempWakeTime.time)
+//                            .putLong("lastWakeTime", wakeDate.time)
 //                            .putFloat("durationMinutes", durationMinutes.value.toFloat())
 //                            .apply()
 //
@@ -1314,4 +1334,3 @@ fun isLight(color: Color): Boolean {
 //    val luminance = color.red * 0.299f + color.green * 0.587f + color.blue * 0.114f
 //    return luminance > 0.5f
 //}
-

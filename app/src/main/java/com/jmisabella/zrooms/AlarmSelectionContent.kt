@@ -2,6 +2,7 @@ package com.jmisabella.zrooms
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,11 +23,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.foundation.gestures.detectTapGestures
 import kotlin.math.abs
 import kotlin.math.min
 
@@ -38,23 +40,21 @@ fun AlarmSelectionContent(
     isLandscape: Boolean
 ) {
     BoxWithConstraints {
-        val sheetHeight = if (isLandscape) maxHeight else maxHeight / 3 // Full height in landscape, 1/3 in portrait
+        val sheetHeight = if (isLandscape) maxHeight else maxHeight * 0.6f
         val numCols = 5
-        val numRows = 3
+        val numRows = 5 // Updated to 5 (4 tile rows + 1 silence)
         val spacing = 10.dp
         val gridPadding = if (isLandscape) PaddingValues(10.dp) else PaddingValues(20.dp)
         val textBottomPadding = if (isLandscape) 20.dp else 40.dp
-        // Calculate tile size to fit all 3 rows in landscape
-        val tileSize = if (isLandscape) {
-            val layoutDirection = LocalLayoutDirection.current
-            val totalHorizontalPadding = gridPadding.calculateLeftPadding(layoutDirection) +
-                    gridPadding.calculateRightPadding(layoutDirection)
-            val availW = maxWidth - (spacing * (numCols - 1)) - totalHorizontalPadding
-            val availH = maxHeight - (spacing * (numRows - 1)) - 50.dp // Reduced buffer for text
-            min(availW.value / numCols, availH.value / numRows).dp // Compare float values, convert to Dp
-        } else {
-            null // Use default aspect ratio in portrait
-        }
+        val layoutDirection = LocalLayoutDirection.current
+        val totalHorizontalPadding = gridPadding.calculateLeftPadding(layoutDirection) +
+                gridPadding.calculateRightPadding(layoutDirection)
+        val totalVerticalPadding = gridPadding.calculateTopPadding() +
+                gridPadding.calculateBottomPadding()
+        val availW = maxWidth - totalHorizontalPadding - (spacing * (numCols - 1))
+        val buffer = textBottomPadding
+        val availH = sheetHeight - totalVerticalPadding - (spacing * (numRows - 1)) - buffer
+        val tileSize = min(availW.value / numCols, availH.value / numRows).dp
 
         Box(
             Modifier
@@ -69,7 +69,7 @@ fun AlarmSelectionContent(
                 verticalArrangement = Arrangement.spacedBy(spacing),
                 modifier = Modifier.fillMaxSize()
             ) {
-                val alarmIndices = (20 until 30) + (15 until 20)
+                val alarmIndices = (20 until 30) + (15 until 20) + (30 until 35) // Updated to include 30-34
                 itemsIndexed(alarmIndices) { i, index ->
                     val row = i / 5
                     val col = i % 5
@@ -78,18 +78,12 @@ fun AlarmSelectionContent(
 
                     Box(
                         Modifier
-                            .let { mod ->
-                                if (isLandscape && tileSize != null) {
-                                    mod.size(tileSize) // Use same Dp for width and height
-                                } else {
-                                    mod.aspectRatio(1f) // Default square in portrait
-                                }
-                            }
+                            .size(tileSize)
                             .background(color, RoundedCornerShape(8.dp))
                             .border(
-                                if (isSelected) 4.dp else 0.dp,
-                                Color.White,
-                                RoundedCornerShape(8.dp)
+                                width = if (isSelected) 4.dp else 0.dp,
+                                color = Color.White,
+                                shape = RoundedCornerShape(8.dp)
                             )
                             .pointerInput(Unit) {
                                 detectTapGestures { offset ->
@@ -105,14 +99,44 @@ fun AlarmSelectionContent(
                             }
                     )
                 }
+                item(span = { GridItemSpan(numCols) }) {
+                    val isSilenceSelected = selectedAlarmIndex == null || (selectedAlarmIndex ?: -1) < 0
+                    val silenceColor = if (isSilenceSelected) Color(0xFFfbf7f5) else Color(0xFFbdbdbd)
+                    Box(
+                        Modifier
+                            .fillMaxWidth()
+                            .height(tileSize)
+                            .background(silenceColor, RoundedCornerShape(8.dp))
+                            .border(
+                                width = if (isSilenceSelected) 4.dp else 0.dp,
+                                color = Color.White,
+                                shape = RoundedCornerShape(8.dp)
+                            )
+                            .pointerInput(Unit) {
+                                detectTapGestures {
+                                    onSelect(null)
+                                    audioService?.stopPreview()
+                                }
+                            }
+                    ) {
+                        Text(
+                            text = "silence",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Thin,
+                            color = Color(0xFF696969),
+                            modifier = Modifier.align(Alignment.Center)
+                        )
+                    }
+                }
             }
             Text(
                 text = "waking rooms",
-                fontSize = 14.sp,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
                 color = Color(0xFF808080),
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .padding(bottom = textBottomPadding)
+                    .padding(bottom = if (isLandscape) textBottomPadding else textBottomPadding + 12.dp)
             )
         }
     }
@@ -132,7 +156,7 @@ fun alarmColorFor(row: Int, col: Int, isSelected: Boolean): Color {
         val saturation = 0.8f
         val brightness = if (isSelected) 0.9f else 0.9f * 0.5f
         return hsvToColor(hue, saturation, brightness)
-    } else {
+    } else if (row == 2) {
         val progress = col.toFloat() / 4f
         val startHue = 0.666f  // Deep blue
         val endHue = 0.833f    // Deep purple
@@ -140,6 +164,17 @@ fun alarmColorFor(row: Int, col: Int, isSelected: Boolean): Color {
         val saturation = 0.8f
         val brightness = if (isSelected) 0.6f else 0.6f * 0.5f
         return hsvToColor(hue, saturation, brightness)
+    } else {
+        // New row (row 3): White to soft yellow
+        val progress = col.toFloat() / 4f
+        val hue = 0.166f // Fixed yellow hue
+        val startSat = 0.0f // White
+        val endSat = 0.3f // Soft yellow
+        val sat = startSat + (endSat - startSat) * progress
+        val startBright = if (isSelected) 1.0f else 0.4f
+        val endBright = if (isSelected) 0.9f else 0.35f
+        val bright = startBright - (startBright - endBright) * progress
+        return hsvToColor(hue, sat, bright)
     }
 }
 
@@ -147,6 +182,7 @@ fun alarmColorFor(row: Int, col: Int, isSelected: Boolean): Color {
 //
 //import androidx.compose.foundation.background
 //import androidx.compose.foundation.border
+//import androidx.compose.foundation.gestures.detectTapGestures
 //import androidx.compose.foundation.layout.Arrangement
 //import androidx.compose.foundation.layout.Box
 //import androidx.compose.foundation.layout.BoxWithConstraints
@@ -158,20 +194,20 @@ fun alarmColorFor(row: Int, col: Int, isSelected: Boolean): Color {
 //import androidx.compose.foundation.layout.padding
 //import androidx.compose.foundation.layout.size
 //import androidx.compose.foundation.lazy.grid.GridCells
+//import androidx.compose.foundation.lazy.grid.GridItemSpan
 //import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 //import androidx.compose.foundation.lazy.grid.itemsIndexed
 //import androidx.compose.foundation.shape.RoundedCornerShape
 //import androidx.compose.material.Text
 //import androidx.compose.runtime.Composable
-//import androidx.compose.runtime.LaunchedEffect
 //import androidx.compose.ui.Alignment
 //import androidx.compose.ui.Modifier
 //import androidx.compose.ui.graphics.Color
+//import androidx.compose.ui.input.pointer.pointerInput
 //import androidx.compose.ui.platform.LocalLayoutDirection
+//import androidx.compose.ui.text.font.FontWeight
 //import androidx.compose.ui.unit.dp
 //import androidx.compose.ui.unit.sp
-//import androidx.compose.ui.input.pointer.pointerInput
-//import androidx.compose.foundation.gestures.detectTapGestures
 //import kotlin.math.abs
 //import kotlin.math.min
 //
@@ -184,23 +220,22 @@ fun alarmColorFor(row: Int, col: Int, isSelected: Boolean): Color {
 //    isLandscape: Boolean
 //) {
 //    BoxWithConstraints {
-//        val sheetHeight = if (isLandscape) maxHeight else maxHeight / 3 // Full height in landscape, 1/3 in portrait
+//        val sheetHeight = if (isLandscape) maxHeight else maxHeight / 2.2f
 //        val numCols = 5
-//        val numRows = 3
+//        val numRows = 4 // Changed to 4 to accommodate the new silence row
 //        val spacing = 10.dp
 //        val gridPadding = if (isLandscape) PaddingValues(10.dp) else PaddingValues(20.dp)
 //        val textBottomPadding = if (isLandscape) 20.dp else 40.dp
-//        // Calculate tile size to fit all 3 rows in landscape
-//        val tileSize = if (isLandscape) {
-//            val layoutDirection = LocalLayoutDirection.current
-//            val totalHorizontalPadding = gridPadding.calculateLeftPadding(layoutDirection) +
-//                    gridPadding.calculateRightPadding(layoutDirection)
-//            val availW = maxWidth - (spacing * (numCols - 1)) - totalHorizontalPadding
-//            val availH = maxHeight - (spacing * (numRows - 1)) - 50.dp // Reduced buffer for text
-//            min(availW.value / numCols, availH.value / numRows).dp // Compare float values, convert to Dp
-//        } else {
-//            null // Use default aspect ratio in portrait
-//        }
+//        val layoutDirection = LocalLayoutDirection.current
+//        val totalHorizontalPadding = gridPadding.calculateLeftPadding(layoutDirection) +
+//                gridPadding.calculateRightPadding(layoutDirection)
+//        val totalVerticalPadding = gridPadding.calculateTopPadding() +
+//                gridPadding.calculateBottomPadding()
+//        val availW = maxWidth - totalHorizontalPadding - (spacing * (numCols - 1))
+//        val buffer = textBottomPadding // Buffer to prevent overlap with bottom text
+//        val availH = sheetHeight - totalVerticalPadding - (spacing * (numRows - 1)) - buffer
+//        // Always calculate tileSize to ensure fit in both orientations
+//        val tileSize = min(availW.value / numCols, availH.value / numRows).dp
 //
 //        Box(
 //            Modifier
@@ -224,18 +259,12 @@ fun alarmColorFor(row: Int, col: Int, isSelected: Boolean): Color {
 //
 //                    Box(
 //                        Modifier
-//                            .let { mod ->
-//                                if (isLandscape && tileSize != null) {
-//                                    mod.size(tileSize) // Use same Dp for width and height
-//                                } else {
-//                                    mod.aspectRatio(1f) // Default square in portrait
-//                                }
-//                            }
+//                            .size(tileSize) // Use calculated tileSize for square tiles
 //                            .background(color, RoundedCornerShape(8.dp))
 //                            .border(
-//                                if (isSelected) 4.dp else 0.dp,
-//                                Color.White,
-//                                RoundedCornerShape(8.dp)
+//                                width = if (isSelected) 4.dp else 0.dp,
+//                                color = Color.White,
+//                                shape = RoundedCornerShape(8.dp)
 //                            )
 //                            .pointerInput(Unit) {
 //                                detectTapGestures { offset ->
@@ -251,21 +280,46 @@ fun alarmColorFor(row: Int, col: Int, isSelected: Boolean): Color {
 //                            }
 //                    )
 //                }
+//                // Add the silence row as a spanning item
+//                item(span = { GridItemSpan(numCols) }) {
+//                    val isSilenceSelected = selectedAlarmIndex == null || (selectedAlarmIndex ?: -1) < 0
+//                    val silenceColor = if (isSilenceSelected) Color(0xFFfbf7f5) else Color(0xFFbdbdbd) // Brighter on select to match iOS contrast
+//                    Box(
+//                        Modifier
+//                            .fillMaxWidth()
+//                            .height(tileSize)
+//                            .background(silenceColor, RoundedCornerShape(8.dp))
+//                            .border(
+//                                width = if (isSilenceSelected) 4.dp else 0.dp,
+//                                color = Color.White,
+//                                shape = RoundedCornerShape(8.dp)
+//                            )
+//                            .pointerInput(Unit) {
+//                                detectTapGestures {
+//                                    onSelect(null)
+//                                    audioService?.stopPreview()
+//                                }
+//                            }
+//                    ) {
+//                        Text(
+//                            text = "silence",
+//                            fontSize = 14.sp,
+//                            fontWeight = FontWeight.Thin,
+//                            color = Color(0xFF696969), // Lighter text for visibility on darker backgrounds
+//                            modifier = Modifier.align(Alignment.Center)
+//                        )
+//                    }
+//                }
 //            }
 //            Text(
 //                text = "waking rooms",
-//                fontSize = 14.sp,
+//                fontSize = 16.sp,
+//                fontWeight = FontWeight.Bold,
 //                color = Color(0xFF808080),
 //                modifier = Modifier
 //                    .align(Alignment.BottomCenter)
-//                    .padding(bottom = textBottomPadding)
+//                    .padding(bottom = if (isLandscape) textBottomPadding else textBottomPadding + 12.dp)
 //            )
-//        }
-//    }
-//
-//    LaunchedEffect(Unit) {
-//        selectedAlarmIndex?.let { index ->
-//            audioService?.playPreview(index)
 //        }
 //    }
 //}
@@ -294,5 +348,4 @@ fun alarmColorFor(row: Int, col: Int, isSelected: Boolean): Color {
 //        return hsvToColor(hue, saturation, brightness)
 //    }
 //}
-
 
