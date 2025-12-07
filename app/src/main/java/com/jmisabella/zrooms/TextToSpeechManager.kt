@@ -38,9 +38,9 @@ class TextToSpeechManager(private val context: Context) {
     var onAmbientVolumeChanged: ((Float) -> Unit)? = null
 
     companion object {
-        private const val MEDITATION_SPEECH_RATE = 0.50f // Calm, slow rate (increased from 0.33 by ~20%)
-        private const val MEDITATION_PITCH = 0.75f // Lower pitch for calmer voice (decreased from 0.9)
-        const val VOICE_VOLUME = 0.05f // Voice volume (fixed, cannot be changed dynamically)
+        private const val MEDITATION_SPEECH_RATE = 0.55f // Calm, slow rate (increased from 0.33 by ~20%)
+        private const val MEDITATION_PITCH = 0.55f // Lower pitch for calmer voice (decreased from 0.9)
+        const val VOICE_VOLUME = 0.13f // Voice volume (fixed, cannot be changed dynamically)
         const val MAX_AMBIENT_VOLUME = 0.6f // Maximum ambient volume
     }
 
@@ -259,6 +259,7 @@ class TextToSpeechManager(private val context: Context) {
 
         val params = HashMap<String, String>()
         params[TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID] = "utterance_$currentUtteranceIndex"
+        params[TextToSpeech.Engine.KEY_PARAM_VOLUME] = VOICE_VOLUME.toString()
 
         tts?.speak(phrase, TextToSpeech.QUEUE_FLUSH, params)
 
