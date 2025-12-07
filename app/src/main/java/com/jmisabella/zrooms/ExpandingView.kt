@@ -118,12 +118,12 @@ fun ExpandingView(
         Color(0xFFE0E0E0) // Light grey for dark backgrounds
     }
 
-    // Text-to-speech manager
-    val ttsManager = remember { TextToSpeechManager(context) }
-    var isMeditationPlaying by remember { mutableStateOf(false) }
-
-    // Custom meditation manager
+    // Custom meditation manager (must be created first)
     val meditationManager = remember { CustomMeditationManager(context) }
+
+    // Text-to-speech manager (needs meditationManager for random meditation selection)
+    val ttsManager = remember { TextToSpeechManager(context, meditationManager) }
+    var isMeditationPlaying by remember { mutableStateOf(false) }
     var showMeditationList by remember { mutableStateOf(false) }
 
     // Update on room entry
