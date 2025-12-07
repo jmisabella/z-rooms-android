@@ -111,6 +111,13 @@ fun ExpandingView(
 ) {
     val context = LocalContext.current
 
+    // Adaptive slider colors based on background brightness
+    val sliderColor = if (isLight(color)) {
+        Color(0xFF3A3A3A) // Dark grey for bright backgrounds
+    } else {
+        Color(0xFFE0E0E0) // Light grey for dark backgrounds
+    }
+
     // Text-to-speech manager
     val ttsManager = remember { TextToSpeechManager(context) }
     var isMeditationPlaying by remember { mutableStateOf(false) }
@@ -371,7 +378,10 @@ fun ExpandingView(
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 20.dp)
+                        .padding(horizontal = 20.dp),
+                    thumbColor = sliderColor,
+                    activeTrackColor = sliderColor,
+                    inactiveTrackColor = sliderColor.copy(alpha = 0.3f)
                 )
                 if (showLabel) {
                     Spacer(Modifier.height(8.dp))
@@ -398,7 +408,10 @@ fun ExpandingView(
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 20.dp)
+                        .padding(horizontal = 20.dp),
+                    thumbColor = sliderColor,
+                    activeTrackColor = sliderColor,
+                    inactiveTrackColor = sliderColor.copy(alpha = 0.3f)
                 )
 
                 if (showBalanceLabel) {

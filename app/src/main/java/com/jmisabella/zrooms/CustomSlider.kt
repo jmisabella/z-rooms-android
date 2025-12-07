@@ -1,6 +1,7 @@
 package com.jmisabella.zrooms
 
 import androidx.compose.material.Slider
+import androidx.compose.material.SliderDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -8,6 +9,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import kotlin.math.pow
 import kotlin.math.round
 
@@ -18,7 +20,10 @@ fun CustomSlider(
     maxValue: Double = 480.0,
     step: Double = 1.0,
     onEditingChanged: (Boolean) -> Unit = {},
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    thumbColor: Color? = null,
+    activeTrackColor: Color? = null,
+    inactiveTrackColor: Color? = null
 ) {
     var sliderPosition by remember {
         mutableStateOf(calculateNormalized(value.value, maxValue))
@@ -27,6 +32,8 @@ fun CustomSlider(
     LaunchedEffect(value.value) {
         sliderPosition = calculateNormalized(value.value, maxValue)
     }
+
+    val defaultColors = SliderDefaults.colors()
 
     Slider(
         value = sliderPosition,
@@ -39,7 +46,16 @@ fun CustomSlider(
         onValueChangeFinished = {
             onEditingChanged(false)
         },
-        modifier = modifier
+        modifier = modifier,
+        colors = if (thumbColor != null || activeTrackColor != null || inactiveTrackColor != null) {
+            SliderDefaults.colors(
+                thumbColor = thumbColor ?: defaultColors.thumbColor(enabled = true).value,
+                activeTrackColor = activeTrackColor ?: defaultColors.trackColor(enabled = true, active = true).value,
+                inactiveTrackColor = inactiveTrackColor ?: defaultColors.trackColor(enabled = true, active = false).value
+            )
+        } else {
+            defaultColors
+        }
     )
 }
 
