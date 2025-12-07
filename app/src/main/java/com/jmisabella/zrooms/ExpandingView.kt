@@ -39,6 +39,9 @@ import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.AlarmOn
 import androidx.compose.material.icons.outlined.NightsStay
 import androidx.compose.material.icons.outlined.Schedule
+import androidx.compose.material.icons.outlined.Eco
+import androidx.compose.material.icons.outlined.FormatQuote
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -107,6 +110,15 @@ fun ExpandingView(
     audioService: AudioService? = null
 ) {
     val context = LocalContext.current
+
+    // Text-to-speech manager
+    val ttsManager = remember { TextToSpeechManager(context) }
+    var isMeditationPlaying by remember { mutableStateOf(false) }
+
+    // Custom meditation manager
+    val meditationManager = remember { CustomMeditationManager(context) }
+    var showMeditationList by remember { mutableStateOf(false) }
+
     // Update on room entry
     LaunchedEffect(Unit) {
         if (isAlarmEnabled.value) {
@@ -122,9 +134,38 @@ fun ExpandingView(
         }
     }
 
-    val defaultDimDurationSeconds = 180.0 // 3 minutes for room entry
+    // Set up TTS manager and clean up on dispose
+    DisposableEffect(Unit) {
+        // Set up ambient volume callback
+        ttsManager.onAmbientVolumeChanged = { volume ->
+            audioService?.setAmbientVolume(volume)
+        }
+        // Set initial ambient volume
+        audioService?.setAmbientVolume(ttsManager.ambientVolume)
+
+        onDispose {
+            ttsManager.stopSpeaking()
+            ttsManager.shutdown()
+        }
+    }
+
+    // Track meditation playing state
+    LaunchedEffect(ttsManager.isPlayingMeditation) {
+        isMeditationPlaying = ttsManager.isPlayingMeditation
+    }
+
+    // Ambient volume state (0.0 to 0.6)
+    val ambientVolumeState = remember { mutableStateOf(ttsManager.ambientVolume.toDouble()) }
+
+    // Update TTS manager and ambient volume when slider changes
+    LaunchedEffect(ambientVolumeState.value) {
+        ttsManager.updateAmbientVolume(ambientVolumeState.value.toFloat())
+    }
+
+    val defaultDimDurationSeconds = 600.0 // 10 minutes for room entry
 
     var showLabel by remember { mutableStateOf(false) }
+    var showBalanceLabel by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
     var showAlarmStateLabel by remember { mutableStateOf(false) }
     var tempWakeTime by remember {
@@ -343,6 +384,35 @@ fun ExpandingView(
                             .padding(8.dp)
                     )
                 }
+
+                Spacer(Modifier.height(8.dp))
+
+                // Ambient volume slider (0.0 = silent, 0.6 = full)
+                CustomSlider(
+                    value = ambientVolumeState,
+                    minValue = 0.0,
+                    maxValue = 0.6,
+                    step = 0.01,
+                    onEditingChanged = { editing ->
+                        showBalanceLabel = editing
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp)
+                )
+
+                if (showBalanceLabel) {
+                    Spacer(Modifier.height(8.dp))
+                    val ambientPercent = ((ambientVolumeState.value / 0.6) * 100).toInt()
+                    Text(
+                        text = "ambient $ambientPercent%",
+                        color = Color.White,
+                        fontSize = 18.sp,
+                        modifier = Modifier
+                            .background(Color.Black.copy(alpha = 0.5f))
+                            .padding(8.dp)
+                    )
+                }
             }
 
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -376,17 +446,16 @@ fun ExpandingView(
                     Box(
                         modifier = Modifier
                             .clickable {
-                                sunTrigger++
-                                dimMode = DimMode.Bright
+                                showMeditationList = true
                             }
                             .background(Color.Black.copy(alpha = 0.5f), CircleShape)
                             .padding(12.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
-                            Icons.Filled.WbSunny,
-                            contentDescription = "Brighten Screen",
-                            tint = Color(0xFFFFCA28),
+                            Icons.Outlined.FormatQuote,
+                            contentDescription = "Custom Meditations",
+                            tint = Color(0xFF9E9E9E),
                             modifier = Modifier.size(28.dp)
                         )
                     }
@@ -396,18 +465,39 @@ fun ExpandingView(
                     Box(
                         modifier = Modifier
                             .clickable {
-                                nightsTrigger++
-                                dimMode = DimMode.Dark
-                                dimSeconds = 3.0 // Override for moon button
+                                showTimePicker = true
                             }
                             .background(Color.Black.copy(alpha = 0.5f), CircleShape)
                             .padding(12.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
-                            Icons.Outlined.NightsStay,
-                            contentDescription = "Dim Screen",
-                            tint = Color(0xFF64B5F6),
+                            Icons.Outlined.Schedule,
+                            contentDescription = "Set Timer",
+                            tint = Color(0xFFFFA726),
+                            modifier = Modifier.size(28.dp)
+                        )
+                    }
+
+                    Spacer(Modifier.width(40.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .clickable {
+                                if (isMeditationPlaying) {
+                                    ttsManager.stopSpeaking()
+                                } else {
+                                    ttsManager.startSpeakingRandomMeditation()
+                                }
+                            }
+                            .background(Color.Black.copy(alpha = 0.5f), CircleShape)
+                            .padding(12.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            Icons.Outlined.Eco,
+                            contentDescription = if (isMeditationPlaying) "Stop Meditation" else "Play Meditation",
+                            tint = if (isMeditationPlaying) Color(0xFF4CAF50) else Color(0xFF9E9E9E),
                             modifier = Modifier.size(28.dp)
                         )
                     }
@@ -438,25 +528,6 @@ fun ExpandingView(
 //                            modifier = Modifier.size(28.dp)
 //                        )
 //                    }
-
-                    Spacer(Modifier.width(40.dp))
-
-                    Box(
-                        modifier = Modifier
-                            .clickable {
-                                showTimePicker = true
-                            }
-                            .background(Color.Black.copy(alpha = 0.5f), CircleShape)
-                            .padding(12.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            Icons.Outlined.Schedule,
-                            contentDescription = "Set Timer",
-                            tint = Color(0xFFFFA726),
-                            modifier = Modifier.size(28.dp)
-                        )
-                    }
                 }
             }
         }
@@ -602,6 +673,17 @@ fun ExpandingView(
                 }
             }
         }
+    }
+
+    // Custom meditation list dialog
+    if (showMeditationList) {
+        CustomMeditationListView(
+            manager = meditationManager,
+            onDismiss = { showMeditationList = false },
+            onPlay = { meditationText ->
+                ttsManager.startSpeakingWithPauses(meditationText)
+            }
+        )
     }
 
     LaunchedEffect(sunTrigger) {
@@ -809,7 +891,7 @@ fun isLight(color: Color): Boolean {
 //        }
 //    }
 //
-//    val defaultDimDurationSeconds = 180.0 // 3 minutes for room entry
+//    val defaultDimDurationSeconds = 600.0 // 10 minutes for room entry
 //
 //    var showLabel by remember { mutableStateOf(false) }
 //    var showTimePicker by remember { mutableStateOf(false) }
