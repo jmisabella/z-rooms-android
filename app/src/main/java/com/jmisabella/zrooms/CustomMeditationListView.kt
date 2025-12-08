@@ -52,6 +52,23 @@ fun CustomMeditationListView(
                     )
 
                     Row {
+                        if (manager.meditations.isNotEmpty()) {
+                            IconButton(
+                                onClick = {
+                                    manager.getRandomMeditation()?.let { meditation ->
+                                        onPlay(meditation.text)
+                                        onDismiss()
+                                    }
+                                }
+                            ) {
+                                Icon(
+                                    Icons.Filled.Shuffle,
+                                    contentDescription = "Play Random",
+                                    tint = Color(0xFFFFB74D)
+                                )
+                            }
+                        }
+
                         if (manager.canAddMore) {
                             IconButton(
                                 onClick = {

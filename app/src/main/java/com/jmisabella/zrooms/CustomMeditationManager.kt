@@ -106,4 +106,12 @@ class CustomMeditationManager(private val context: Context) {
 
         saveMeditations()
     }
+
+    fun getRandomMeditation(): CustomMeditation? {
+        return if (meditations.isNotEmpty()) {
+            meditations.random()
+        } else {
+            null
+        }
+    }
 }
