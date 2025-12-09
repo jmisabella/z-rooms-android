@@ -73,6 +73,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.zIndex
 import kotlin.math.abs
 
 private fun updateDurationToRemaining(
@@ -111,13 +112,36 @@ fun ExpandingView(
 ) {
     val context = LocalContext.current
 
-    // Text-to-speech manager
-    val ttsManager = remember { TextToSpeechManager(context) }
-    var isMeditationPlaying by remember { mutableStateOf(false) }
+    // Adaptive slider colors based on background brightness
+    val sliderColor = if (isLight(color)) {
+        Color(0xFF3A3A3A) // Dark grey for bright backgrounds
+    } else {
+        Color(0xFFE0E0E0) // Light grey for dark backgrounds
+    }
 
-    // Custom meditation manager
+    // Custom meditation manager (must be created first)
     val meditationManager = remember { CustomMeditationManager(context) }
+
+    // Text-to-speech manager (needs meditationManager for random meditation selection)
+    val ttsManager = remember { TextToSpeechManager(context, meditationManager) }
+    var isMeditationPlaying by remember { mutableStateOf(false) }
     var showMeditationList by remember { mutableStateOf(false) }
+
+    // Meditation text display settings
+    val showMeditationText = remember {
+        mutableStateOf(
+            PreferenceManager.getDefaultSharedPreferences(context).getBoolean("showMeditationText", false)
+        )
+    }
+
+    // Listen for changes to the preference
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(500) // Check every 500ms for preference changes
+            showMeditationText.value = PreferenceManager.getDefaultSharedPreferences(context)
+                .getBoolean("showMeditationText", false)
+        }
+    }
 
     // Update on room entry
     LaunchedEffect(Unit) {
@@ -357,61 +381,79 @@ fun ExpandingView(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
+            Box(
                 modifier = Modifier.padding(top = 40.dp)
             ) {
-                CustomSlider(
-                    value = durationMinutes,
-                    minValue = 0.0,
-                    maxValue = 1440.0,
-                    step = 1.0,
-                    onEditingChanged = { editing ->
-                        showLabel = editing
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp)
-                )
-                if (showLabel) {
-                    Spacer(Modifier.height(8.dp))
-                    Text(
-                        text = formatDuration(durationMinutes.value),
-                        color = Color.White,
-                        fontSize = 18.sp,
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    CustomSlider(
+                        value = durationMinutes,
+                        minValue = 0.0,
+                        maxValue = 1440.0,
+                        step = 1.0,
+                        onEditingChanged = { editing ->
+                            showLabel = editing
+                        },
                         modifier = Modifier
-                            .background(Color.Black.copy(alpha = 0.5f))
-                            .padding(8.dp)
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp),
+                        thumbColor = sliderColor,
+                        activeTrackColor = sliderColor,
+                        inactiveTrackColor = sliderColor.copy(alpha = 0.3f)
+                    )
+
+                    Spacer(Modifier.height(8.dp))
+
+                    // Ambient volume slider (0.0 = silent, 1.0 = full)
+                    CustomSlider(
+                        value = ambientVolumeState,
+                        minValue = 0.0,
+                        maxValue = 1.0,
+                        step = 0.01,
+                        onEditingChanged = { editing ->
+                            showBalanceLabel = editing
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp),
+                        thumbColor = sliderColor,
+                        activeTrackColor = sliderColor,
+                        inactiveTrackColor = sliderColor.copy(alpha = 0.3f)
                     )
                 }
 
-                Spacer(Modifier.height(8.dp))
-
-                // Ambient volume slider (0.0 = silent, 0.6 = full)
-                CustomSlider(
-                    value = ambientVolumeState,
-                    minValue = 0.0,
-                    maxValue = 0.6,
-                    step = 0.01,
-                    onEditingChanged = { editing ->
-                        showBalanceLabel = editing
-                    },
+                // Overlay labels with fixed positioning
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 20.dp)
-                )
+                        .zIndex(1f)
+                ) {
+                    if (showLabel) {
+                        Text(
+                            text = formatDuration(durationMinutes.value),
+                            color = Color.White,
+                            fontSize = 18.sp,
+                            modifier = Modifier
+                                .background(Color.Black.copy(alpha = 0.7f))
+                                .padding(8.dp)
+                        )
+                    }
 
-                if (showBalanceLabel) {
                     Spacer(Modifier.height(8.dp))
-                    val ambientPercent = ((ambientVolumeState.value / 0.6) * 100).toInt()
-                    Text(
-                        text = "ambient $ambientPercent%",
-                        color = Color.White,
-                        fontSize = 18.sp,
-                        modifier = Modifier
-                            .background(Color.Black.copy(alpha = 0.5f))
-                            .padding(8.dp)
-                    )
+
+                    if (showBalanceLabel) {
+                        val ambientPercent = ((ambientVolumeState.value / 1.0) * 100).toInt()
+                        Text(
+                            text = "ambient $ambientPercent%",
+                            color = Color.White,
+                            fontSize = 18.sp,
+                            modifier = Modifier
+                                .background(Color.Black.copy(alpha = 0.7f))
+                                .padding(8.dp)
+                        )
+                    }
                 }
             }
 
@@ -531,6 +573,16 @@ fun ExpandingView(
                 }
             }
         }
+
+        // Meditation text display at bottom
+        MeditationTextDisplay(
+            currentPhrase = ttsManager.currentPhrase,
+            previousPhrase = ttsManager.previousPhrase,
+            isVisible = showMeditationText.value && isMeditationPlaying,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+        )
     }
 
     // Hide alarm state label after 2 seconds

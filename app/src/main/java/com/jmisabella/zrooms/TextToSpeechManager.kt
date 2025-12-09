@@ -17,14 +17,23 @@ import java.util.Locale
  * A manager for text-to-speech using Android's TextToSpeech engine.
  * Supports pause patterns like "(3s)" for 3 seconds and "(1.5m)" for 1.5 minutes.
  */
-class TextToSpeechManager(private val context: Context) {
+class TextToSpeechManager(
+    private val context: Context,
+    private val customMeditationManager: CustomMeditationManager? = null
+) {
     var isSpeaking by mutableStateOf(false)
         private set
 
     var isPlayingMeditation by mutableStateOf(false)
         private set
 
-    var ambientVolume by mutableStateOf(0.6f) // 0.0 (silent) to 0.6 (full ambient)
+    var ambientVolume by mutableStateOf(1.0f) // 0.0 (silent) to 1.0 (full ambient), default to 100%
+        private set
+
+    var currentPhrase by mutableStateOf("")
+        private set
+
+    var previousPhrase by mutableStateOf("")
         private set
 
     private var tts: TextToSpeech? = null
@@ -38,10 +47,10 @@ class TextToSpeechManager(private val context: Context) {
     var onAmbientVolumeChanged: ((Float) -> Unit)? = null
 
     companion object {
-        private const val MEDITATION_SPEECH_RATE = 0.55f // Calm, slow rate (increased from 0.33 by ~20%)
-        private const val MEDITATION_PITCH = 0.55f // Lower pitch for calmer voice (decreased from 0.9)
-        const val VOICE_VOLUME = 0.13f // Voice volume (fixed, cannot be changed dynamically)
-        const val MAX_AMBIENT_VOLUME = 0.6f // Maximum ambient volume
+        private const val MEDITATION_SPEECH_RATE = 0.6f // Calm, slow rate (increased from 0.33 by ~20%)
+        private const val MEDITATION_PITCH = 0.58f // Lower pitch for calmer voice (decreased from 0.9)
+        const val VOICE_VOLUME = 0.23f // Voice volume (fixed, cannot be changed dynamically)
+        const val MAX_AMBIENT_VOLUME = 1.0f // Maximum ambient volume
     }
 
     init {
@@ -122,6 +131,8 @@ class TextToSpeechManager(private val context: Context) {
         isPlayingMeditation = false
         utteranceQueue.clear()
         currentUtteranceIndex = 0
+        currentPhrase = ""
+        previousPhrase = ""
     }
 
     /**
@@ -211,11 +222,13 @@ class TextToSpeechManager(private val context: Context) {
     }
 
     /**
-     * Loads a random meditation text file from res/raw (preset_meditation1 through preset_meditation10)
+     * Loads a random meditation from both preset files and custom meditations
      */
     private fun loadRandomMeditationFile(): String? {
-        val validResources = mutableListOf<Int>()
+        // Collect all available meditations
+        val allMeditations = mutableListOf<String>()
 
+        // 1. Load all preset meditation files from res/raw
         for (i in 1..10) {
             val resId = context.resources.getIdentifier(
                 "preset_meditation$i",
@@ -223,25 +236,35 @@ class TextToSpeechManager(private val context: Context) {
                 context.packageName
             )
             if (resId != 0) {
-                validResources.add(resId)
+                try {
+                    val text = context.resources.openRawResource(resId)
+                        .bufferedReader()
+                        .use { it.readText() }
+                        .trim()
+                    if (text.isNotEmpty()) {
+                        allMeditations.add(text)
+                    }
+                } catch (e: Exception) {
+                    println("Could not read preset meditation $i: ${e.message}")
+                }
             }
         }
 
-        if (validResources.isEmpty()) {
-            println("No preset meditation files found")
+        // 2. Add all custom meditations
+        customMeditationManager?.meditations?.forEach { meditation ->
+            if (meditation.text.isNotEmpty()) {
+                allMeditations.add(meditation.text)
+            }
+        }
+
+        // 3. Check if we have any meditations at all
+        if (allMeditations.isEmpty()) {
+            println("No meditation files found (neither preset nor custom)")
             return null
         }
 
-        // Pick a random preset meditation file
-        val randomResId = validResources.random()
-
-        // Load the text
-        return try {
-            context.resources.openRawResource(randomResId).bufferedReader().use { it.readText() }.trim()
-        } catch (e: Exception) {
-            println("Could not read preset meditation file: ${e.message}")
-            null
-        }
+        // 4. Pick a random meditation from all available ones
+        return allMeditations.random()
     }
 
     /**
@@ -251,11 +274,17 @@ class TextToSpeechManager(private val context: Context) {
         if (!isCustomMode || currentUtteranceIndex >= utteranceQueue.size) {
             isSpeaking = false
             isPlayingMeditation = false
+            previousPhrase = currentPhrase
+            currentPhrase = ""
             return
         }
 
         val (phrase, delayMs) = utteranceQueue[currentUtteranceIndex]
         currentUtteranceIndex++
+
+        // Update current and previous phrases
+        previousPhrase = currentPhrase
+        currentPhrase = phrase
 
         val params = HashMap<String, String>()
         params[TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID] = "utterance_$currentUtteranceIndex"
