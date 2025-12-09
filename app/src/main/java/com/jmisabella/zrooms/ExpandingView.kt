@@ -127,6 +127,22 @@ fun ExpandingView(
     var isMeditationPlaying by remember { mutableStateOf(false) }
     var showMeditationList by remember { mutableStateOf(false) }
 
+    // Meditation text display settings
+    val showMeditationText = remember {
+        mutableStateOf(
+            PreferenceManager.getDefaultSharedPreferences(context).getBoolean("showMeditationText", false)
+        )
+    }
+
+    // Listen for changes to the preference
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(500) // Check every 500ms for preference changes
+            showMeditationText.value = PreferenceManager.getDefaultSharedPreferences(context)
+                .getBoolean("showMeditationText", false)
+        }
+    }
+
     // Update on room entry
     LaunchedEffect(Unit) {
         if (isAlarmEnabled.value) {
@@ -557,6 +573,16 @@ fun ExpandingView(
                 }
             }
         }
+
+        // Meditation text display at bottom
+        MeditationTextDisplay(
+            currentPhrase = ttsManager.currentPhrase,
+            previousPhrase = ttsManager.previousPhrase,
+            isVisible = showMeditationText.value && isMeditationPlaying,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+        )
     }
 
     // Hide alarm state label after 2 seconds

@@ -17,6 +17,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.platform.LocalContext
+import androidx.preference.PreferenceManager
 
 @Composable
 fun CustomMeditationListView(
@@ -24,7 +26,13 @@ fun CustomMeditationListView(
     onDismiss: () -> Unit,
     onPlay: (String) -> Unit
 ) {
+    val context = LocalContext.current
+    val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+
     var editingMeditation by remember { mutableStateOf<CustomMeditation?>(null) }
+    var showMeditationText by remember {
+        mutableStateOf(prefs.getBoolean("showMeditationText", false))
+    }
 
     Dialog(onDismissRequest = onDismiss) {
         Surface(
@@ -81,6 +89,22 @@ fun CustomMeditationListView(
                                     tint = Color(0xFF4CAF50)
                                 )
                             }
+                        }
+
+                        // Text display toggle
+                        IconButton(
+                            onClick = {
+                                showMeditationText = !showMeditationText
+                                prefs.edit()
+                                    .putBoolean("showMeditationText", showMeditationText)
+                                    .apply()
+                            }
+                        ) {
+                            Icon(
+                                Icons.Filled.ClosedCaption,
+                                contentDescription = if (showMeditationText) "Hide Meditation Text" else "Show Meditation Text",
+                                tint = if (showMeditationText) Color(0xFF64B5F6) else Color(0xFF757575)
+                            )
                         }
 
                         IconButton(onClick = onDismiss) {

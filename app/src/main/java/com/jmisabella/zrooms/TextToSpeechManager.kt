@@ -30,6 +30,12 @@ class TextToSpeechManager(
     var ambientVolume by mutableStateOf(1.0f) // 0.0 (silent) to 1.0 (full ambient), default to 100%
         private set
 
+    var currentPhrase by mutableStateOf("")
+        private set
+
+    var previousPhrase by mutableStateOf("")
+        private set
+
     private var tts: TextToSpeech? = null
     private var isInitialized = false
     private val scope = CoroutineScope(Dispatchers.Main + Job())
@@ -125,6 +131,8 @@ class TextToSpeechManager(
         isPlayingMeditation = false
         utteranceQueue.clear()
         currentUtteranceIndex = 0
+        currentPhrase = ""
+        previousPhrase = ""
     }
 
     /**
@@ -266,11 +274,17 @@ class TextToSpeechManager(
         if (!isCustomMode || currentUtteranceIndex >= utteranceQueue.size) {
             isSpeaking = false
             isPlayingMeditation = false
+            previousPhrase = currentPhrase
+            currentPhrase = ""
             return
         }
 
         val (phrase, delayMs) = utteranceQueue[currentUtteranceIndex]
         currentUtteranceIndex++
+
+        // Update current and previous phrases
+        previousPhrase = currentPhrase
+        currentPhrase = phrase
 
         val params = HashMap<String, String>()
         params[TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID] = "utterance_$currentUtteranceIndex"
