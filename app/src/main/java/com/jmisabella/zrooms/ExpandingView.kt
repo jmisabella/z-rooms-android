@@ -73,6 +73,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.zIndex
 import kotlin.math.abs
 
 private fun updateDurationToRemaining(
@@ -364,67 +365,79 @@ fun ExpandingView(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
+            Box(
                 modifier = Modifier.padding(top = 40.dp)
             ) {
-                CustomSlider(
-                    value = durationMinutes,
-                    minValue = 0.0,
-                    maxValue = 1440.0,
-                    step = 1.0,
-                    onEditingChanged = { editing ->
-                        showLabel = editing
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp),
-                    thumbColor = sliderColor,
-                    activeTrackColor = sliderColor,
-                    inactiveTrackColor = sliderColor.copy(alpha = 0.3f)
-                )
-                if (showLabel) {
-                    Spacer(Modifier.height(8.dp))
-                    Text(
-                        text = formatDuration(durationMinutes.value),
-                        color = Color.White,
-                        fontSize = 18.sp,
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    CustomSlider(
+                        value = durationMinutes,
+                        minValue = 0.0,
+                        maxValue = 1440.0,
+                        step = 1.0,
+                        onEditingChanged = { editing ->
+                            showLabel = editing
+                        },
                         modifier = Modifier
-                            .background(Color.Black.copy(alpha = 0.5f))
-                            .padding(8.dp)
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp),
+                        thumbColor = sliderColor,
+                        activeTrackColor = sliderColor,
+                        inactiveTrackColor = sliderColor.copy(alpha = 0.3f)
+                    )
+
+                    Spacer(Modifier.height(8.dp))
+
+                    // Ambient volume slider (0.0 = silent, 1.0 = full)
+                    CustomSlider(
+                        value = ambientVolumeState,
+                        minValue = 0.0,
+                        maxValue = 1.0,
+                        step = 0.01,
+                        onEditingChanged = { editing ->
+                            showBalanceLabel = editing
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp),
+                        thumbColor = sliderColor,
+                        activeTrackColor = sliderColor,
+                        inactiveTrackColor = sliderColor.copy(alpha = 0.3f)
                     )
                 }
 
-                Spacer(Modifier.height(8.dp))
-
-                // Ambient volume slider (0.0 = silent, 1.0 = full)
-                CustomSlider(
-                    value = ambientVolumeState,
-                    minValue = 0.0,
-                    maxValue = 1.0,
-                    step = 0.01,
-                    onEditingChanged = { editing ->
-                        showBalanceLabel = editing
-                    },
+                // Overlay labels with fixed positioning
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 20.dp),
-                    thumbColor = sliderColor,
-                    activeTrackColor = sliderColor,
-                    inactiveTrackColor = sliderColor.copy(alpha = 0.3f)
-                )
+                        .zIndex(1f)
+                ) {
+                    if (showLabel) {
+                        Text(
+                            text = formatDuration(durationMinutes.value),
+                            color = Color.White,
+                            fontSize = 18.sp,
+                            modifier = Modifier
+                                .background(Color.Black.copy(alpha = 0.7f))
+                                .padding(8.dp)
+                        )
+                    }
 
-                if (showBalanceLabel) {
                     Spacer(Modifier.height(8.dp))
-                    val ambientPercent = ((ambientVolumeState.value / 1.0) * 100).toInt()
-                    Text(
-                        text = "ambient $ambientPercent%",
-                        color = Color.White,
-                        fontSize = 18.sp,
-                        modifier = Modifier
-                            .background(Color.Black.copy(alpha = 0.5f))
-                            .padding(8.dp)
-                    )
+
+                    if (showBalanceLabel) {
+                        val ambientPercent = ((ambientVolumeState.value / 1.0) * 100).toInt()
+                        Text(
+                            text = "ambient $ambientPercent%",
+                            color = Color.White,
+                            fontSize = 18.sp,
+                            modifier = Modifier
+                                .background(Color.Black.copy(alpha = 0.7f))
+                                .padding(8.dp)
+                        )
+                    }
                 }
             }
 
