@@ -27,7 +27,7 @@ class TextToSpeechManager(
     var isPlayingMeditation by mutableStateOf(false)
         private set
 
-    var ambientVolume by mutableStateOf(0.6f) // 0.0 (silent) to 0.6 (full ambient)
+    var ambientVolume by mutableStateOf(1.0f) // 0.0 (silent) to 1.0 (full ambient), default to 100%
         private set
 
     private var tts: TextToSpeech? = null
@@ -44,7 +44,7 @@ class TextToSpeechManager(
         private const val MEDITATION_SPEECH_RATE = 0.6f // Calm, slow rate (increased from 0.33 by ~20%)
         private const val MEDITATION_PITCH = 0.58f // Lower pitch for calmer voice (decreased from 0.9)
         const val VOICE_VOLUME = 0.23f // Voice volume (fixed, cannot be changed dynamically)
-        const val MAX_AMBIENT_VOLUME = 0.6f // Maximum ambient volume
+        const val MAX_AMBIENT_VOLUME = 1.0f // Maximum ambient volume
     }
 
     init {

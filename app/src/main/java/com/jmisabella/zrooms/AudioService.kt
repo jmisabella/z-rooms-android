@@ -35,6 +35,7 @@ class AudioService : Service() {
     private var alarmPlayer: ExoPlayer? = null
     private var previewPlayer: ExoPlayer? = null
     private var ambientVolume: Float = 0f
+    private var targetAmbientVolume: Float = 1.0f // User's preferred ambient volume (default to 100%)
     private var alarmVolume: Float = 0f
     private var previewVolume: Float = 0f
     private var currentAmbientFile: String? = null
@@ -106,7 +107,7 @@ class AudioService : Service() {
                 }
                 AudioManager.AUDIOFOCUS_GAIN -> {
                     mainHandler.post {
-                        setAmbientVolume(1f)
+                        setAmbientVolume(targetAmbientVolume)
                         if (ambientPlayer?.isPlaying == false) {
                             ambientPlayer?.play()
                         }
@@ -155,7 +156,7 @@ class AudioService : Service() {
                     override fun onPlaybackStateChanged(state: Int) {
                         if (state == Player.STATE_READY) {
                             play()
-                            fadeAmbientVolume(1f, 2000L)
+                            fadeAmbientVolume(targetAmbientVolume, 2000L)
                             removeListener(this)
                         }
                     }
@@ -421,6 +422,7 @@ class AudioService : Service() {
     }
 
     fun setAmbientVolume(vol: Float) {
+        targetAmbientVolume = vol.coerceIn(0f, 1.0f) // Store user's preferred volume (max 1.0)
         ambientPlayer?.volume = vol
         ambientVolume = vol
     }

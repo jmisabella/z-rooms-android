@@ -346,18 +346,18 @@ fun ContentView() {
                 }
             }
 
-            Column(
-                modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = bottomLabelPadding),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = "z rooms",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFFB3B3B3)
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                if (selectedItem == null) {
+            if (selectedItem == null) {
+                Column(
+                    modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = bottomLabelPadding),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "z rooms",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFFB3B3B3)
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = buildAnnotatedString {
                             append("swipe ")

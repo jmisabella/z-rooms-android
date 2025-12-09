@@ -397,11 +397,11 @@ fun ExpandingView(
 
                 Spacer(Modifier.height(8.dp))
 
-                // Ambient volume slider (0.0 = silent, 0.6 = full)
+                // Ambient volume slider (0.0 = silent, 1.0 = full)
                 CustomSlider(
                     value = ambientVolumeState,
                     minValue = 0.0,
-                    maxValue = 0.6,
+                    maxValue = 1.0,
                     step = 0.01,
                     onEditingChanged = { editing ->
                         showBalanceLabel = editing
@@ -416,7 +416,7 @@ fun ExpandingView(
 
                 if (showBalanceLabel) {
                     Spacer(Modifier.height(8.dp))
-                    val ambientPercent = ((ambientVolumeState.value / 0.6) * 100).toInt()
+                    val ambientPercent = ((ambientVolumeState.value / 1.0) * 100).toInt()
                     Text(
                         text = "ambient $ambientPercent%",
                         color = Color.White,
