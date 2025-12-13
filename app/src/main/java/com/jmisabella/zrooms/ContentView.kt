@@ -199,7 +199,8 @@ fun ContentView() {
     }
 
     val coroutineScope = rememberCoroutineScope()
-    val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
     val bottomLabelPadding = if (isLandscape) 40.dp else 60.dp
     val sheetState = rememberModalBottomSheetState(
         initialValue = ModalBottomSheetValue.Hidden,
@@ -258,7 +259,9 @@ fun ContentView() {
                     )
             )
 
-            BoxWithConstraints {
+            BoxWithConstraints(
+                modifier = Modifier.fillMaxSize()
+            ) {
                 val availW = maxWidth - (20.dp * 2)
                 val availH = maxHeight - (20.dp * 2)
                 val numCols = 5
@@ -269,31 +272,33 @@ fun ContentView() {
                 val itemH = minOf(itemW, maxItemH).coerceAtLeast(48.dp) // Ensure minimum tappable size
                 val aspect = (itemW.value / itemH.value)
 
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(5),
-                    contentPadding = PaddingValues(
-                        top = if (isLandscape) 0.dp else 80.dp,
-                        start = 20.dp,
-                        end = 20.dp,
-                        bottom = if (isLandscape) 60.dp else 80.dp
-                    ),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
-                    modifier = Modifier
-                        .fillMaxSize()
-                ) {
-                    items(35) { index -> // Updated to 35 items
-                        AlarmItemView(
-                            index = index,
-                            aspect = aspect,
-                            colorFor = ::colorFor,
-                            files = files,
-                            selectedItem = selectedItem,
-                            onSelect = { selectedIndex ->
-                                selectedItem = SelectedItem(selectedIndex)
-                                audioService?.playAmbient(selectedIndex, durationMinutes, isAlarmEnabled, selectedAlarmIndex.takeIf { it >= 0 })
-                            }
-                        )
+                androidx.compose.runtime.key(configuration.orientation) {
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(5),
+                        contentPadding = PaddingValues(
+                            top = if (isLandscape) 0.dp else 80.dp,
+                            start = 20.dp,
+                            end = 20.dp,
+                            bottom = if (isLandscape) 60.dp else 80.dp
+                        ),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                        modifier = Modifier
+                            .fillMaxSize()
+                    ) {
+                        items(35) { index -> // Updated to 35 items
+                            AlarmItemView(
+                                index = index,
+                                aspect = aspect,
+                                colorFor = ::colorFor,
+                                files = files,
+                                selectedItem = selectedItem,
+                                onSelect = { selectedIndex ->
+                                    selectedItem = SelectedItem(selectedIndex)
+                                    audioService?.playAmbient(selectedIndex, durationMinutes, isAlarmEnabled, selectedAlarmIndex.takeIf { it >= 0 })
+                                }
+                            )
+                        }
                     }
                 }
             }

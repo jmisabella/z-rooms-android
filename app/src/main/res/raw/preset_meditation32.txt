@@ -108,6 +108,6 @@ Feel your presence, (1s)
 Open your eyes. (1.5s)
 You are home. (3s)
 
-Or stay home in your body, (1s)
+Or (0.85s) stay home in your body, (1s)
 Safe and grounded, (1s)
 Sinking peacefully into rest. (5s)

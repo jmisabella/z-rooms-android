@@ -75,6 +75,6 @@ Roll your shoulders… (1.5s)
 Open your eyes. (1.5s)
 Simple and clear. (3.5s)
 
-Or let the numbers fade, (1s)
+Or (0.85s) let the numbers fade, (1s)
 Breath dissolving into rest, (1s)
 As you settle into sleep. (5s)

@@ -55,6 +55,6 @@ That light is inside you. (6s)
 When you're ready… (2s)
 Open your eyes slowly, (1.5s) carrying the warmth. (3.5s)
 
-Or keep the flame glowing within, (1.5s)
+Or (0.85s) keep the flame glowing within, (1.5s)
 Eyes closed, (1s)
 Drifting into peaceful rest. (5s)

@@ -61,6 +61,6 @@ Take a deep breath… (4s)
 Slowly open your eyes, (1.5s)
 Hands lighter now. (3.5s)
 
-Or stay by the stream, (1s)
+Or (0.85s) stay by the stream, (1s)
 Hands empty and free, (1s)
 Letting sleep flow over you. (5s)

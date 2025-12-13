@@ -111,6 +111,6 @@ Wiggle gently… (1.5s)
 Perhaps smile, (1s) open your eyes, (1s)
 And look for more to be grateful for. (3s)
 
-Or rest in gratitude, (1s)
+Or (0.85s) rest in gratitude, (1s)
 Eyes closed, (1s)
 Letting thankfulness carry you to sleep. (5s)

@@ -75,6 +75,6 @@ Return to your small human body, (1.5s)
 Infinite within, (1.5s)
 And open your eyes. (3s)
 
-Or rest in the infinite, (1s)
+Or (0.85s) rest in the infinite, (1s)
 Boundless and free, (1s)
 Dissolving into sleep. (5s)
