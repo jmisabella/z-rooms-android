@@ -1,33 +1,10 @@
-Your existing privacy policy for **Z Rooms** is well-crafted and already covers the essential aspects required for both iOS and Android apps, especially given that the app operates entirely offline, does not collect personal information, and has identical functionality across platforms. Since the app’s features, data handling, and licensing (Apache 2.0) remain the same, the privacy policy is largely reusable for the Android version without significant changes. However, to ensure full compliance with Google Play’s policies and to address platform-specific nuances, there are a few minor adjustments and considerations to make. Below, I’ll outline what (if anything) needs to be changed and provide a revised version of the privacy policy tailored for Android compatibility.
-
-### Key Considerations for Android
-1. **Google Play Data Safety Section**: Google Play requires you to complete a **Data Safety form** in the Play Console, which aligns with your privacy policy. Since Z Rooms doesn’t collect, process, or share personal data, your policy’s emphasis on “no personal information collected” is perfect, but you’ll need to confirm this in the form. Ensure the policy explicitly addresses Android-specific features like background audio playback permissions.
-2. **Permissions Disclosure**: Android apps often require explicit permission disclosures (e.g., for background audio). Your policy already mentions Background Mode for audio playback, which is sufficient, but we can clarify it to cover Android’s permission model (e.g., foreground service or media playback permissions in Kotlin).
-3. **Licensing Mention**: The Apache 2.0 license applies to the app’s code, not user data, so it doesn’t need to be mentioned in the privacy policy unless you’re distributing open-source components that require attribution. If you’re using third-party libraries in Kotlin (e.g., for audio playback), check if they require specific disclosures.
-4. **Google Play Families Policy**: Since you’ve selected “all age groups” for Z Rooms, Google may scrutinize the app for child-directed content. Your policy already states you don’t collect data from minors, which is compliant, but we can reinforce this for clarity.
-5. **Platform Neutrality**: The policy references iOS-specific terms like “mobile application (Z Rooms).” For Android, ensure the language is platform-agnostic to avoid confusion.
-6. **Contact Information and Accessibility**: The policy’s contact details (email and data subject access request link) are sufficient, but ensure the privacy policy URL is publicly accessible (e.g., hosted on a website or Bandcamp page) as Google requires this.
-
-### Recommended Changes
-Here’s a breakdown of minor tweaks to make the policy fully Android-compatible:
-- **Update Platform References**: Replace or broaden iOS-specific references to include Android explicitly (e.g., “mobile application (Z Rooms) on iOS and Android”).
-- **Clarify Background Audio Permissions**: Add a sentence to explicitly address Android’s permission model for background audio playback to align with Google Play’s transparency requirements.
-- **Reinforce No Data Collection**: Emphasize that no permissions requiring user data (e.g., location, storage, or network) are used, which aligns with your Kotlin app’s offline nature.
-- **Date Update**: Update the “Last updated” date to reflect the Android release (e.g., today’s date, September 23, 2025).
-- **Optional Licensing Note**: If your app uses third-party Kotlin libraries under Apache 2.0, consider a brief mention of open-source licenses in a separate section (not mandatory for privacy but good practice for transparency).
-
-### Revised Privacy Policy
-Below is the updated privacy policy with minimal changes to ensure compatibility with Google Play while maintaining alignment with your iOS version. I’ve kept the structure intact, made the language platform-agnostic, and added Android-specific clarifications. Changes are highlighted in **bold** for clarity.
-
----
-
 # Privacy Notice
 
-**Last updated: September 23, 2025**
+**Last updated: December 13, 2025**
 
 This Privacy Notice for Jeffrey Isabella ("we," "us," or "our") describes how and why we might access, collect, store, use, and/or share ("process") your personal information when you use our services ("Services"), including when you:
 
-- Download and use our mobile application (Z Rooms) **on iOS or Android**, an ambient audio and white noise app that allows users to select from various "rooms" with distinct color palettes and ambient audio tracks, featuring subtle animations, a duration timer (up to 8 hours), and optional alarms, or any other application of ours that links to this Privacy Notice. Z Rooms is designed to provide ambient audio and visual experiences to promote relaxation and sleep, and it does not collect, process, or store any health-related data or personal information from users.
+- Download and use our mobile application (Z Rooms) on Android, an ambient audio, white noise, and guided meditation app that allows users to select from various "rooms" with distinct color palettes and ambient audio tracks, 35 preset guided meditations, custom meditation creation tools, featuring subtle animations, a duration timer (up to 8 hours), and optional alarms, or any other application of ours that links to this Privacy Notice. Z Rooms is designed to provide ambient audio, visual experiences, and guided meditation content to promote relaxation and sleep, and it does not collect, process, or store any health-related data or personal information from users. The app includes guided meditation features with preset meditations and the ability to create custom meditations. All custom meditations are stored locally on your device only and are never transmitted, collected, or processed by us. Meditation content does not contain medical advice or treatment information.
 - Engage with us in other related ways, including any sales, marketing, or events
 
 **Questions or concerns?** Reading this Privacy Notice will help you understand your privacy rights and choices. We are responsible for making decisions about how your personal information is processed. If you do not agree with our policies and practices, please do not use our Services. If you still have any questions or concerns, please contact us at jeff.isabella@gmail.com.
@@ -66,7 +43,6 @@ Want to learn more about what we do with any information we collect? [Review the
 10. [DO WE MAKE UPDATES TO THIS NOTICE?](#do-we-make-updates-to-this-notice)
 11. [HOW CAN YOU CONTACT US ABOUT THIS NOTICE?](#how-can-you-contact-us-about-this-notice)
 12. [HOW CAN YOU REVIEW, UPDATE, OR DELETE THE DATA WE COLLECT FROM YOU?](#how-can-you-review-update-or-delete-the-data-we-collect-from-you)
-**13. [OPEN-SOURCE SOFTWARE AND LICENSING](#open-source-software-and-licensing)**
 
 ## 1. WHAT INFORMATION DO WE COLLECT?
 
@@ -76,13 +52,13 @@ Want to learn more about what we do with any information we collect? [Review the
 
 We collect personal information that you voluntarily provide to us when you express an interest in obtaining information about us or our products and Services, when you participate in activities on the Services, or otherwise when you contact us.
 
-**Sensitive Information.** We do not process sensitive information. Z Rooms does not collect or process any health-related data, such as sleep patterns, biometric information, or wellness metrics, as its functionality is limited to providing pre-programmed ambient audio and visual experiences.
+**Sensitive Information.** We do not process sensitive information. Z Rooms does not collect or process any health-related data, such as sleep patterns, biometric information, or wellness metrics. While the app provides guided meditation and wellness content, all user-created custom meditations are stored locally on your device only and are never transmitted to us or any third party. The app operates entirely offline and does not track, monitor, or collect any data about your meditation practice or usage patterns.
 
 **App-Generated Audio and Visuals.** Z Rooms generates ambient audio tracks and visual animations for user enjoyment. These are pre-programmed app features and do not involve the collection or processing of any user-generated audio, visual, or sensory data.
 
-**Background Audio Playback.** Z Rooms uses Background Mode **(on iOS) or foreground services (on Android)** to allow ambient audio to continue playing when your device’s screen is locked. **This feature requires media playback permissions on Android but does not involve accessing, collecting, or processing any device or user data beyond what is necessary for audio playback.**
+**Background Audio Playback.** Z Rooms uses foreground services on Android to allow ambient audio to continue playing when your device's screen is locked. This feature is implemented solely to enable continuous audio playback and does not involve accessing, collecting, or processing any device or user data beyond what is necessary for audio playback.
 
-**No Device Permissions for Data Collection.** **Z Rooms does not request or use permissions that access user data, such as location, storage, network, or personal information, on either iOS or Android.**
+**No Device Permissions for Data Collection.** Z Rooms does not request or use permissions that access user data, such as location, storage (except for local app data), network, or personal information on Android.
 
 All personal information that you provide to us must be true, complete, and accurate, and you must notify us of any changes to such personal information.
 
@@ -144,7 +120,7 @@ We do not collect or retain any personal information from users of Z Rooms, as t
 
 **In Short:** *We do not knowingly collect data from or market to children under 18 years of age or the equivalent age as specified by law in your jurisdiction.*
 
-We do not knowingly collect, solicit data from, or market to children under 18 years of age or the equivalent age as specified by law in your jurisdiction, nor do we knowingly sell such personal information. By using the Services, you represent that you are at least 18 or the equivalent age as specified by law in your jurisdiction or that you are the parent or guardian of such a minor and consent to such minor dependent’s use of the Services. If we learn that personal information from users less than 18 years of age or the equivalent age as specified by law in your jurisdiction has been collected, we will deactivate the account and take reasonable measures to promptly delete such data from our records. If you become aware of any data we may have collected from children under age 18 or the equivalent age as specified by law in your jurisdiction, please contact us at jeff.isabella@gmail.com.
+We do not knowingly collect, solicit data from, or market to children under 18 years of age or the equivalent age as specified by law in your jurisdiction, nor do we knowingly sell such personal information. By using the Services, you represent that you are at least 18 or the equivalent age as specified by law in your jurisdiction or that you are the parent or guardian of such a minor and consent to such minor dependent's use of the Services. If we learn that personal information from users less than 18 years of age or the equivalent age as specified by law in your jurisdiction has been collected, we will deactivate the account and take reasonable measures to promptly delete such data from our records. If you become aware of any data we may have collected from children under age 18 or the equivalent age as specified by law in your jurisdiction, please contact us at jeff.isabella@gmail.com.
 
 ## 7. WHAT ARE YOUR PRIVACY RIGHTS?
 
@@ -192,7 +168,7 @@ The table below shows the categories of personal information we have collected i
 | H. Audio, electronic, sensory, or similar information | Images and audio, video or call recordings created in connection with our business activities | NO |
 | I. Professional or employment-related information | Business contact details in order to provide you our Services at a business level or job title, work history, and professional qualifications if you apply for a job with us | NO |
 | J. Education Information | Student records and directory information | NO |
-| K. Inferences drawn from collected personal information | Inferences drawn from any of the collected personal information listed above to create a profile or summary about, for example, an individual’s preferences and characteristics | NO |
+| K. Inferences drawn from collected personal information | Inferences drawn from any of the collected personal information listed above to create a profile or summary about, for example, an individual's preferences and characteristics | NO |
 | L. Sensitive personal Information |  | NO |
 
 We may also collect other personal information outside of these categories through instances where you interact with us in person, online, or by phone or mail in the context of:
@@ -231,7 +207,7 @@ You have rights under certain US state data protection laws. However, these righ
 - **Right to request** the deletion of your personal data
 - **Right to obtain a copy** of the personal data you previously shared with us
 - **Right to non-discrimination** for exercising your rights
-- **Right to opt out** of the processing of your personal data if it is used for targeted advertising (or sharing as defined under California’s privacy law), the sale of personal data, or profiling in furtherance of decisions that produce legal or similarly significant effects ("profiling")
+- **Right to opt out** of the processing of your personal data if it is used for targeted advertising (or sharing as defined under California's privacy law), the sale of personal data, or profiling in furtherance of decisions that produce legal or similarly significant effects ("profiling")
 
 Depending upon the state where you live, you may also have the following rights:
 
@@ -275,36 +251,3 @@ If you have questions or comments about this notice, you may email us at jeff.is
 ## 12. HOW CAN YOU REVIEW, UPDATE, OR DELETE THE DATA WE COLLECT FROM YOU?
 
 Based on the applicable laws of your country or state of residence in the US, you may have the right to request access to the personal information we collect from you, details about how we have processed it, correct inaccuracies, or delete your personal information. You may also have the right to withdraw your consent to our processing of your personal information. These rights may be limited in some circumstances by applicable law. To request to review, update, or delete your personal information, please fill out and submit a [data subject access request](https://app.termly.io/notify/04d28e7b-6453-42d3-9644-569a587b76bb).
-
-## 13. OPEN-SOURCE SOFTWARE AND LICENSING
-
-**In Short:** *Z Rooms includes software components licensed under the Apache 2.0 License.*
-
-Z Rooms is built using software components licensed under the Apache 2.0 License. These components are used to provide core functionality, such as audio playback and visual animations, and do not involve the collection, processing, or sharing of personal information. For details on the open-source software used, including attribution and license terms, please refer to the app’s documentation or contact us at jeff.isabella@gmail.com.
-
----
-
-### Key Changes Explained
-1. **Date Updated**: Changed to September 23, 2025, to reflect the Android release.
-2. **Platform Reference**: Added “on iOS or Android” to the opening description for clarity.
-3. **Background Audio Clarification**: Updated the “Background Audio Playback” section to include Android’s “foreground services” and explicitly state that no data is collected via permissions, aligning with Google Play’s transparency requirements.
-4. **No Data Permissions**: Added a new sentence under “No Device Permissions for Data Collection” to confirm Z Rooms doesn’t use permissions like location or storage, reinforcing the offline nature for Android users.
-5. **Open-Source Licensing**: Added a new section (13) to mention the Apache 2.0 License for Kotlin-based components, which is optional but enhances transparency. If you don’t use third-party libraries requiring attribution, you can omit this section.
-6. **Unchanged Sections**: The rest of the policy (e.g., GDPR, US state rights, no data collection) remains identical, as Z Rooms’ functionality and data practices are the same across platforms.
-
-### Additional Steps for Google Play
-1. **Host the Privacy Policy**: Ensure the policy is accessible via a public URL (e.g., on your Bandcamp page, a personal website, or a free hosting service like GitHub Pages). Enter this URL in the Play Console under **Policy > App content > Privacy policy**.
-2. **Complete the Data Safety Form**:
-   - In Play Console, go to **Policy > App content > Data safety**.
-   - Answer “No” to questions about collecting, processing, or sharing personal data (e.g., identifiers, location, etc.), as your policy confirms Z Rooms is offline.
-   - For “Data collected,” select “No data collected.”
-   - For permissions (e.g., foreground service for audio), mark them as “ephemeral” (used only during app operation, not stored).
-   - Submit the form—it should align with your policy’s “no data collection” stance.
-3. **Verify Families Compliance**: Since you selected all age groups, ensure no ads or features violate Google’s Families policy. Your offline app with no ads is compliant, but double-check in the **Content rating** questionnaire.
-
-### Notes
-- The revised policy above should work for both iOS and Android, maintaining consistency. If you prefer to keep separate policies, you can use the original for iOS and this version for Android.
-- If your Kotlin app uses specific libraries (e.g., ExoPlayer for audio), check their licenses for attribution requirements and list them in the app or a linked page (not mandatory in the privacy policy).
-- If Google rejects the policy during review, they’ll specify issues (e.g., missing permission details). You can revise and resubmit quickly.
-
-This revised policy should fully comply with Google Play requirements while reusing 99% of your iOS version. Let me know if you need help with the Data Safety form or hosting the policy!

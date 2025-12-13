@@ -11,7 +11,7 @@ import com.google.gson.reflect.TypeToken
 class CustomMeditationManager(private val context: Context) {
     private val prefs = context.getSharedPreferences("custom_meditations", Context.MODE_PRIVATE)
     private val storageKey = "customMeditations"
-    private val maxMeditations = 10
+    private val maxMeditations = 35
     private val gson = Gson()
 
     val meditations = mutableStateListOf<CustomMeditation>()
