@@ -51,7 +51,8 @@ fun MeditationTextDisplay(
                         endY = Float.POSITIVE_INFINITY
                     )
                 )
-                .padding(horizontal = 24.dp, vertical = 16.dp),
+                // Extended padding at bottom to continue gradient to screen edge
+                .padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 96.dp),
             contentAlignment = Alignment.BottomCenter
         ) {
             Column(

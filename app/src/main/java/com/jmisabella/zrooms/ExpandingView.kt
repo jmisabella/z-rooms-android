@@ -130,7 +130,7 @@ fun ExpandingView(
     // Meditation text display settings
     val showMeditationText = remember {
         mutableStateOf(
-            PreferenceManager.getDefaultSharedPreferences(context).getBoolean("showMeditationText", false)
+            PreferenceManager.getDefaultSharedPreferences(context).getBoolean("showMeditationText", true)
         )
     }
 
@@ -139,7 +139,7 @@ fun ExpandingView(
         while (true) {
             delay(500) // Check every 500ms for preference changes
             showMeditationText.value = PreferenceManager.getDefaultSharedPreferences(context)
-                .getBoolean("showMeditationText", false)
+                .getBoolean("showMeditationText", true)
         }
     }
 
@@ -481,7 +481,8 @@ fun ExpandingView(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 40.dp),
+                        .padding(bottom = 40.dp)
+                        .zIndex(10f), // Ensure buttons are always on top of captions
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -574,7 +575,7 @@ fun ExpandingView(
             }
         }
 
-        // Meditation text display at bottom
+        // Meditation text display at bottom (with click-through enabled)
         MeditationTextDisplay(
             currentPhrase = ttsManager.currentPhrase,
             previousPhrase = ttsManager.previousPhrase,
@@ -582,6 +583,7 @@ fun ExpandingView(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
+                .padding(bottom = 40.dp)
         )
     }
 

@@ -8,6 +8,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Article
+import androidx.compose.material.icons.automirrored.filled.Notes
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -31,7 +33,7 @@ fun CustomMeditationListView(
 
     var editingMeditation by remember { mutableStateOf<CustomMeditation?>(null) }
     var showMeditationText by remember {
-        mutableStateOf(prefs.getBoolean("showMeditationText", false))
+        mutableStateOf(prefs.getBoolean("showMeditationText", true))
     }
 
     Dialog(onDismissRequest = onDismiss) {
@@ -77,21 +79,6 @@ fun CustomMeditationListView(
                             }
                         }
 
-                        if (manager.canAddMore) {
-                            IconButton(
-                                onClick = {
-                                    editingMeditation = CustomMeditation(title = "", text = "")
-                                }
-                            ) {
-                                Icon(
-                                    Icons.Filled.AddCircle,
-                                    contentDescription = "Add Meditation",
-                                    tint = Color(0xFF4CAF50)
-                                )
-                            }
-                        }
-
-                        // Text display toggle
                         IconButton(
                             onClick = {
                                 showMeditationText = !showMeditationText
@@ -118,6 +105,32 @@ fun CustomMeditationListView(
                 }
 
                 Divider(color = Color(0xFF424242))
+
+                // Add New Meditation button (always visible)
+                if (manager.canAddMore) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                editingMeditation = CustomMeditation(title = "", text = "")
+                            }
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            Icons.Filled.AddCircle,
+                            contentDescription = "Add New Meditation",
+                            tint = Color(0xFF4CAF50)
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            "Add New Meditation",
+                            color = Color(0xFF4CAF50),
+                            style = MaterialTheme.typography.body1
+                        )
+                    }
+                    Divider(color = Color(0xFF424242))
+                }
 
                 // Meditation List
                 if (manager.meditations.isEmpty()) {
@@ -188,41 +201,6 @@ fun CustomMeditationListView(
                                 }
                             )
                             Divider(color = Color(0xFF424242))
-                        }
-
-                        if (manager.canAddMore) {
-                            item {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clickable {
-                                            editingMeditation = CustomMeditation(title = "", text = "")
-                                        }
-                                        .padding(16.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Icon(
-                                        Icons.Filled.AddCircle,
-                                        contentDescription = "Add New Meditation",
-                                        tint = Color(0xFF4CAF50)
-                                    )
-                                    Spacer(Modifier.width(8.dp))
-                                    Text(
-                                        "Add New Meditation",
-                                        color = Color(0xFF4CAF50),
-                                        style = MaterialTheme.typography.body1
-                                    )
-                                }
-                            }
-                        } else {
-                            item {
-                                Text(
-                                    text = "Maximum ${manager.meditations.size} meditations reached",
-                                    modifier = Modifier.padding(16.dp),
-                                    style = MaterialTheme.typography.caption,
-                                    color = Color.Gray
-                                )
-                            }
                         }
                     }
                 }
