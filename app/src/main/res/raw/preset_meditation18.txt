@@ -67,6 +67,6 @@ Wiggle your toes… (1.5s)
 Feel the earth beneath you, (1s) open your eyes, (1s)
 And return to the world, (0.8s) still connected. (3.2s)
 
-Or keep feeling that ground, (1s)
+Or (0.85s) keep feeling that ground, (1s)
 Supported and held, (1s)
 As you drift peacefully to sleep. (5s)

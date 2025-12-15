@@ -62,6 +62,6 @@ When you're ready… (2s)
 Come back to the room, (1s) open your eyes, (1s)
 And continue your walk through the day. (3s)
 
-Or let the path fade, (1s)
+Or (0.85s) let the path fade, (1s)
 Footsteps stilling, (1s)
 As you settle into sleep. (5s)

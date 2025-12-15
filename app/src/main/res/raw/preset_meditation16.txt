@@ -74,6 +74,6 @@ Slowly bring movement back… (1.5s)
 Gentle stretches… (1.5s)
 And open your eyes to greet what's next. (4s)
 
-Or stay released, (1s)
+Or (0.85s) stay released, (1s)
 Body soft and heavy, (1s)
 Melting into sleep. (5s)

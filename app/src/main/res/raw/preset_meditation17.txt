@@ -64,6 +64,6 @@ Let the pattern go… (2s)
 Breathe naturally, (1.5s) open your eyes, (1.5s)
 And step back into your day. (3s)
 
-Or maintain this harmony, (1s)
+Or (0.85s) maintain this harmony, (1s)
 Breath flowing softly, (1s)
 Carrying you into dreams. (5s)

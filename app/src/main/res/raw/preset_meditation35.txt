@@ -109,6 +109,6 @@ Then gently, (1s) slowly, (1s)
 Open your eyes. (3s)
 The gap remains, (1s) always. (3s)
 
-Or rest in the silence between, (1.5s)
+Or (0.85s) rest in the silence between, (1.5s)
 In the infinite gap, (1.5s)
 Letting it become the space of sleep. (5s)

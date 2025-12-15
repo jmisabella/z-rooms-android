@@ -65,6 +65,6 @@ You can take a fuller breath… (3s)
 Stretch your arms and greet the world… (2s)
 Opening your eyes to what comes next. (4s)
 
-Or let your breath stay soft, (1s)
+Or (0.85s) let your breath stay soft, (1s)
 Eyes closed, (0.8s)
 Drifting peacefully into rest. (5s)

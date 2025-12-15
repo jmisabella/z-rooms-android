@@ -61,6 +61,6 @@ Feel yourself as vessel and light, (1.5s)
 Body and spirit together, (1.5s)
 And open your eyes to shine. (3s)
 
-Or stay filled with light, (1s)
+Or (0.85s) stay filled with light, (1s)
 Glowing softly, (1s)
 Drifting gently into sleep. (5s)

@@ -80,6 +80,6 @@ Take a natural breath… (1.5s)
 Wiggle gently… (1.5s)
 And open your eyes, (1s) returning refreshed. (3s)
 
-Or stay in this calm, (1s)
+Or (0.85s) stay in this calm, (1s)
 Breathing naturally, (1s)
 Letting sleep embrace you. (5s)

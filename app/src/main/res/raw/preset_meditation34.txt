@@ -103,6 +103,6 @@ Imagine the wave dissolving, (1.5s)
 Calm water returning, (1.5s)
 And open your eyes to ride the next wave. (3s)
 
-Or let the waves keep moving, (1.5s)
+Or (0.85s) let the waves keep moving, (1.5s)
 While you rest as the deep ocean, (1.5s)
 Allowing sleep to wash over you. (5s)

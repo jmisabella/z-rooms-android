@@ -51,6 +51,6 @@ Feel yourself as human again, (1.5s)
 Mountain stillness within, (1.5s)
 And open your eyes. (3s)
 
-Or remain as the mountain, (1s)
+Or (0.85s) remain as the mountain, (1s)
 Unmoving, (1s)
 Letting sleep wash over you like weather. (5s)

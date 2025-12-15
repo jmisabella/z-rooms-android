@@ -50,15 +50,16 @@ fun MeditationTextDisplay(
                         startY = 0f,
                         endY = Float.POSITIVE_INFINITY
                     )
-                )
-                // Extended padding at bottom to continue gradient to screen edge
-                .padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 96.dp),
+                ),
             contentAlignment = Alignment.BottomCenter
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    // Add padding to text content, not the gradient box
+                    .padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 24.dp)
             ) {
                 // Previous phrase (faded out)
                 AnimatedVisibility(

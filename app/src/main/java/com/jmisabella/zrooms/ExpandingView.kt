@@ -576,6 +576,9 @@ fun ExpandingView(
         }
 
         // Meditation text display at bottom (with click-through enabled)
+        val configuration = androidx.compose.ui.platform.LocalConfiguration.current
+        val isPortrait = configuration.orientation == android.content.res.Configuration.ORIENTATION_PORTRAIT
+
         MeditationTextDisplay(
             currentPhrase = ttsManager.currentPhrase,
             previousPhrase = ttsManager.previousPhrase,
@@ -583,7 +586,7 @@ fun ExpandingView(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
-                .padding(bottom = 40.dp)
+                .padding(bottom = if (isPortrait) 48.dp else 0.dp)
         )
     }
 

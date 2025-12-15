@@ -56,6 +56,6 @@ If the day is calling, (0.8s) slowly bring movement back… (1.5s)
 Stretch if you like… (1.5s)
 And gently open your eyes. (4s)
 
-Or if sleep is near, (0.8s) simply remain here… (1.5s)
+Or (0.85s) if sleep is near, (0.8s) simply remain here… (1.5s)
 Resting in the quiet… (1.5s)
 Letting it carry you into dreams. (5s)

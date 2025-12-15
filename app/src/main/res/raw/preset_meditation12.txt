@@ -62,6 +62,6 @@ Wiggle gently… (1.5s)
 Stretch and open your eyes… (1.5s)
 Carrying this gratitude with you. (4s)
 
-Or stay here, (0.8s) eyes closed, (0.8s)
+Or (0.85s) stay here, (0.8s) eyes closed, (0.8s)
 Still grateful, (1s)
 Drifting softly into sleep. (5s)

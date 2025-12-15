@@ -78,6 +78,6 @@ Roll your shoulders back… (1.5s)
 Lift your chin, (0.8s) open your eyes, (1s)
 And carry this strength into the world. (4s)
 
-Or remain still, (1s)
+Or (0.85s) remain still, (1s)
 The light glowing within, (1s)
 As you surrender to sleep. (5s)
