@@ -229,7 +229,7 @@ class TextToSpeechManager(
         val allMeditations = mutableListOf<String>()
 
         // 1. Load all preset meditation files from res/raw
-        for (i in 1..10) {
+        for (i in 1..35) {
             val resId = context.resources.getIdentifier(
                 "preset_meditation$i",
                 "raw",
