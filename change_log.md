@@ -1,6 +1,9 @@
 # Z Rooms Android - Change Log
 
 ## 2025-12-21
+- Added better variation to the preset meditations.
+
+## 2025-12-21
 
 **Problem:** Two meditation playback issues were discovered after the previous fix:
 1. **Resume Instead of New Selection**: When toggling the leaf button off and back on, the app would sometimes resume the previous meditation instead of selecting a new random one, reducing variety and creating a confusing user experience.
