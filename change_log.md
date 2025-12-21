@@ -6,7 +6,7 @@
 
 **Root Cause:** In the `loadRandomMeditationFile()` function within TextToSpeechManager.kt, the loop that loads preset meditation files was incorrectly limited to `for (i in 1..10)` instead of iterating through all 35 preset meditation files.
 
-**Solution:** Changed the loop range from `1..10` to `1..35` in the `loadRandomMeditationFile()` function. Now when users toggle on a random guided meditation, the app properly selects from all 35 preset meditations plus any custom meditations they've created, providing much greater variety in the meditation experience.
+**Solution:** Replaced the hardcoded loop range (`1..10`, later `1..35`) with dynamic discovery logic that automatically finds all available preset meditation files without any upper limit. The function now uses a while loop that continues checking for `preset_meditation$i` files until it finds a gap, ensuring all preset meditations are included regardless of how many exist. This future-proofs the code so that adding new preset meditations (e.g., preset_meditation36 through preset_meditation40) will automatically work without any code changes. Custom meditations were already being loaded correctly via the `forEach` loop over all custom meditation entries.
 
 **Content Update:** All 35 preset meditation files have been updated to incorporate more breathwork guidance, enhancing the meditation experience with structured breathing exercises integrated throughout the guided sessions.
 

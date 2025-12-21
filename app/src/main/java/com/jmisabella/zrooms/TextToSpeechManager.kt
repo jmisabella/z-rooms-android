@@ -229,25 +229,30 @@ class TextToSpeechManager(
         val allMeditations = mutableListOf<String>()
 
         // 1. Load all preset meditation files from res/raw
-        for (i in 1..35) {
+        // Dynamically discover all preset_meditation files without hardcoded limit
+        var i = 1
+        while (true) {
             val resId = context.resources.getIdentifier(
                 "preset_meditation$i",
                 "raw",
                 context.packageName
             )
-            if (resId != 0) {
-                try {
-                    val text = context.resources.openRawResource(resId)
-                        .bufferedReader()
-                        .use { it.readText() }
-                        .trim()
-                    if (text.isNotEmpty()) {
-                        allMeditations.add(text)
-                    }
-                } catch (e: Exception) {
-                    println("Could not read preset meditation $i: ${e.message}")
-                }
+            if (resId == 0) {
+                // No more preset meditation files found
+                break
             }
+            try {
+                val text = context.resources.openRawResource(resId)
+                    .bufferedReader()
+                    .use { it.readText() }
+                    .trim()
+                if (text.isNotEmpty()) {
+                    allMeditations.add(text)
+                }
+            } catch (e: Exception) {
+                println("Could not read preset meditation $i: ${e.message}")
+            }
+            i++
         }
 
         // 2. Add all custom meditations
