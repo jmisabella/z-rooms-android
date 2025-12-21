@@ -43,6 +43,7 @@ class TextToSpeechManager(
     private var currentUtteranceIndex = 0
     private var isCustomMode = false
     private var pendingPhrase: String? = null // Phrase waiting to be displayed when TTS starts
+    private val prefs = androidx.preference.PreferenceManager.getDefaultSharedPreferences(context)
 
     // Callback to notify when ambient volume changes
     var onAmbientVolumeChanged: ((Float) -> Unit)? = null
@@ -52,6 +53,7 @@ class TextToSpeechManager(
         private const val MEDITATION_PITCH = 0.58f // Lower pitch for calmer voice (decreased from 0.9)
         const val VOICE_VOLUME = 0.23f // Voice volume (fixed, cannot be changed dynamically)
         const val MAX_AMBIENT_VOLUME = 1.0f // Maximum ambient volume
+        const val PREF_MEDITATION_COMPLETED = "meditationCompletedSuccessfully"
     }
 
     init {
@@ -102,6 +104,9 @@ class TextToSpeechManager(
         // Stop any existing speech first to ensure clean state
         stopSpeaking()
 
+        // Clear the meditation completion flag when starting a new meditation
+        prefs.edit().putBoolean(PREF_MEDITATION_COMPLETED, false).apply()
+
         isSpeaking = true
         isPlayingMeditation = true
         isCustomMode = true
@@ -148,6 +153,9 @@ class TextToSpeechManager(
         currentPhrase = ""
         previousPhrase = ""
         pendingPhrase = null
+
+        // Clear the meditation completion flag when manually stopping
+        prefs.edit().putBoolean(PREF_MEDITATION_COMPLETED, false).apply()
     }
 
     /**
@@ -342,12 +350,16 @@ class TextToSpeechManager(
                 speakNextPhrase()
             }
         } else {
-            // All done
+            // All done - meditation completed successfully
             isSpeaking = false
-            isPlayingMeditation = false
+            // KEEP isPlayingMeditation = true so leaf stays green
+            // (User can manually toggle it off if desired)
             isCustomMode = false
             utteranceQueue.clear()
             currentUtteranceIndex = 0
+
+            // Set the meditation completion flag for wake-up greeting
+            prefs.edit().putBoolean(PREF_MEDITATION_COMPLETED, true).apply()
         }
     }
 

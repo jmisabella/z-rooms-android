@@ -1,6 +1,91 @@
 # Z Rooms Android - Change Log
 
 ## 2025-12-21
+
+**Feature:** Wake-Up Greeting - Personalized audio greetings for users who complete meditations before their alarm
+
+**User Experience:** When a user completes a guided meditation the night before and wakes to a non-SILENCE alarm, the app now speaks a brief, randomized greeting phrase approximately 5 seconds after the alarm begins playing. This creates a gentle, personalized wake-up experience that acknowledges the user's meditation practice.
+
+**Implementation Details:**
+
+The wake-up greeting feature consists of three main components:
+
+1. **Meditation Completion Tracking** (TextToSpeechManager.kt):
+   - Added `PREF_MEDITATION_COMPLETED` SharedPreferences key to track successful meditation completion
+   - When meditation starts: Flag is cleared to ensure fresh state
+   - When meditation completes fully: Flag is set to true AND `isPlayingMeditation` state remains true (keeping leaf button green)
+   - When meditation is manually stopped: Flag is cleared
+   - This allows the system to distinguish between completed vs. interrupted meditations
+
+2. **Greeting TTS Engine** (AudioService.kt):
+   - Added dedicated `greetingTts` TextToSpeech instance separate from meditation TTS
+   - Initialized with same voice settings as meditations (speech rate: 0.6f, pitch: 0.58f)
+   - Five randomized greeting phrases: "Welcome back", "Greetings", "Here we are", "Returning to awareness", "Welcome back to this space"
+   - Intentionally avoids time-specific words like "morning" (user might wake from afternoon nap)
+
+3. **Alarm Integration** (AudioService.kt):
+   - Modified `startAlarm()` to check meditation completion flag when alarm triggers
+   - If alarm is SILENCE (selectedAlarmIndex is null or -1): No greeting plays, ambient fades to nothing
+   - If alarm is non-SILENCE AND meditation was completed: Greeting is scheduled
+   - `scheduleWakeUpGreeting()` waits 5 seconds after alarm audio starts
+   - `playWakeUpGreeting()` speaks random phrase and clears completion flag
+   - Greeting plays only ONCE (does not repeat with alarm loop)
+
+**Bug Fix - Leaf Button State:**
+
+Fixed a significant UX issue where the leaf button would turn grey (toggle off) when a meditation completed successfully, making it impossible to distinguish between a completed meditation and one that was never started.
+
+**Previous Behavior:**
+- Meditation completes → `isPlayingMeditation` set to false → Leaf turns grey
+- User has no visual indication that meditation completed successfully
+
+**New Behavior:**
+- Meditation completes → `isPlayingMeditation` stays true → Leaf stays green
+- User can see meditation completed successfully (green leaf)
+- User can manually toggle leaf off by tapping it if desired
+- Wake-up greeting system can detect successful completion
+
+**Trigger Conditions (ALL must be met for greeting to play):**
+1. Alarm/wake time is reached
+2. Non-SILENCE waking room selected (alarm sound plays)
+3. Guided meditation completed successfully the night before (leaf is green)
+
+**Exclusions:**
+- Does NOT play if SILENCE is selected (no alarm sound means no greeting)
+- Does NOT play if meditation was interrupted or manually stopped
+- Does NOT play if no meditation was started
+
+**User Scenarios:**
+
+*Scenario 1: Typical Weekday Morning (Greeting Plays)*
+- User toggles meditation on before sleep
+- Meditation plays to completion → Leaf stays green
+- Alarm triggers with classical music (rooms 31-35)
+- ~5 seconds later: Random greeting phrase spoken
+- Flag cleared, ready for next night
+
+*Scenario 2: Weekend Morning with SILENCE (No Greeting)*
+- User toggles meditation on before sleep
+- Meditation completes → Leaf stays green
+- Alarm triggers with SILENCE selected
+- Ambient audio fades to nothing
+- No greeting plays (SILENCE means user doesn't want alarm sound)
+
+*Scenario 3: No Meditation (No Greeting)*
+- User sleeps without toggling meditation
+- Alarm triggers with classical music
+- No greeting plays (meditation wasn't completed)
+
+*Scenario 4: Interrupted Meditation (No Greeting)*
+- User toggles meditation on but manually stops it mid-session
+- Alarm triggers with classical music
+- No greeting plays (meditation wasn't completed successfully)
+
+**Files Modified:**
+- [app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt](app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt) - Added SharedPreferences tracking for meditation completion state, fixed leaf button to stay green after completion
+- [app/src/main/java/com/jmisabella/zrooms/AudioService.kt](app/src/main/java/com/jmisabella/zrooms/AudioService.kt) - Added wake-up greeting TTS engine, scheduling logic, and alarm integration
+
+## 2025-12-21
 - Added better variation to the preset meditations.
 
 ## 2025-12-21
