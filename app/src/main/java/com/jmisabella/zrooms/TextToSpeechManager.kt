@@ -42,6 +42,7 @@ class TextToSpeechManager(
     private var utteranceQueue = mutableListOf<Pair<String, Long>>() // (phrase, delay in ms)
     private var currentUtteranceIndex = 0
     private var isCustomMode = false
+    private var pendingPhrase: String? = null // Phrase waiting to be displayed when TTS starts
 
     // Callback to notify when ambient volume changes
     var onAmbientVolumeChanged: ((Float) -> Unit)? = null
@@ -62,7 +63,15 @@ class TextToSpeechManager(
                 isInitialized = true
 
                 tts?.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
-                    override fun onStart(utteranceId: String?) {}
+                    override fun onStart(utteranceId: String?) {
+                        isSpeaking = true
+                        // Update caption when TTS actually starts speaking
+                        pendingPhrase?.let { phrase ->
+                            previousPhrase = currentPhrase
+                            currentPhrase = phrase
+                            pendingPhrase = null
+                        }
+                    }
 
                     override fun onDone(utteranceId: String?) {
                         didFinishSpeaking()
@@ -71,6 +80,7 @@ class TextToSpeechManager(
                     override fun onError(utteranceId: String?) {
                         isSpeaking = false
                         isPlayingMeditation = false
+                        pendingPhrase = null
                     }
                 })
             }
@@ -87,7 +97,10 @@ class TextToSpeechManager(
      * Splits into utterances automatically with appropriate delays
      */
     fun startSpeakingWithPauses(text: String) {
-        if (!isInitialized || isSpeaking || text.isEmpty()) return
+        if (!isInitialized || text.isEmpty()) return
+
+        // Stop any existing speech first to ensure clean state
+        stopSpeaking()
 
         isSpeaking = true
         isPlayingMeditation = true
@@ -108,9 +121,10 @@ class TextToSpeechManager(
 
     /**
      * Starts speaking a random meditation from text files in res/raw
+     * Always picks a new random meditation, stopping any existing playback
      */
     fun startSpeakingRandomMeditation(): String? {
-        if (!isInitialized || isSpeaking) return null
+        if (!isInitialized) return null
 
         // Try to load a random meditation file
         val meditationText = loadRandomMeditationFile() ?: run {
@@ -133,6 +147,7 @@ class TextToSpeechManager(
         currentUtteranceIndex = 0
         currentPhrase = ""
         previousPhrase = ""
+        pendingPhrase = null
     }
 
     /**
@@ -281,15 +296,15 @@ class TextToSpeechManager(
             isPlayingMeditation = false
             previousPhrase = currentPhrase
             currentPhrase = ""
+            pendingPhrase = null
             return
         }
 
         val (phrase, delayMs) = utteranceQueue[currentUtteranceIndex]
         currentUtteranceIndex++
 
-        // Update current and previous phrases
-        previousPhrase = currentPhrase
-        currentPhrase = phrase
+        // Store phrase to be displayed when TTS actually starts (in onStart callback)
+        pendingPhrase = phrase
 
         val params = HashMap<String, String>()
         params[TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID] = "utterance_$currentUtteranceIndex"
