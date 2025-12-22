@@ -21,12 +21,16 @@ import android.os.Looper
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
+import android.speech.tts.TextToSpeech
+import android.speech.tts.UtteranceProgressListener
 import androidx.core.app.NotificationCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.preference.PreferenceManager
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.audio.AudioAttributes as ExoAudioAttributes
+import java.util.Locale
 import kotlin.concurrent.timer
 
 class AudioService : Service() {
@@ -53,9 +57,22 @@ class AudioService : Service() {
     private var currentAlarmFade: Runnable? = null
     private var currentPreviewFade: Runnable? = null
 
+    // Wake-up greeting TTS
+    private var greetingTts: TextToSpeech? = null
+    private var isGreetingTtsInitialized = false
+
     companion object {
         const val CHANNEL_ID = "audio_service_channel"
         const val NOTIFICATION_ID = 1
+
+        // Wake-up greeting phrases
+        private val GREETING_PHRASES = arrayOf(
+            "Welcome back",
+            "Greetings",
+            "Here we are",
+            "Returning to awareness",
+            "Welcome back to this space"
+        )
     }
 
     inner class AudioBinder : Binder() {
@@ -115,6 +132,17 @@ class AudioService : Service() {
                 }
             }
         }
+
+        // Initialize wake-up greeting TTS
+        greetingTts = TextToSpeech(this) { status ->
+            if (status == TextToSpeech.SUCCESS) {
+                greetingTts?.language = Locale.US
+                greetingTts?.setSpeechRate(0.6f) // Same as meditation speech rate
+                greetingTts?.setPitch(0.58f) // Same as meditation pitch
+                isGreetingTtsInitialized = true
+            }
+        }
+
         val notification = buildNotification()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             startForeground(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK)
@@ -138,6 +166,12 @@ class AudioService : Service() {
         currentAmbientFade?.let { mainHandler.removeCallbacks(it) }
         currentAlarmFade?.let { mainHandler.removeCallbacks(it) }
         currentPreviewFade?.let { mainHandler.removeCallbacks(it) }
+
+        // Clean up greeting TTS
+        greetingTts?.stop()
+        greetingTts?.shutdown()
+        greetingTts = null
+
         super.onDestroy()
     }
     fun playAmbient(index: Int, durationMinutes: Double, isAlarmEnabled: Boolean, selectedAlarmIndex: Int?) {
@@ -323,7 +357,7 @@ class AudioService : Service() {
 
     private fun startAlarm(selectedAlarmIndex: Int?) {
         if (selectedAlarmIndex == null || selectedAlarmIndex == -1) {
-            // No alarm: Just fade ambient out
+            // No alarm (SILENCE): Just fade ambient out, no greeting
             fadeAmbientVolume(0f, 2000L) {
                 ambientPlayer?.stop()
                 ambientPlayer?.release()
@@ -334,6 +368,11 @@ class AudioService : Service() {
         }
         isAlarmActive = true
         LocalBroadcastManager.getInstance(this).sendBroadcast(Intent("com.jmisabella.zrooms.ALARM_STARTED"))
+
+        // Check if we should play wake-up greeting
+        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+        val meditationCompleted = prefs.getBoolean(TextToSpeechManager.PREF_MEDITATION_COMPLETED, false)
+
         val alarmRes = getAlarmResource(selectedAlarmIndex)
         alarmPlayer = ExoPlayer.Builder(this@AudioService).build().apply {
             setAudioAttributes(playbackAudioAttributes, false)
@@ -348,6 +387,11 @@ class AudioService : Service() {
                         play()
                         fadeAlarmVolume(1f, 500L)
                         removeListener(this)
+
+                        // Schedule wake-up greeting if meditation was completed
+                        if (meditationCompleted) {
+                            scheduleWakeUpGreeting()
+                        }
                     }
                 }
             }
@@ -374,6 +418,42 @@ class AudioService : Service() {
                 }
             }
         })
+    }
+
+    /**
+     * Schedules the wake-up greeting to play 5 seconds after alarm starts
+     * Only plays once, then clears the meditation completion flag
+     */
+    private fun scheduleWakeUpGreeting() {
+        if (!isGreetingTtsInitialized) return
+
+        mainHandler.postDelayed({
+            if (isAlarmActive) { // Only play if alarm is still active
+                playWakeUpGreeting()
+            }
+        }, 5000L) // 5 seconds delay
+    }
+
+    /**
+     * Plays a random wake-up greeting phrase using TTS
+     */
+    private fun playWakeUpGreeting() {
+        if (!isGreetingTtsInitialized) return
+
+        // Select a random greeting phrase
+        val greeting = GREETING_PHRASES.random()
+
+        // Set up utterance parameters
+        val params = HashMap<String, String>()
+        params[TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID] = "wake_up_greeting"
+        params[TextToSpeech.Engine.KEY_PARAM_VOLUME] = TextToSpeechManager.VOICE_VOLUME.toString()
+
+        // Speak the greeting
+        greetingTts?.speak(greeting, TextToSpeech.QUEUE_FLUSH, params)
+
+        // Clear the meditation completion flag after greeting plays
+        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+        prefs.edit().putBoolean(TextToSpeechManager.PREF_MEDITATION_COMPLETED, false).apply()
     }
 
     fun fadeAlarmVolume(target: Float, duration: Long, completion: () -> Unit = {}) {

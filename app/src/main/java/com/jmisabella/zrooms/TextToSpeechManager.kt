@@ -42,6 +42,8 @@ class TextToSpeechManager(
     private var utteranceQueue = mutableListOf<Pair<String, Long>>() // (phrase, delay in ms)
     private var currentUtteranceIndex = 0
     private var isCustomMode = false
+    private var pendingPhrase: String? = null // Phrase waiting to be displayed when TTS starts
+    private val prefs = androidx.preference.PreferenceManager.getDefaultSharedPreferences(context)
 
     // Callback to notify when ambient volume changes
     var onAmbientVolumeChanged: ((Float) -> Unit)? = null
@@ -51,6 +53,7 @@ class TextToSpeechManager(
         private const val MEDITATION_PITCH = 0.58f // Lower pitch for calmer voice (decreased from 0.9)
         const val VOICE_VOLUME = 0.23f // Voice volume (fixed, cannot be changed dynamically)
         const val MAX_AMBIENT_VOLUME = 1.0f // Maximum ambient volume
+        const val PREF_MEDITATION_COMPLETED = "meditationCompletedSuccessfully"
     }
 
     init {
@@ -62,7 +65,15 @@ class TextToSpeechManager(
                 isInitialized = true
 
                 tts?.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
-                    override fun onStart(utteranceId: String?) {}
+                    override fun onStart(utteranceId: String?) {
+                        isSpeaking = true
+                        // Update caption when TTS actually starts speaking
+                        pendingPhrase?.let { phrase ->
+                            previousPhrase = currentPhrase
+                            currentPhrase = phrase
+                            pendingPhrase = null
+                        }
+                    }
 
                     override fun onDone(utteranceId: String?) {
                         didFinishSpeaking()
@@ -71,6 +82,7 @@ class TextToSpeechManager(
                     override fun onError(utteranceId: String?) {
                         isSpeaking = false
                         isPlayingMeditation = false
+                        pendingPhrase = null
                     }
                 })
             }
@@ -87,7 +99,13 @@ class TextToSpeechManager(
      * Splits into utterances automatically with appropriate delays
      */
     fun startSpeakingWithPauses(text: String) {
-        if (!isInitialized || isSpeaking || text.isEmpty()) return
+        if (!isInitialized || text.isEmpty()) return
+
+        // Stop any existing speech first to ensure clean state
+        stopSpeaking()
+
+        // Clear the meditation completion flag when starting a new meditation
+        prefs.edit().putBoolean(PREF_MEDITATION_COMPLETED, false).apply()
 
         isSpeaking = true
         isPlayingMeditation = true
@@ -108,9 +126,10 @@ class TextToSpeechManager(
 
     /**
      * Starts speaking a random meditation from text files in res/raw
+     * Always picks a new random meditation, stopping any existing playback
      */
     fun startSpeakingRandomMeditation(): String? {
-        if (!isInitialized || isSpeaking) return null
+        if (!isInitialized) return null
 
         // Try to load a random meditation file
         val meditationText = loadRandomMeditationFile() ?: run {
@@ -133,6 +152,10 @@ class TextToSpeechManager(
         currentUtteranceIndex = 0
         currentPhrase = ""
         previousPhrase = ""
+        pendingPhrase = null
+
+        // Clear the meditation completion flag when manually stopping
+        prefs.edit().putBoolean(PREF_MEDITATION_COMPLETED, false).apply()
     }
 
     /**
@@ -229,25 +252,30 @@ class TextToSpeechManager(
         val allMeditations = mutableListOf<String>()
 
         // 1. Load all preset meditation files from res/raw
-        for (i in 1..35) {
+        // Dynamically discover all preset_meditation files without hardcoded limit
+        var i = 1
+        while (true) {
             val resId = context.resources.getIdentifier(
                 "preset_meditation$i",
                 "raw",
                 context.packageName
             )
-            if (resId != 0) {
-                try {
-                    val text = context.resources.openRawResource(resId)
-                        .bufferedReader()
-                        .use { it.readText() }
-                        .trim()
-                    if (text.isNotEmpty()) {
-                        allMeditations.add(text)
-                    }
-                } catch (e: Exception) {
-                    println("Could not read preset meditation $i: ${e.message}")
-                }
+            if (resId == 0) {
+                // No more preset meditation files found
+                break
             }
+            try {
+                val text = context.resources.openRawResource(resId)
+                    .bufferedReader()
+                    .use { it.readText() }
+                    .trim()
+                if (text.isNotEmpty()) {
+                    allMeditations.add(text)
+                }
+            } catch (e: Exception) {
+                println("Could not read preset meditation $i: ${e.message}")
+            }
+            i++
         }
 
         // 2. Add all custom meditations
@@ -276,15 +304,15 @@ class TextToSpeechManager(
             isPlayingMeditation = false
             previousPhrase = currentPhrase
             currentPhrase = ""
+            pendingPhrase = null
             return
         }
 
         val (phrase, delayMs) = utteranceQueue[currentUtteranceIndex]
         currentUtteranceIndex++
 
-        // Update current and previous phrases
-        previousPhrase = currentPhrase
-        currentPhrase = phrase
+        // Store phrase to be displayed when TTS actually starts (in onStart callback)
+        pendingPhrase = phrase
 
         val params = HashMap<String, String>()
         params[TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID] = "utterance_$currentUtteranceIndex"
@@ -322,12 +350,16 @@ class TextToSpeechManager(
                 speakNextPhrase()
             }
         } else {
-            // All done
+            // All done - meditation completed successfully
             isSpeaking = false
-            isPlayingMeditation = false
+            // KEEP isPlayingMeditation = true so leaf stays green
+            // (User can manually toggle it off if desired)
             isCustomMode = false
             utteranceQueue.clear()
             currentUtteranceIndex = 0
+
+            // Set the meditation completion flag for wake-up greeting
+            prefs.edit().putBoolean(PREF_MEDITATION_COMPLETED, true).apply()
         }
     }
 
