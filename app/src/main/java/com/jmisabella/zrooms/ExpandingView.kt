@@ -41,6 +41,7 @@ import androidx.compose.material.icons.outlined.NightsStay
 import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.Eco
 import androidx.compose.material.icons.outlined.FormatQuote
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -124,8 +125,10 @@ fun ExpandingView(
 
     // Text-to-speech manager (needs meditationManager for random meditation selection)
     val ttsManager = remember { TextToSpeechManager(context, meditationManager) }
+    val voiceManager = remember { VoiceManager.getInstance(context) }
     var isMeditationPlaying by remember { mutableStateOf(false) }
     var showMeditationList by remember { mutableStateOf(false) }
+    var showVoiceSettings by remember { mutableStateOf(false) }
 
     // Meditation text display settings
     val showMeditationText = remember {
@@ -486,6 +489,27 @@ fun ExpandingView(
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    // Voice Settings Button (leftmost position)
+                    Box(
+                        modifier = Modifier
+                            .clickable {
+                                showVoiceSettings = true
+                            }
+                            .background(Color.Black.copy(alpha = 0.5f), CircleShape)
+                            .padding(12.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            Icons.Outlined.Settings,
+                            contentDescription = "Voice Settings",
+                            tint = Color(0xFF9E9E9E),
+                            modifier = Modifier.size(28.dp)
+                        )
+                    }
+
+                    Spacer(Modifier.width(40.dp))
+
+                    // Custom Meditations Button
                     Box(
                         modifier = Modifier
                             .clickable {
@@ -739,6 +763,18 @@ fun ExpandingView(
             onDismiss = { showMeditationList = false },
             onPlay = { meditationText ->
                 ttsManager.startSpeakingWithPauses(meditationText)
+            }
+        )
+    }
+
+    // Voice Settings Dialog
+    if (showVoiceSettings) {
+        VoiceSettingsView(
+            voiceManager = voiceManager,
+            onDismiss = {
+                showVoiceSettings = false
+                // Refresh voice settings when user closes the dialog
+                ttsManager.refreshVoiceSettings()
             }
         )
     }

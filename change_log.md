@@ -1,5 +1,199 @@
 # Z Rooms Android - Change Log
 
+## 2025-12-25
+
+**Feature:** Enhanced Voice Quality - Optional high-quality TTS voices for meditation narration
+
+**User Experience:** Users can now optionally select higher-quality TTS voices for meditation narration while maintaining the default "artificial" voice aesthetic as the default. A new gear icon (settings button) appears in the meditation view (ExpandingView), positioned as the leftmost button in the bottom row. Tapping this icon opens voice settings where users can toggle "Enhanced Voice" on/off and select from available high-quality voices. Each voice can be previewed with a sample meditation phrase before selection. The app maintains 100% offline functionality - only voices that don't require network connectivity are shown.
+
+**Implementation Details:**
+
+The enhanced voice quality feature consists of three main components:
+
+1. **Voice Management System** (VoiceManager.kt - NEW, 335 lines):
+   - Singleton pattern managing TTS voice discovery, selection, and configuration
+   - Discovers all available offline English voices and filters/sorts by quality
+   - Quality detection: Maps Android Voice.QUALITY_* constants to user-friendly labels
+   - Persistent voice preferences via SharedPreferences (keys: `use_enhanced_voice`, `preferred_voice_name`)
+   - Dynamic speech rate calculation based on voice quality:
+     - Default voices (QUALITY_NORMAL): 0.8x multiplier (slower for robotic voices)
+     - Enhanced voices (QUALITY_HIGH): 1.0x multiplier (natural speed)
+     - Premium voices (QUALITY_VERY_HIGH): 1.0x multiplier (natural speed)
+   - Natural pitch (1.0) for ALL voices (removed artificial pitch lowering)
+   - Voice name mapping: Converts cryptic Google TTS codes to friendly names
+     - Female voices: sfg→Samantha, iob→Emily, iog→Victoria
+     - Male voices: tpf→Alex, iom→Daniel, tpd→Michael, tpc→James
+     - Fallback to generic names (Voice A, Voice B, etc.) for unknown codes
+   - Separate preview TTS instance to avoid interfering with meditation playback
+   - Preview management: `stopPreview()` prevents audio looping and allows rapid voice comparison
+   - `getPreferredVoice()` fallback logic: User selection → Any high-quality voice → Default system voice
+
+2. **Voice Settings UI** (VoiceSettingsView.kt - NEW, 370 lines):
+   - Jetpack Compose full-screen settings interface
+   - Enhanced Voice toggle (OFF by default) - preserves default artificial aesthetic
+   - Scrollable LazyColumn voice list (only visible when Enhanced Voice enabled)
+   - VoiceListItem components showing:
+     - Friendly voice name (no redundant quality label - context already clear)
+     - Locale display (e.g., "English (United States)")
+     - Download status indicator for voices requiring download
+     - Preview button (play/stop icon) with immediate switching
+     - Selected indicator (checkmark icon)
+   - Preview functionality: Sample text "Welcome to your meditation practice. Take a deep breath and relax."
+   - Preview state management: Clicking new preview immediately stops previous one
+   - "Get More Voices" button: Deep-links to Android TTS settings for voice management
+   - Info section (scrollable, at bottom of list when Enhanced Voice ON):
+     - Explains voices are managed by device's TTS engine
+     - Notes many voices come pre-installed, others require download (100-500MB each)
+     - Provides path: Settings → Accessibility → Text-to-Speech → Speech Services by Google → Settings icon → Voice selection
+     - Clarifies enhanced voices stored in device system storage, not app
+   - Close button returns to meditation view and refreshes voice settings
+
+3. **Integration Changes**:
+
+   **TextToSpeechManager.kt** (MODIFIED):
+   - Removed hardcoded speech rate/pitch constants
+   - Added VoiceManager instance initialization
+   - Added `applyVoiceSettings()`: Applies preferred voice and dynamic speech rate
+   - Modified TTS initialization to call `applyVoiceSettings()`
+   - Added `refreshVoiceSettings()`: Callable when user changes voice preferences
+   - Uses `MEDITATION_PITCH = 1.0f` constant (natural pitch for all voices)
+   - Voice selection priority: Enhanced voice (if enabled) → Default US English locale
+
+   **ExpandingView.kt** (MODIFIED):
+   - Added gear icon (Settings) as leftmost button in bottom row
+   - Button order: gear → quote (custom meditation) → clock (alarm timer) → leaf (meditation toggle)
+   - Added `showVoiceSettings` state variable for sheet presentation
+   - VoiceSettingsView presented as full-screen overlay when gear icon tapped
+   - Calls `ttsManager.refreshVoiceSettings()` on dismiss to apply voice changes
+
+**Voice Quality Configuration:**
+
+```kotlin
+// VoiceManager.kt - Dynamic speech rate based on voice quality
+fun getSpeechRateMultiplier(voice: Voice?): Float {
+    if (voice == null || !useEnhancedVoice.value) {
+        return 0.8f  // DEFAULT_VOICE_RATE
+    }
+
+    // Enhanced and high-quality voices sound better at normal speed
+    return if (voice.quality >= Voice.QUALITY_HIGH) {
+        1.0f  // ENHANCED_VOICE_RATE
+    } else {
+        0.8f  // DEFAULT_VOICE_RATE
+    }
+}
+```
+
+**Voice Discovery and Filtering:**
+
+```kotlin
+// VoiceManager.kt - Discovers offline English voices only
+private fun discoverVoices() {
+    val voices = tts?.voices?.filter { voice ->
+        voice.locale.language == "en" && !voice.isNetworkConnectionRequired
+    }?.sortedWith(compareByDescending<Voice> {
+        it.quality  // Sort by quality (high to low)
+    }.thenBy {
+        if (it.locale == Locale.US) 0 else 1  // Then US locale first
+    }) ?: emptyList()
+
+    availableVoices.value = voices
+}
+```
+
+**Friendly Voice Names (Android-Specific):**
+
+Android voice names are cryptic (e.g., "en-us-x-tpf-local"). VoiceManager maps Google TTS voice codes to iOS-like friendly names:
+
+```kotlin
+// Extract voice code from name like "en-us-x-tpf-local"
+val voiceCode = when {
+    name.contains("-x-") -> {
+        name.substringAfter("-x-").substringBefore("-").substringBefore("#")
+    }
+    else -> ""
+}
+
+// Map to friendly names based on actual voice characteristics
+return when (voiceCode) {
+    "sfg" -> "Samantha"      // Female
+    "iob" -> "Emily"         // Female
+    "iog" -> "Victoria"      // Female
+    "tpf" -> "Alex"          // Male
+    "iom" -> "Daniel"        // Male
+    "tpd" -> "Michael"       // Male
+    "tpc" -> "James"         // Male
+    else -> "Voice A/B/C..."  // Fallback by position
+}
+```
+
+**User Scenarios:**
+
+*Scenario 1: Default User (No Changes)*
+- Enhanced Voice toggle remains OFF (default)
+- Meditations use default system voice at 0.8x speed, 1.0 pitch
+- Exactly same experience as before this feature was added
+- No behavior change
+
+*Scenario 2: Enhanced Voice Discovery*
+- User taps gear icon in meditation view
+- Opens voice settings
+- Toggles "Enhanced Voice" ON
+- Scrollable list of voices appears with friendly names
+- Taps preview button on "Samantha" → Hears sample at 1.0x speed
+- Taps preview button on "Alex" → Previous preview stops, new one starts
+- Selects "Samantha" (checkmark appears)
+- Closes settings
+- Next meditation uses Samantha voice at natural speed (1.0x)
+- Preference persists across app restarts
+
+*Scenario 3: Voice Requires Download*
+- User selects voice with "Needs Download" indicator
+- Voice won't work until downloaded
+- Taps "Get More Voices" button
+- Deep-linked to Android TTS settings
+- Downloads voice via Google Text-to-Speech app
+- Returns to z rooms app
+- Selected voice now available for meditations
+
+*Scenario 4: Enhanced Voice Unavailable (Fallback)*
+- User previously selected enhanced voice "Victoria"
+- Voice gets deleted from system settings
+- App fallback priority:
+  1. Try to use Victoria → Not available
+  2. Try any QUALITY_HIGH voice for en-US → If available, use it
+  3. Fall back to default system voice → Always available
+- Meditation plays successfully with fallback voice
+
+**Android-Specific Implementation Notes:**
+
+Unlike iOS where voices download automatically on first use, Android requires manual voice download through the Google Text-to-Speech app settings. The implementation handles this with:
+- Clear "Needs Download" indicators on unavailable voices
+- "Get More Voices" button with deep-link to `com.android.settings.TTS_SETTINGS`
+- Info section explaining download process step-by-step
+- Fallback logic when selected voice unavailable
+
+**Key Technical Decisions:**
+
+1. **Offline-Only Voices**: Only shows voices with `isNetworkConnectionRequired == false`
+2. **Singleton Pattern**: VoiceManager ensures single TTS instance for voice discovery
+3. **Separate Preview TTS**: Prevents interference with meditation playback
+4. **Observable State**: Uses Compose `mutableStateOf` for reactive UI updates
+5. **SharedPreferences Persistence**: Survives app restarts, device reboots
+6. **Natural Pitch (1.0)**: Removed artificial pitch lowering (0.58 in old code) for all voices
+7. **Dynamic Speech Rate**: Quality-based adjustment for optimal listening experience
+8. **Immediate Preview Switching**: Better UX for voice comparison
+
+**Files Created:**
+- [app/src/main/java/com/jmisabella/zrooms/VoiceManager.kt](app/src/main/java/com/jmisabella/zrooms/VoiceManager.kt) - Voice management singleton (335 lines)
+- [app/src/main/java/com/jmisabella/zrooms/VoiceSettingsView.kt](app/src/main/java/com/jmisabella/zrooms/VoiceSettingsView.kt) - Compose UI for voice settings (370 lines)
+
+**Files Modified:**
+- [app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt](app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt) - Integrated VoiceManager, dynamic voice selection and speech rate
+- [app/src/main/java/com/jmisabella/zrooms/ExpandingView.kt](app/src/main/java/com/jmisabella/zrooms/ExpandingView.kt) - Added gear icon button and VoiceSettingsView sheet presentation
+
+**Total Code Changes:** ~705 lines new, ~30 lines modified = ~735 lines total
+
 ## 2025-12-21
 
 **Feature:** Wake-Up Greeting - Personalized audio greetings for users who complete meditations before their alarm

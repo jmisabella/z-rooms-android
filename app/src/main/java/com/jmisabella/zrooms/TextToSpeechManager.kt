@@ -44,13 +44,13 @@ class TextToSpeechManager(
     private var isCustomMode = false
     private var pendingPhrase: String? = null // Phrase waiting to be displayed when TTS starts
     private val prefs = androidx.preference.PreferenceManager.getDefaultSharedPreferences(context)
+    private val voiceManager = VoiceManager.getInstance(context)
 
     // Callback to notify when ambient volume changes
     var onAmbientVolumeChanged: ((Float) -> Unit)? = null
 
     companion object {
-        private const val MEDITATION_SPEECH_RATE = 0.6f // Calm, slow rate (increased from 0.33 by ~20%)
-        private const val MEDITATION_PITCH = 0.58f // Lower pitch for calmer voice (decreased from 0.9)
+        private const val MEDITATION_PITCH = 1.0f // Natural pitch for all voices
         const val VOICE_VOLUME = 0.23f // Voice volume (fixed, cannot be changed dynamically)
         const val MAX_AMBIENT_VOLUME = 1.0f // Maximum ambient volume
         const val PREF_MEDITATION_COMPLETED = "meditationCompletedSuccessfully"
@@ -59,9 +59,8 @@ class TextToSpeechManager(
     init {
         tts = TextToSpeech(context) { status ->
             if (status == TextToSpeech.SUCCESS) {
-                tts?.language = Locale.US
-                tts?.setSpeechRate(MEDITATION_SPEECH_RATE)
-                tts?.setPitch(MEDITATION_PITCH)
+                // Apply preferred voice and speech parameters
+                applyVoiceSettings()
                 isInitialized = true
 
                 tts?.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
@@ -86,6 +85,37 @@ class TextToSpeechManager(
                     }
                 })
             }
+        }
+    }
+
+    /**
+     * Applies voice settings from VoiceManager
+     * Uses dynamic speech rate based on voice quality
+     */
+    private fun applyVoiceSettings() {
+        val preferredVoice = voiceManager.getPreferredVoice()
+
+        if (preferredVoice != null) {
+            tts?.setVoice(preferredVoice)
+        } else {
+            // Fallback to default US English
+            tts?.language = Locale.US
+        }
+
+        // Apply dynamic speech rate based on voice quality
+        val speechRate = voiceManager.getSpeechRateMultiplier(preferredVoice)
+        tts?.setSpeechRate(speechRate)
+
+        // Use natural pitch for all voices
+        tts?.setPitch(MEDITATION_PITCH)
+    }
+
+    /**
+     * Refreshes voice settings - call this when user changes voice preferences
+     */
+    fun refreshVoiceSettings() {
+        if (isInitialized) {
+            applyVoiceSettings()
         }
     }
 
