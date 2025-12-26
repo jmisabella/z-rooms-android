@@ -446,7 +446,7 @@ class AudioService : Service() {
         // Set up utterance parameters
         val params = HashMap<String, String>()
         params[TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID] = "wake_up_greeting"
-        params[TextToSpeech.Engine.KEY_PARAM_VOLUME] = TextToSpeechManager.VOICE_VOLUME.toString()
+        params[TextToSpeech.Engine.KEY_PARAM_VOLUME] = VoiceManager.VOICE_VOLUME.toString()
 
         // Speak the greeting
         greetingTts?.speak(greeting, TextToSpeech.QUEUE_FLUSH, params)

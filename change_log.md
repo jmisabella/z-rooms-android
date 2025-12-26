@@ -1,5 +1,51 @@
 # Z Rooms Android - Change Log
 
+## 2025-12-25 14:30 EST
+
+**Bug Fix:** Voice Volume Consistency - Unified TTS voice volume across all playback instances
+
+**Problem:** The voice preview feature in VoiceSettingsView was playing at full volume (1.0), which was significantly louder than the meditation narration volume (0.23f). This created a jarring experience where users would hear previews at one volume level but meditations at a much quieter level. Additionally, the VOICE_VOLUME constant was duplicated in multiple files (TextToSpeechManager and referenced in AudioService), violating DRY principles and creating maintenance risk.
+
+**Solution:** Consolidated voice volume management by:
+1. Moving the VOICE_VOLUME constant to VoiceManager as the single source of truth
+2. Adding volume parameter to preview TTS in VoiceManager.previewVoice()
+3. Updating all TTS instances to reference VoiceManager.VOICE_VOLUME
+
+**Implementation Details:**
+
+All three TTS voice instances now use the same volume (0.23f):
+- **Meditation narration** (TextToSpeechManager.speakNextPhrase())
+- **Voice preview** (VoiceManager.previewVoice())
+- **Wake-up greeting** (AudioService.playWakeUpGreeting())
+
+**Code Changes:**
+
+```kotlin
+// VoiceManager.kt - Single source of truth for voice volume
+companion object {
+    // Voice volume (shared across meditation playback and preview)
+    const val VOICE_VOLUME = 0.23f
+}
+
+// Preview now uses same volume as meditations
+fun previewVoice(voice: Voice, text: String, onComplete: (() -> Unit)? = null) {
+    val params = HashMap<String, String>()
+    params[TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID] = "preview"
+    params[TextToSpeech.Engine.KEY_PARAM_VOLUME] = VOICE_VOLUME.toString()
+    // ...
+}
+```
+
+**Files Modified:**
+- [app/src/main/java/com/jmisabella/zrooms/VoiceManager.kt](app/src/main/java/com/jmisabella/zrooms/VoiceManager.kt) - Added VOICE_VOLUME constant (line 44), added volume parameter to preview TTS (line 270)
+- [app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt](app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt) - Removed duplicate VOICE_VOLUME constant, updated reference to VoiceManager.VOICE_VOLUME (line 348)
+- [app/src/main/java/com/jmisabella/zrooms/AudioService.kt](app/src/main/java/com/jmisabella/zrooms/AudioService.kt) - Updated wake-up greeting to use VoiceManager.VOICE_VOLUME (line 449)
+
+**User Impact:**
+- Voice previews now play at the same comfortable volume as meditations (0.23f instead of 1.0)
+- Consistent audio experience across all TTS features
+- No more jarring volume differences when testing voices
+
 ## 2025-12-25
 
 **Feature:** Enhanced Voice Quality - Optional high-quality TTS voices for meditation narration

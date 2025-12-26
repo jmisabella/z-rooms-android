@@ -51,7 +51,6 @@ class TextToSpeechManager(
 
     companion object {
         private const val MEDITATION_PITCH = 1.0f // Natural pitch for all voices
-        const val VOICE_VOLUME = 0.23f // Voice volume (fixed, cannot be changed dynamically)
         const val MAX_AMBIENT_VOLUME = 1.0f // Maximum ambient volume
         const val PREF_MEDITATION_COMPLETED = "meditationCompletedSuccessfully"
     }
@@ -346,7 +345,7 @@ class TextToSpeechManager(
 
         val params = HashMap<String, String>()
         params[TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID] = "utterance_$currentUtteranceIndex"
-        params[TextToSpeech.Engine.KEY_PARAM_VOLUME] = VOICE_VOLUME.toString()
+        params[TextToSpeech.Engine.KEY_PARAM_VOLUME] = VoiceManager.VOICE_VOLUME.toString()
 
         tts?.speak(phrase, TextToSpeech.QUEUE_FLUSH, params)
 

@@ -41,6 +41,9 @@ class VoiceManager private constructor(private val context: Context) {
         private const val DEFAULT_VOICE_RATE = 0.8f  // Slower for robotic voices
         private const val ENHANCED_VOICE_RATE = 1.0f // Natural speed for high-quality voices
 
+        // Voice volume (shared across meditation playback and preview)
+        const val VOICE_VOLUME = 0.23f
+
         fun getInstance(context: Context): VoiceManager {
             return INSTANCE ?: synchronized(this) {
                 INSTANCE ?: VoiceManager(context.applicationContext).also { INSTANCE = it }
@@ -293,6 +296,7 @@ class VoiceManager private constructor(private val context: Context) {
 
                 val params = HashMap<String, String>()
                 params[TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID] = "preview"
+                params[TextToSpeech.Engine.KEY_PARAM_VOLUME] = VOICE_VOLUME.toString()
 
                 previewTTS?.setOnUtteranceProgressListener(object : android.speech.tts.UtteranceProgressListener() {
                     override fun onStart(utteranceId: String?) {}
