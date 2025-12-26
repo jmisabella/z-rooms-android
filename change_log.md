@@ -1,5 +1,136 @@
 # Z Rooms Android - Change Log
 
+## 2025-12-26 00:15: Voice Settings UI Simplification
+
+### **THE REQUEST**
+
+The user requested simplification of the Voice Settings interface to make voice selection more straightforward and reduce UI clutter. Specific changes requested:
+
+1. Remove the Enhanced Voice toggle button - all voices should display all the time instead of requiring toggle activation
+2. Move the "About Enhanced Voices" section to the top of Voice Settings
+3. Change the section title from "About Enhanced Voices" to "About Voices"
+4. Remove the last sentence: "Enhanced voiced do not increase app size and are stored in your device's system storage"
+5. Make the "About Voices" section scrollable so it doesn't permanently occupy screen space when browsing voices
+6. Remove the "Get More Voices" button and simplify the About Voices description
+
+### **THE PROBLEM**
+
+The original Voice Settings interface had several UX issues:
+
+1. **Two-Step Activation**: Users had to toggle Enhanced Voice ON before they could see and select available voices, adding unnecessary friction
+2. **Fixed Info Section**: The "About Voices" information card stayed fixed at the top while scrolling, taking up valuable screen real estate and minimizing the number of visible voice options
+3. **Redundant Title**: "About Enhanced Voices" was redundant since the context already made it clear these were enhanced voices
+4. **Unnecessary Information**: The sentence about app size and system storage was more technical detail than users needed
+5. **Get More Voices Button**: The deep-link to TTS settings added complexity without clear benefit, and instructions for downloading voices were unnecessarily detailed for a meditation app
+
+### **THE SOLUTION**
+
+**Implementation Changes:**
+
+1. **Removed Enhanced Voice Toggle** (lines 75-113):
+   - Deleted the entire Card component containing the toggle switch
+   - Removed the `useEnhancedVoice` variable that was no longer needed
+   - Eliminated conditional rendering - voice list now always displays
+
+2. **Repositioned About Section** (lines 79-109):
+   - Moved "About Voices" card inside the LazyColumn as the first `item`
+   - Changed from fixed position to scrollable item
+   - Users can now scroll past it to see more voices
+
+3. **Simplified Title and Content**:
+   - Changed title from "ℹ️ About Enhanced Voices" to "ℹ️ About Voices" (line 91)
+   - Replaced detailed 3-paragraph description with simple 2-sentence explanation (lines 98-102)
+   - Old text: Explained voice management, download sizes (100-500MB), step-by-step settings navigation, and storage details
+   - New text: "Voices are provided by your device's Text-to-Speech engine. The voices shown here are currently available on your device."
+
+4. **Removed "Get More Voices" Button**:
+   - Deleted entire OutlinedButton component and deep-link logic (~30 lines)
+   - Removed unused `context` variable (LocalContext.current)
+   - Removed unused Intent imports
+   - Rationale: Users can still access TTS settings through device settings if needed, but this complexity doesn't belong in a meditation app's voice selector
+
+5. **Reorganized Layout Structure**:
+   - "About Voices" section (scrollable)
+   - "Voice Selection" header (scrollable)
+   - Voice list items (scrollable)
+
+### **USER EXPERIENCE IMPROVEMENTS**
+
+**Before:**
+- Toggle Enhanced Voice ON → Wait for voice list to appear → Scroll through voices with fixed info card taking up space → "Get More Voices" button at bottom
+- Limited voice options visible at once due to fixed "About Enhanced Voices" section
+- Three-step process to select a voice
+- Verbose instructions about downloading voices, file sizes, and navigation paths
+
+**After:**
+- Open Voice Settings → Immediately see all available voices
+- Scroll past simple "About Voices" card to maximize visible voice options
+- Two-step process to select a voice (simpler, more direct)
+- Clean, minimal explanation: just what users need to know
+
+**Benefits:**
+- More voices visible on screen at once when browsing
+- Faster voice selection workflow
+- Cleaner, less cluttered interface
+- Information available when needed but not intrusive
+- Removed unnecessary technical details and complexity
+- Focus on meditation experience rather than TTS management
+
+### **CHANGES MADE**
+
+**VoiceSettingsView.kt Structure (Before):**
+```
+Header
+├── Enhanced Voice Toggle Card (always visible)
+├── IF Enhanced Voice ON:
+│   ├── Voice Selection Header (fixed)
+│   ├── LazyColumn:
+│   │   ├── Voice List Items
+│   │   ├── Get More Voices Button
+│   │   └── About Enhanced Voices Card (verbose, 3 paragraphs)
+│   ELSE:
+│   └── About Enhanced Voices Card (fixed, verbose)
+```
+
+**VoiceSettingsView.kt Structure (After):**
+```
+Header
+└── LazyColumn:
+    ├── About Voices Card (scrollable, 2 sentences)
+    ├── Voice Selection Header (scrollable)
+    └── Voice List Items (scrollable)
+```
+
+### **FILES MODIFIED**
+
+- [app/src/main/java/com/jmisabella/zrooms/VoiceSettingsView.kt](app/src/main/java/com/jmisabella/zrooms/VoiceSettingsView.kt):
+  - Removed Enhanced Voice toggle Card (deleted ~40 lines)
+  - Removed `useEnhancedVoice` variable declaration
+  - Removed conditional `if (useEnhancedVoice)` branching logic (deleted ~150 lines)
+  - Removed "Get More Voices" button and deep-link logic (deleted ~30 lines)
+  - Removed unused `context` variable (LocalContext.current)
+  - Moved "About Voices" into LazyColumn as first item (lines 80-105)
+  - Simplified section title from "About Enhanced Voices" to "About Voices" (line 92)
+  - Replaced verbose 3-paragraph description with concise 2-sentence explanation (lines 98-102)
+  - Voice list now always displays without toggle requirement
+
+**Text Changes:**
+
+Old "About Enhanced Voices" content:
+> "Higher quality voices are managed by your device's Text-to-Speech engine. Many voices come pre-installed on newer devices, while others may require download (100-500MB each).
+>
+> To manage voices:
+> Settings → Accessibility → Text-to-Speech → Speech Services by Google → Settings icon → Voice selection
+>
+> Enhanced voices do not increase app size and are stored in your device's system storage."
+
+New "About Voices" content:
+> "Voices are provided by your device's Text-to-Speech engine. The voices shown here are currently available on your device."
+
+**Code Reduction:** ~220 lines removed, ~5 lines added = ~215 net line reduction
+
+**Total Lines:** 159 lines (down from ~370 lines)
+
 ## 2025-12-25 23:27: Enhanced Opening Phrase Variety in Preset Meditations
 
 ### **THE REQUEST**

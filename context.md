@@ -6,3 +6,5 @@ Users can also write their OWN custom meditations and save up to 35 custom medit
 
 Also there is a closed caption which, when enabled, displays the meditation being spoken in text form along the bottom of the screen. This optional feature is enabled by default. 
 
+**Multiple Voices**
+User can select from a variety of voices, already offered by iOS/Android ecosystems. While most of these voices may already be readily available on most devices, some may need to be downloaded as a system download to the device. 
