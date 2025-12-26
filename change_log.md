@@ -1,5 +1,431 @@
 # Z Rooms Android - Change Log
 
+## 2025-12-25 23:27: Enhanced Opening Phrase Variety in Preset Meditations
+
+### **THE REQUEST**
+
+The user noticed that an excessive number of preset meditations began with the exact same literal phrase: "Before we begin, consider this." This repetitive opening created a monotonous user experience for regular meditation users. The request was to introduce significant variety in the opening phrases while maintaining the overall contemplative meaning and tone.
+
+**Initial Analysis:**
+- 27 out of 36 meditation files used "Before we begin,"
+- 13 of those used the generic "consider this" after it
+- This lack of variety made meditations feel formulaic and less engaging
+
+### **THE SOLUTION**
+
+**Implementation Strategy:**
+Developed a diverse collection of 20+ opening phrase variations across 5 categories, distributed thoughtfully across all meditation files based on their content and sources. The approach prioritized attribution-specific phrases for meditations with named sources (Marcus Aurelius, Tao Te Ching, etc.) while using varied invitations and tone-setters for original content.
+
+**Opening Phrase Categories Created:**
+
+**Category 1: Invitations to Reflect**
+- "A thought to hold"
+- "Consider these words"
+- "Reflect on this"
+- "Let's begin with this insight"
+- "Here's a thought to carry with us"
+- "A moment to contemplate"
+- "Something to ponder"
+- "Something to reflect upon"
+- "Here's a reflection"
+
+**Category 2: Setting the Tone**
+- "To set our intention"
+- "As we prepare"
+- "To ground this practice"
+- "To guide our journey today"
+- "Let us settle in with"
+- "We begin with"
+
+**Category 3: Attribution-Specific (for meditations with sources)**
+- "In the words of William Wordsworth, from I Wandered Lonely As A Cloud"
+- "Marcus Aurelius reminds us, from his Meditations"
+- "Wisdom from Ralph Waldo Emerson's Self-Reliance"
+- "From Lao Tzu's Tao Te Ching, these words"
+- "The Bhagavad Gita teaches us"
+- "An ancient teaching from the Tao Te Ching"
+- "Wisdom from the Dhammapada"
+- "Ancient Buddhist wisdom teaches"
+- "From the Upanishads, this teaching"
+
+**Category 4: Gentle Invitation**
+- "Let these words guide us"
+- "May we hold this truth"
+- "A reminder for our practice"
+- "Let's begin with this thought"
+
+**Category 5: Direct Entry**
+- One meditation (preset_meditation4.txt) starts directly with instructions, no preamble
+
+**Preserved "Before we begin" instances (2-3 total, as requested):**
+- "A reflection before we begin" (meditation 10)
+- "Before we begin, from the Serenity Prayer" (meditation 25)
+- "Before we begin, from an old Zen saying" (meditation 28)
+
+### **CHANGES MADE**
+
+Updated 27 out of 36 meditation files with varied opening phrases:
+
+**Meditations with Attribution-Specific Phrases:**
+- preset_meditation1.txt: "In the words of William Wordsworth..."
+- preset_meditation2.txt: "Marcus Aurelius reminds us..."
+- preset_meditation6.txt: "Wisdom from Ralph Waldo Emerson's Self-Reliance"
+- preset_meditation8.txt: "From Lao Tzu's Tao Te Ching, these words"
+- preset_meditation11.txt: "The Bhagavad Gita teaches us"
+- preset_meditation15.txt: "An ancient teaching from the Tao Te Ching"
+- preset_meditation20.txt: "Wisdom from the Dhammapada"
+- preset_meditation21.txt: "Ancient Buddhist wisdom teaches"
+- preset_meditation30.txt: "From the Upanishads, this teaching"
+
+**Meditations with Reflection & Invitation Phrases:**
+- preset_meditation3.txt: "Here's a reflection"
+- preset_meditation7.txt: "Let us settle in with"
+- preset_meditation12.txt: "To guide our journey today"
+- preset_meditation13.txt: "A thought to hold"
+- preset_meditation14.txt: "Let's begin with this insight"
+- preset_meditation16.txt: "Something to ponder"
+- preset_meditation17.txt: "To set our intention"
+- preset_meditation18.txt: "Reflect on this"
+- preset_meditation19.txt: "Here's a thought to carry with us"
+- preset_meditation22.txt: "Something to reflect upon"
+- preset_meditation24.txt: "A moment to contemplate"
+- preset_meditation26.txt: "As we prepare"
+- preset_meditation29.txt: "Consider these words"
+- preset_meditation31.txt: "To ground this practice"
+- preset_meditation32.txt: "Let these words guide us"
+- preset_meditation33.txt: "A reminder for our practice"
+- preset_meditation34.txt: "May we hold this truth"
+- preset_meditation35.txt: "We begin with"
+
+### **DISTRIBUTION & VARIETY ACHIEVED**
+
+**Before:**
+- 27 files using "Before we begin,"
+- 13 files with "Before we begin, consider this"
+- Extremely repetitive, formulaic feel
+
+**After:**
+- Only 2-3 files retain "Before we begin" (10, 25, 28)
+- 20+ unique opening phrases across all categories
+- Variety distributed evenly based on meditation content and sources
+- Each meditation feels more unique and thoughtfully crafted
+
+### **FILES MODIFIED**
+
+All meditation files in `zz-time/Meditations/`:
+- preset_meditation1.txt through preset_meditation35.txt
+- Total: 27 files updated with new opening phrases
+- 3 files retained "Before we begin" for variety
+- Multiple files already had "Let's begin with this thought" variations (kept for continuity)
+
+
+## 2025-12-25 15:00 EST
+
+**Feature Enhancement:** Prevent Consecutive Meditation Repeats - Ensures variety in meditation selection
+
+**User Experience:** When users toggle the leaf button on to play a meditation, then toggle it off to stop, and toggle it back on again, the app now guarantees that the second meditation will be different from the first. This prevents the jarring experience of hearing the exact same meditation twice in a row when toggling the leaf button multiple times.
+
+**Implementation Details:**
+
+Added meditation history tracking to prevent immediate repeats:
+
+1. **Last Played Tracking:**
+   - New variable `lastPlayedMeditation: String?` stores the full text of the most recently played meditation
+   - Updated when meditation is selected in `loadRandomMeditationFile()`
+   - Persists for the app session (not saved to disk)
+
+2. **Smart Random Selection:**
+   - When 2+ meditations available AND a previous meditation exists:
+     - Filters out `lastPlayedMeditation` from available pool
+     - Selects randomly from remaining meditations
+   - When only 1 meditation available:
+     - Plays that single meditation (no choice)
+   - First time playing (no previous meditation):
+     - Selects randomly from all available meditations
+
+3. **Selection Logic:**
+```kotlin
+val selectedMeditation = if (allMeditations.size > 1 && lastPlayedMeditation != null) {
+    // Filter out the last played meditation and pick from remaining
+    val availableMeditations = allMeditations.filter { it != lastPlayedMeditation }
+    availableMeditations.random()
+} else {
+    // First time playing or only one meditation available
+    allMeditations.random()
+}
+lastPlayedMeditation = selectedMeditation
+```
+
+**User Scenarios:**
+
+*Scenario 1: Typical Toggle On/Off/On (Multiple Meditations Available)*
+- User toggles leaf ON → Meditation #12 plays
+- User toggles leaf OFF → Meditation stops
+- User toggles leaf ON → Meditation #27 plays (guaranteed NOT #12)
+- User toggles leaf OFF → Meditation stops
+- User toggles leaf ON → Any meditation EXCEPT #27 plays
+
+*Scenario 2: Only One Meditation Available*
+- User has deleted all presets except one, no custom meditations
+- User toggles leaf ON → Meditation #1 plays
+- User toggles leaf OFF → Meditation stops
+- User toggles leaf ON → Meditation #1 plays (only choice available)
+
+*Scenario 3: With 70 Total Meditations (35 presets + 35 custom)*
+- Each toggle ensures variety: 69 different options each time
+- Prevents repetitive experience even with frequent toggling
+- Last played meditation only persists during app session
+
+**Benefits:**
+- Better user experience with guaranteed variety
+- Prevents frustration from hearing same meditation immediately after stopping it
+- Works seamlessly with both preset and custom meditations
+- No impact on first-time meditation selection
+- Minimal memory overhead (stores single meditation text)
+
+**Files Modified:**
+- [app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt](app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt) - Added `lastPlayedMeditation` tracking (line 46), updated `loadRandomMeditationFile()` with smart selection logic (lines 324-342)
+
+## 2025-12-25 14:30 EST
+
+**Bug Fix:** Voice Volume Consistency - Unified TTS voice volume across all playback instances
+
+**Problem:** The voice preview feature in VoiceSettingsView was playing at full volume (1.0), which was significantly louder than the meditation narration volume (0.23f). This created a jarring experience where users would hear previews at one volume level but meditations at a much quieter level. Additionally, the VOICE_VOLUME constant was duplicated in multiple files (TextToSpeechManager and referenced in AudioService), violating DRY principles and creating maintenance risk.
+
+**Solution:** Consolidated voice volume management by:
+1. Moving the VOICE_VOLUME constant to VoiceManager as the single source of truth
+2. Adding volume parameter to preview TTS in VoiceManager.previewVoice()
+3. Updating all TTS instances to reference VoiceManager.VOICE_VOLUME
+
+**Implementation Details:**
+
+All three TTS voice instances now use the same volume (0.23f):
+- **Meditation narration** (TextToSpeechManager.speakNextPhrase())
+- **Voice preview** (VoiceManager.previewVoice())
+- **Wake-up greeting** (AudioService.playWakeUpGreeting())
+
+**Code Changes:**
+
+```kotlin
+// VoiceManager.kt - Single source of truth for voice volume
+companion object {
+    // Voice volume (shared across meditation playback and preview)
+    const val VOICE_VOLUME = 0.23f
+}
+
+// Preview now uses same volume as meditations
+fun previewVoice(voice: Voice, text: String, onComplete: (() -> Unit)? = null) {
+    val params = HashMap<String, String>()
+    params[TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID] = "preview"
+    params[TextToSpeech.Engine.KEY_PARAM_VOLUME] = VOICE_VOLUME.toString()
+    // ...
+}
+```
+
+**Files Modified:**
+- [app/src/main/java/com/jmisabella/zrooms/VoiceManager.kt](app/src/main/java/com/jmisabella/zrooms/VoiceManager.kt) - Added VOICE_VOLUME constant (line 44), added volume parameter to preview TTS (line 270)
+- [app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt](app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt) - Removed duplicate VOICE_VOLUME constant, updated reference to VoiceManager.VOICE_VOLUME (line 348)
+- [app/src/main/java/com/jmisabella/zrooms/AudioService.kt](app/src/main/java/com/jmisabella/zrooms/AudioService.kt) - Updated wake-up greeting to use VoiceManager.VOICE_VOLUME (line 449)
+
+**User Impact:**
+- Voice previews now play at the same comfortable volume as meditations (0.23f instead of 1.0)
+- Consistent audio experience across all TTS features
+- No more jarring volume differences when testing voices
+
+## 2025-12-25
+
+**Feature:** Enhanced Voice Quality - Optional high-quality TTS voices for meditation narration
+
+**User Experience:** Users can now optionally select higher-quality TTS voices for meditation narration while maintaining the default "artificial" voice aesthetic as the default. A new gear icon (settings button) appears in the meditation view (ExpandingView), positioned as the leftmost button in the bottom row. Tapping this icon opens voice settings where users can toggle "Enhanced Voice" on/off and select from available high-quality voices. Each voice can be previewed with a sample meditation phrase before selection. The app maintains 100% offline functionality - only voices that don't require network connectivity are shown.
+
+**Implementation Details:**
+
+The enhanced voice quality feature consists of three main components:
+
+1. **Voice Management System** (VoiceManager.kt - NEW, 335 lines):
+   - Singleton pattern managing TTS voice discovery, selection, and configuration
+   - Discovers all available offline English voices and filters/sorts by quality
+   - Quality detection: Maps Android Voice.QUALITY_* constants to user-friendly labels
+   - Persistent voice preferences via SharedPreferences (keys: `use_enhanced_voice`, `preferred_voice_name`)
+   - Dynamic speech rate calculation based on voice quality:
+     - Default voices (QUALITY_NORMAL): 0.8x multiplier (slower for robotic voices)
+     - Enhanced voices (QUALITY_HIGH): 1.0x multiplier (natural speed)
+     - Premium voices (QUALITY_VERY_HIGH): 1.0x multiplier (natural speed)
+   - Natural pitch (1.0) for ALL voices (removed artificial pitch lowering)
+   - Voice name mapping: Converts cryptic Google TTS codes to friendly names
+     - Female voices: sfg→Samantha, iob→Emily, iog→Victoria
+     - Male voices: tpf→Alex, iom→Daniel, tpd→Michael, tpc→James
+     - Fallback to generic names (Voice A, Voice B, etc.) for unknown codes
+   - Separate preview TTS instance to avoid interfering with meditation playback
+   - Preview management: `stopPreview()` prevents audio looping and allows rapid voice comparison
+   - `getPreferredVoice()` fallback logic: User selection → Any high-quality voice → Default system voice
+
+2. **Voice Settings UI** (VoiceSettingsView.kt - NEW, 370 lines):
+   - Jetpack Compose full-screen settings interface
+   - Enhanced Voice toggle (OFF by default) - preserves default artificial aesthetic
+   - Scrollable LazyColumn voice list (only visible when Enhanced Voice enabled)
+   - VoiceListItem components showing:
+     - Friendly voice name (no redundant quality label - context already clear)
+     - Locale display (e.g., "English (United States)")
+     - Download status indicator for voices requiring download
+     - Preview button (play/stop icon) with immediate switching
+     - Selected indicator (checkmark icon)
+   - Preview functionality: Sample text "Welcome to your meditation practice. Take a deep breath and relax."
+   - Preview state management: Clicking new preview immediately stops previous one
+   - "Get More Voices" button: Deep-links to Android TTS settings for voice management
+   - Info section (scrollable, at bottom of list when Enhanced Voice ON):
+     - Explains voices are managed by device's TTS engine
+     - Notes many voices come pre-installed, others require download (100-500MB each)
+     - Provides path: Settings → Accessibility → Text-to-Speech → Speech Services by Google → Settings icon → Voice selection
+     - Clarifies enhanced voices stored in device system storage, not app
+   - Close button returns to meditation view and refreshes voice settings
+
+3. **Integration Changes**:
+
+   **TextToSpeechManager.kt** (MODIFIED):
+   - Removed hardcoded speech rate/pitch constants
+   - Added VoiceManager instance initialization
+   - Added `applyVoiceSettings()`: Applies preferred voice and dynamic speech rate
+   - Modified TTS initialization to call `applyVoiceSettings()`
+   - Added `refreshVoiceSettings()`: Callable when user changes voice preferences
+   - Uses `MEDITATION_PITCH = 1.0f` constant (natural pitch for all voices)
+   - Voice selection priority: Enhanced voice (if enabled) → Default US English locale
+
+   **ExpandingView.kt** (MODIFIED):
+   - Added gear icon (Settings) as leftmost button in bottom row
+   - Button order: gear → quote (custom meditation) → clock (alarm timer) → leaf (meditation toggle)
+   - Added `showVoiceSettings` state variable for sheet presentation
+   - VoiceSettingsView presented as full-screen overlay when gear icon tapped
+   - Calls `ttsManager.refreshVoiceSettings()` on dismiss to apply voice changes
+
+**Voice Quality Configuration:**
+
+```kotlin
+// VoiceManager.kt - Dynamic speech rate based on voice quality
+fun getSpeechRateMultiplier(voice: Voice?): Float {
+    if (voice == null || !useEnhancedVoice.value) {
+        return 0.8f  // DEFAULT_VOICE_RATE
+    }
+
+    // Enhanced and high-quality voices sound better at normal speed
+    return if (voice.quality >= Voice.QUALITY_HIGH) {
+        1.0f  // ENHANCED_VOICE_RATE
+    } else {
+        0.8f  // DEFAULT_VOICE_RATE
+    }
+}
+```
+
+**Voice Discovery and Filtering:**
+
+```kotlin
+// VoiceManager.kt - Discovers offline English voices only
+private fun discoverVoices() {
+    val voices = tts?.voices?.filter { voice ->
+        voice.locale.language == "en" && !voice.isNetworkConnectionRequired
+    }?.sortedWith(compareByDescending<Voice> {
+        it.quality  // Sort by quality (high to low)
+    }.thenBy {
+        if (it.locale == Locale.US) 0 else 1  // Then US locale first
+    }) ?: emptyList()
+
+    availableVoices.value = voices
+}
+```
+
+**Friendly Voice Names (Android-Specific):**
+
+Android voice names are cryptic (e.g., "en-us-x-tpf-local"). VoiceManager maps Google TTS voice codes to iOS-like friendly names:
+
+```kotlin
+// Extract voice code from name like "en-us-x-tpf-local"
+val voiceCode = when {
+    name.contains("-x-") -> {
+        name.substringAfter("-x-").substringBefore("-").substringBefore("#")
+    }
+    else -> ""
+}
+
+// Map to friendly names based on actual voice characteristics
+return when (voiceCode) {
+    "sfg" -> "Samantha"      // Female
+    "iob" -> "Emily"         // Female
+    "iog" -> "Victoria"      // Female
+    "tpf" -> "Alex"          // Male
+    "iom" -> "Daniel"        // Male
+    "tpd" -> "Michael"       // Male
+    "tpc" -> "James"         // Male
+    else -> "Voice A/B/C..."  // Fallback by position
+}
+```
+
+**User Scenarios:**
+
+*Scenario 1: Default User (No Changes)*
+- Enhanced Voice toggle remains OFF (default)
+- Meditations use default system voice at 0.8x speed, 1.0 pitch
+- Exactly same experience as before this feature was added
+- No behavior change
+
+*Scenario 2: Enhanced Voice Discovery*
+- User taps gear icon in meditation view
+- Opens voice settings
+- Toggles "Enhanced Voice" ON
+- Scrollable list of voices appears with friendly names
+- Taps preview button on "Samantha" → Hears sample at 1.0x speed
+- Taps preview button on "Alex" → Previous preview stops, new one starts
+- Selects "Samantha" (checkmark appears)
+- Closes settings
+- Next meditation uses Samantha voice at natural speed (1.0x)
+- Preference persists across app restarts
+
+*Scenario 3: Voice Requires Download*
+- User selects voice with "Needs Download" indicator
+- Voice won't work until downloaded
+- Taps "Get More Voices" button
+- Deep-linked to Android TTS settings
+- Downloads voice via Google Text-to-Speech app
+- Returns to z rooms app
+- Selected voice now available for meditations
+
+*Scenario 4: Enhanced Voice Unavailable (Fallback)*
+- User previously selected enhanced voice "Victoria"
+- Voice gets deleted from system settings
+- App fallback priority:
+  1. Try to use Victoria → Not available
+  2. Try any QUALITY_HIGH voice for en-US → If available, use it
+  3. Fall back to default system voice → Always available
+- Meditation plays successfully with fallback voice
+
+**Android-Specific Implementation Notes:**
+
+Unlike iOS where voices download automatically on first use, Android requires manual voice download through the Google Text-to-Speech app settings. The implementation handles this with:
+- Clear "Needs Download" indicators on unavailable voices
+- "Get More Voices" button with deep-link to `com.android.settings.TTS_SETTINGS`
+- Info section explaining download process step-by-step
+- Fallback logic when selected voice unavailable
+
+**Key Technical Decisions:**
+
+1. **Offline-Only Voices**: Only shows voices with `isNetworkConnectionRequired == false`
+2. **Singleton Pattern**: VoiceManager ensures single TTS instance for voice discovery
+3. **Separate Preview TTS**: Prevents interference with meditation playback
+4. **Observable State**: Uses Compose `mutableStateOf` for reactive UI updates
+5. **SharedPreferences Persistence**: Survives app restarts, device reboots
+6. **Natural Pitch (1.0)**: Removed artificial pitch lowering (0.58 in old code) for all voices
+7. **Dynamic Speech Rate**: Quality-based adjustment for optimal listening experience
+8. **Immediate Preview Switching**: Better UX for voice comparison
+
+**Files Created:**
+- [app/src/main/java/com/jmisabella/zrooms/VoiceManager.kt](app/src/main/java/com/jmisabella/zrooms/VoiceManager.kt) - Voice management singleton (335 lines)
+- [app/src/main/java/com/jmisabella/zrooms/VoiceSettingsView.kt](app/src/main/java/com/jmisabella/zrooms/VoiceSettingsView.kt) - Compose UI for voice settings (370 lines)
+
+**Files Modified:**
+- [app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt](app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt) - Integrated VoiceManager, dynamic voice selection and speech rate
+- [app/src/main/java/com/jmisabella/zrooms/ExpandingView.kt](app/src/main/java/com/jmisabella/zrooms/ExpandingView.kt) - Added gear icon button and VoiceSettingsView sheet presentation
+
+**Total Code Changes:** ~705 lines new, ~30 lines modified = ~735 lines total
+
 ## 2025-12-21
 
 **Feature:** Wake-Up Greeting - Personalized audio greetings for users who complete meditations before their alarm

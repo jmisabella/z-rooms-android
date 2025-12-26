@@ -43,15 +43,15 @@ class TextToSpeechManager(
     private var currentUtteranceIndex = 0
     private var isCustomMode = false
     private var pendingPhrase: String? = null // Phrase waiting to be displayed when TTS starts
+    private var lastPlayedMeditation: String? = null // Track last meditation to avoid repeats
     private val prefs = androidx.preference.PreferenceManager.getDefaultSharedPreferences(context)
+    private val voiceManager = VoiceManager.getInstance(context)
 
     // Callback to notify when ambient volume changes
     var onAmbientVolumeChanged: ((Float) -> Unit)? = null
 
     companion object {
-        private const val MEDITATION_SPEECH_RATE = 0.6f // Calm, slow rate (increased from 0.33 by ~20%)
-        private const val MEDITATION_PITCH = 0.58f // Lower pitch for calmer voice (decreased from 0.9)
-        const val VOICE_VOLUME = 0.23f // Voice volume (fixed, cannot be changed dynamically)
+        private const val MEDITATION_PITCH = 1.0f // Natural pitch for all voices
         const val MAX_AMBIENT_VOLUME = 1.0f // Maximum ambient volume
         const val PREF_MEDITATION_COMPLETED = "meditationCompletedSuccessfully"
     }
@@ -59,9 +59,8 @@ class TextToSpeechManager(
     init {
         tts = TextToSpeech(context) { status ->
             if (status == TextToSpeech.SUCCESS) {
-                tts?.language = Locale.US
-                tts?.setSpeechRate(MEDITATION_SPEECH_RATE)
-                tts?.setPitch(MEDITATION_PITCH)
+                // Apply preferred voice and speech parameters
+                applyVoiceSettings()
                 isInitialized = true
 
                 tts?.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
@@ -86,6 +85,37 @@ class TextToSpeechManager(
                     }
                 })
             }
+        }
+    }
+
+    /**
+     * Applies voice settings from VoiceManager
+     * Uses dynamic speech rate based on voice quality
+     */
+    private fun applyVoiceSettings() {
+        val preferredVoice = voiceManager.getPreferredVoice()
+
+        if (preferredVoice != null) {
+            tts?.setVoice(preferredVoice)
+        } else {
+            // Fallback to default US English
+            tts?.language = Locale.US
+        }
+
+        // Apply dynamic speech rate based on voice quality
+        val speechRate = voiceManager.getSpeechRateMultiplier(preferredVoice)
+        tts?.setSpeechRate(speechRate)
+
+        // Use natural pitch for all voices
+        tts?.setPitch(MEDITATION_PITCH)
+    }
+
+    /**
+     * Refreshes voice settings - call this when user changes voice preferences
+     */
+    fun refreshVoiceSettings() {
+        if (isInitialized) {
+            applyVoiceSettings()
         }
     }
 
@@ -291,8 +321,25 @@ class TextToSpeechManager(
             return null
         }
 
-        // 4. Pick a random meditation from all available ones
-        return allMeditations.random()
+        // 4. Pick a random meditation from all available ones, avoiding the last played one
+        val selectedMeditation = if (allMeditations.size > 1 && lastPlayedMeditation != null) {
+            // Filter out the last played meditation and pick from remaining
+            val availableMeditations = allMeditations.filter { it != lastPlayedMeditation }
+            if (availableMeditations.isNotEmpty()) {
+                availableMeditations.random()
+            } else {
+                // Fallback: if filtering resulted in empty list (shouldn't happen), pick any
+                allMeditations.random()
+            }
+        } else {
+            // First time playing or only one meditation available
+            allMeditations.random()
+        }
+
+        // 5. Remember this meditation to avoid repeating it next time
+        lastPlayedMeditation = selectedMeditation
+
+        return selectedMeditation
     }
 
     /**
@@ -316,7 +363,7 @@ class TextToSpeechManager(
 
         val params = HashMap<String, String>()
         params[TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID] = "utterance_$currentUtteranceIndex"
-        params[TextToSpeech.Engine.KEY_PARAM_VOLUME] = VOICE_VOLUME.toString()
+        params[TextToSpeech.Engine.KEY_PARAM_VOLUME] = VoiceManager.VOICE_VOLUME.toString()
 
         tts?.speak(phrase, TextToSpeech.QUEUE_FLUSH, params)
 
