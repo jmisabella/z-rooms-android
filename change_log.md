@@ -1,5 +1,72 @@
 # Z Rooms Android - Change Log
 
+## 2025-12-25 15:00 EST
+
+**Feature Enhancement:** Prevent Consecutive Meditation Repeats - Ensures variety in meditation selection
+
+**User Experience:** When users toggle the leaf button on to play a meditation, then toggle it off to stop, and toggle it back on again, the app now guarantees that the second meditation will be different from the first. This prevents the jarring experience of hearing the exact same meditation twice in a row when toggling the leaf button multiple times.
+
+**Implementation Details:**
+
+Added meditation history tracking to prevent immediate repeats:
+
+1. **Last Played Tracking:**
+   - New variable `lastPlayedMeditation: String?` stores the full text of the most recently played meditation
+   - Updated when meditation is selected in `loadRandomMeditationFile()`
+   - Persists for the app session (not saved to disk)
+
+2. **Smart Random Selection:**
+   - When 2+ meditations available AND a previous meditation exists:
+     - Filters out `lastPlayedMeditation` from available pool
+     - Selects randomly from remaining meditations
+   - When only 1 meditation available:
+     - Plays that single meditation (no choice)
+   - First time playing (no previous meditation):
+     - Selects randomly from all available meditations
+
+3. **Selection Logic:**
+```kotlin
+val selectedMeditation = if (allMeditations.size > 1 && lastPlayedMeditation != null) {
+    // Filter out the last played meditation and pick from remaining
+    val availableMeditations = allMeditations.filter { it != lastPlayedMeditation }
+    availableMeditations.random()
+} else {
+    // First time playing or only one meditation available
+    allMeditations.random()
+}
+lastPlayedMeditation = selectedMeditation
+```
+
+**User Scenarios:**
+
+*Scenario 1: Typical Toggle On/Off/On (Multiple Meditations Available)*
+- User toggles leaf ON → Meditation #12 plays
+- User toggles leaf OFF → Meditation stops
+- User toggles leaf ON → Meditation #27 plays (guaranteed NOT #12)
+- User toggles leaf OFF → Meditation stops
+- User toggles leaf ON → Any meditation EXCEPT #27 plays
+
+*Scenario 2: Only One Meditation Available*
+- User has deleted all presets except one, no custom meditations
+- User toggles leaf ON → Meditation #1 plays
+- User toggles leaf OFF → Meditation stops
+- User toggles leaf ON → Meditation #1 plays (only choice available)
+
+*Scenario 3: With 70 Total Meditations (35 presets + 35 custom)*
+- Each toggle ensures variety: 69 different options each time
+- Prevents repetitive experience even with frequent toggling
+- Last played meditation only persists during app session
+
+**Benefits:**
+- Better user experience with guaranteed variety
+- Prevents frustration from hearing same meditation immediately after stopping it
+- Works seamlessly with both preset and custom meditations
+- No impact on first-time meditation selection
+- Minimal memory overhead (stores single meditation text)
+
+**Files Modified:**
+- [app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt](app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt) - Added `lastPlayedMeditation` tracking (line 46), updated `loadRandomMeditationFile()` with smart selection logic (lines 324-342)
+
 ## 2025-12-25 14:30 EST
 
 **Bug Fix:** Voice Volume Consistency - Unified TTS voice volume across all playback instances

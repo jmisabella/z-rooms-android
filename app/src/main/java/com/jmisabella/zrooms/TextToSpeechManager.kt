@@ -43,6 +43,7 @@ class TextToSpeechManager(
     private var currentUtteranceIndex = 0
     private var isCustomMode = false
     private var pendingPhrase: String? = null // Phrase waiting to be displayed when TTS starts
+    private var lastPlayedMeditation: String? = null // Track last meditation to avoid repeats
     private val prefs = androidx.preference.PreferenceManager.getDefaultSharedPreferences(context)
     private val voiceManager = VoiceManager.getInstance(context)
 
@@ -320,8 +321,25 @@ class TextToSpeechManager(
             return null
         }
 
-        // 4. Pick a random meditation from all available ones
-        return allMeditations.random()
+        // 4. Pick a random meditation from all available ones, avoiding the last played one
+        val selectedMeditation = if (allMeditations.size > 1 && lastPlayedMeditation != null) {
+            // Filter out the last played meditation and pick from remaining
+            val availableMeditations = allMeditations.filter { it != lastPlayedMeditation }
+            if (availableMeditations.isNotEmpty()) {
+                availableMeditations.random()
+            } else {
+                // Fallback: if filtering resulted in empty list (shouldn't happen), pick any
+                allMeditations.random()
+            }
+        } else {
+            // First time playing or only one meditation available
+            allMeditations.random()
+        }
+
+        // 5. Remember this meditation to avoid repeating it next time
+        lastPlayedMeditation = selectedMeditation
+
+        return selectedMeditation
     }
 
     /**
