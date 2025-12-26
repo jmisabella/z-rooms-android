@@ -8,6 +8,13 @@ local.properties
 # Log/OS Files
 *.log
 
+# macOS
+.DS_Store
+
+# Audio files
+*.mp3
+*.m4a
+
 # Android Studio generated files and folders
 captures/
 .externalNativeBuild/
