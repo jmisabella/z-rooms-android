@@ -27,7 +27,7 @@ class TextToSpeechManager(
     var isPlayingMeditation by mutableStateOf(false)
         private set
 
-    var ambientVolume by mutableStateOf(1.0f) // 0.0 (silent) to 1.0 (full ambient), default to 100%
+    var ambientVolume by mutableStateOf(0.8f) // 0.0 (silent) to 1.0 (full ambient), default to 80%
         private set
 
     var currentPhrase by mutableStateOf("")

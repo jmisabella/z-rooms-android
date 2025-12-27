@@ -1,5 +1,66 @@
 # Z Rooms Android - Change Log
 
+## 2025-12-27 10:45: UX Improvement - Default Ambient Audio Volume Reduced to 80%
+
+### **THE REQUEST**
+
+Change the default ambient audio volume from 100% to 80% to provide a better balance between the meditation voice narration and ambient background audio.
+
+### **THE PROBLEM**
+
+**User Experience Issue:**
+At the default 100% ambient volume level, the meditation voice (fixed at 23% volume) was too quiet relative to the ambient background audio. This created a suboptimal listening experience where users had to manually adjust the ambient slider down to hear the meditation guidance clearly.
+
+**Testing Results:**
+After testing across all ambient audio track types (white noise, dark ambient, bright ambient, and classical compositions), the user found that 80% ambient volume provided the ideal ratio between voice clarity and ambient atmosphere.
+
+### **THE SOLUTION**
+
+Updated the default ambient volume from 100% (1.0f) to 80% (0.8f) in both TextToSpeechManager and AudioService. This change:
+1. Provides better out-of-box experience for new users
+2. Ensures meditation voice narration is clearly audible over ambient audio
+3. Maintains full user control (slider still allows 0-100% adjustment)
+4. Works well across all ambient track styles
+
+**Code Changes:**
+
+**TextToSpeechManager.kt** - Updated default ambient volume:
+```kotlin
+// Before:
+var ambientVolume by mutableStateOf(1.0f) // default to 100%
+
+// After:
+var ambientVolume by mutableStateOf(0.8f) // default to 80%
+```
+
+**AudioService.kt** - Updated target ambient volume to match:
+```kotlin
+// Before:
+private var targetAmbientVolume: Float = 1.0f // default to 100%
+
+// After:
+private var targetAmbientVolume: Float = 0.8f // default to 80%
+```
+
+### **FILES MODIFIED**
+
+- [app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt](app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt#L30) - Changed default `ambientVolume` from 1.0f to 0.8f
+- [app/src/main/java/com/jmisabella/zrooms/AudioService.kt](app/src/main/java/com/jmisabella/zrooms/AudioService.kt#L42) - Changed default `targetAmbientVolume` from 1.0f to 0.8f
+
+### **USER IMPACT**
+
+**Positive Changes:**
+- Better default experience - voice narration is clearly audible without manual adjustment
+- Improved meditation quality with optimal voice-to-ambient ratio
+- Tested and verified across all 4 ambient audio styles
+
+**No Breaking Changes:**
+- Users can still adjust ambient volume from 0-100% using the slider
+- Setting is not persisted, so always resets to the new 80% default on app launch
+- Meditation voice volume remains unchanged at 23%
+
+---
+
 ## 2024-12-26 16:30: Bug Fix - Voice Settings Not Applied to Meditations
 
 ### **THE REQUEST**
