@@ -48,9 +48,7 @@ fun AlarmSelectionView(
     val sheetState = rememberModalBottomSheetState(
         initialValue = ModalBottomSheetValue.Hidden,
         confirmValueChange = { newValue ->
-            println("confirmValueChange called, newValue=$newValue")
             if (newValue == ModalBottomSheetValue.Hidden) {
-                println("AlarmSelectionView dismissed via confirmValueChange, calling onDismiss")
                 audioService?.stopPreview()
                 onDismiss()
             }
@@ -124,16 +122,12 @@ fun AlarmSelectionView(
                                         RoundedCornerShape(8.dp)
                                     )
                                     .pointerInput(index, selectedAlarmIndex) {
-                                        detectTapGestures { offset ->
-                                            println("Alarm tile tapped: index=$index, isSelected=$isSelected, selectedAlarmIndex=$selectedAlarmIndex, offset=$offset, recompositionKey=$recompositionKey")
+                                        detectTapGestures { _ ->
                                             if (isSelected) {
-                                                println("Deselecting alarm tile: index=$index")
                                                 onSelect(null)
                                                 audioService?.stopPreview()
-                                                println("stopPreview called for index=$index")
                                                 recompositionKey = System.currentTimeMillis()
                                             } else {
-                                                println("Selecting alarm tile: index=$index")
                                                 onSelect(index)
                                                 audioService?.playPreview(index)
                                                 recompositionKey = System.currentTimeMillis()
@@ -156,11 +150,9 @@ fun AlarmSelectionView(
         }
     ) {
         LaunchedEffect(Unit) {
-            println("AlarmSelectionView composed, showing sheet, selectedAlarmIndex=$selectedAlarmIndex")
             sheetState.show()
             selectedAlarmIndex?.let { index ->
                 if (index >= 0) {
-                    println("Playing preview for pre-selected alarm index: $index")
                     audioService?.playPreview(index)
                 }
             }
@@ -168,9 +160,7 @@ fun AlarmSelectionView(
     }
 
     LaunchedEffect(sheetState.currentValue) {
-        println("sheetState.currentValue changed to: ${sheetState.currentValue}")
         if (sheetState.currentValue == ModalBottomSheetValue.Hidden) {
-            println("Sheet hidden, calling onDismiss")
             audioService?.stopPreview()
             onDismiss()
         }

@@ -194,9 +194,6 @@ fun ContentView() {
         }
     }
 
-    LaunchedEffect(showingAlarmSelection) {
-        println("showingAlarmSelection changed to: $showingAlarmSelection")
-    }
 
     val coroutineScope = rememberCoroutineScope()
     val configuration = LocalConfiguration.current
@@ -205,26 +202,21 @@ fun ContentView() {
     val sheetState = rememberModalBottomSheetState(
         initialValue = ModalBottomSheetValue.Hidden,
         skipHalfExpanded = isLandscape,
-        confirmValueChange = { newValue ->
-            println("confirmValueChange called, newValue=$newValue")
+        confirmValueChange = { _ ->
             true
         }
     )
 
     LaunchedEffect(sheetState.currentValue) {
-        println("sheetState.currentValue changed to: ${sheetState.currentValue}")
         if (sheetState.currentValue == ModalBottomSheetValue.Hidden) {
-            println("Sheet hidden, calling onDismiss")
             showingAlarmSelection = false
             audioService?.stopPreview()
         } else if (sheetState.currentValue != ModalBottomSheetValue.Hidden && selectedAlarmIndex >= 0) {
-            println("Sheet shown, playing preview for pre-selected alarm index: $selectedAlarmIndex")
             audioService?.playPreview(selectedAlarmIndex)
         }
     }
 
     LaunchedEffect(selectedAlarmIndex) {
-        println("selectedAlarmIndex changed to: $selectedAlarmIndex")
         if (selectedAlarmIndex >= 0 && sheetState.currentValue != ModalBottomSheetValue.Hidden) {
             audioService?.playPreview(selectedAlarmIndex)
         }
@@ -236,7 +228,6 @@ fun ContentView() {
             AlarmSelectionContent(
                 selectedAlarmIndex = selectedAlarmIndex,
                 onSelect = { index ->
-                    println("Alarm selected, index=$index")
                     selectedAlarmIndex = index ?: -1
                     PreferenceManager.getDefaultSharedPreferences(context).edit().putInt("selectedAlarmIndex", selectedAlarmIndex).apply()
                 },
@@ -325,7 +316,6 @@ fun ContentView() {
                         isAlarmEnabled = alarmEnabledState,
                         changeRoom = { direction ->
                             if (selectedItem == null) {
-                                println("No selected item, cannot change room")
                                 false
                             } else {
                                 val currentIndex = selectedItem!!.id
@@ -335,7 +325,6 @@ fun ContentView() {
                                     audioService?.playAmbient(newIndex, durationMinutes, isAlarmEnabled, selectedAlarmIndex.takeIf { it >= 0 })
                                     true
                                 } else {
-                                    println("Invalid new index: $newIndex or audioService not ready")
                                     false
                                 }
                             }
@@ -343,7 +332,6 @@ fun ContentView() {
                         currentIndex = selected.id,
                         maxIndex = files.size,
                         selectAlarm = {
-                            println("selectAlarm called from ExpandingView, setting showingAlarmSelection to true")
                             showingAlarmSelection = true
                         },
                         audioService = audioService
@@ -389,19 +377,14 @@ fun ContentView() {
                         .windowInsetsPadding(WindowInsets.navigationBars)
                         .pointerInput(Unit) {
                             detectDragGestures(
-                                onDragStart = { offset ->
-                                    println("Swipe area drag started at offset: $offset, showingAlarmSelection=$showingAlarmSelection, selectedItem=$selectedItem")
+                                onDragStart = { _ ->
                                 },
                                 onDragEnd = {
-                                    println("Swipe area drag ended, showingAlarmSelection=$showingAlarmSelection")
                                 },
                                 onDragCancel = {
-                                    println("Swipe area drag cancelled, showingAlarmSelection=$showingAlarmSelection")
                                 }
                             ) { _, dragAmount ->
-                                println("Swipe area drag detected, dragAmount=$dragAmount, showingAlarmSelection=$showingAlarmSelection, selectedItem=$selectedItem")
                                 if (dragAmount.y < -10 && !showingAlarmSelection) {
-                                    println("Swipe up detected in swipe area, setting showingAlarmSelection to true")
                                     showingAlarmSelection = true
                                 }
                             }
@@ -414,12 +397,10 @@ fun ContentView() {
     LaunchedEffect(showingAlarmSelection) {
         if (showingAlarmSelection) {
             coroutineScope.launch {
-                println("Launching sheetState.show()")
                 sheetState.show()
             }
         } else {
             coroutineScope.launch {
-                println("Launching sheetState.hide()")
                 sheetState.hide()
             }
         }

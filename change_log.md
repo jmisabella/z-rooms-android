@@ -1,6 +1,154 @@
 # Z Rooms Android - Change Log
 
-## 2025-12-26 00:15: Voice Settings UI Simplification
+## 2024-12-26 16:30: Bug Fix - Voice Settings Not Applied to Meditations
+
+### **THE REQUEST**
+
+User reported that when selecting a different voice in the Voice Settings dialog, the selected voice was not being applied to guided meditations. The meditation would continue using the default system voice instead of the user's chosen voice.
+
+### **THE PROBLEM**
+
+**Root Cause:**
+The `VoiceManager.setPreferredVoice()` method was saving the voice selection to preferences but was not enabling the `useEnhancedVoice` flag. The `getPreferredVoice()` method checks if enhanced voice is enabled, and returns `null` (default system voice) when disabled, even if a voice has been selected.
+
+**Impact:**
+- Users could select enhanced voices but they would not be used for meditation playback
+- Voice previews worked correctly (they used their own TTS instance)
+- Actual meditation playback ignored the voice selection and used the default system voice
+- User experience was confusing as the settings appeared to save but had no effect
+
+**Code Flow Analysis:**
+1. User selects voice in VoiceSettingsView → calls `voiceManager.setPreferredVoice(voice)`
+2. `setPreferredVoice()` saves voice name to preferences but doesn't enable enhanced voice
+3. When meditation plays → `TextToSpeechManager.applyVoiceSettings()` calls `voiceManager.getPreferredVoice()`
+4. `getPreferredVoice()` checks `if (!useEnhancedVoice.value)` and returns `null`
+5. TTS engine uses default system voice instead of selected voice
+
+### **THE SOLUTION**
+
+Modified `VoiceManager.setPreferredVoice()` to automatically enable `useEnhancedVoice` when a voice is selected. This ensures that:
+1. When user selects a voice, the enhanced voice feature is automatically enabled
+2. The selected voice is properly saved to SharedPreferences
+3. Both preferences (`PREF_PREFERRED_VOICE_NAME` and `PREF_USE_ENHANCED_VOICE`) are updated atomically in a single transaction
+
+**Code Changes:**
+```kotlin
+// Before (BUGGY):
+fun setPreferredVoice(voice: Voice?) {
+    selectedVoice.value = voice
+    if (voice != null) {
+        prefs.edit().putString(PREF_PREFERRED_VOICE_NAME, voice.name).apply()
+    } else {
+        prefs.edit().remove(PREF_PREFERRED_VOICE_NAME).apply()
+    }
+}
+
+// After (FIXED):
+fun setPreferredVoice(voice: Voice?) {
+    selectedVoice.value = voice
+    if (voice != null) {
+        // Automatically enable enhanced voice when a voice is selected
+        useEnhancedVoice.value = true
+        prefs.edit()
+            .putString(PREF_PREFERRED_VOICE_NAME, voice.name)
+            .putBoolean(PREF_USE_ENHANCED_VOICE, true)
+            .apply()
+    } else {
+        prefs.edit().remove(PREF_PREFERRED_VOICE_NAME).apply()
+    }
+}
+```
+
+### **FILES CHANGED**
+
+- `app/src/main/java/com/jmisabella/zrooms/VoiceManager.kt` - Fixed `setPreferredVoice()` method
+- `BUGS.md` - New file created to track bugs and their resolutions
+- `change_log.md` - This entry
+
+### **TESTING**
+
+To verify the fix:
+1. Open a room
+2. Tap the Voice Settings button (gear icon)
+3. Select a different voice from the list (e.g., "Alex" or "Samantha")
+4. Close the Voice Settings dialog
+5. Tap the meditation button (leaf icon) to play a guided meditation
+6. Verify the meditation uses the selected voice (not the default system voice)
+
+### **DEPLOYMENT NOTE**
+
+This fix is critical for Play Store release as it affects a core user-facing feature. Users expect voice selection to work immediately and intuitively.
+
+---
+
+## 2024-12-26 14:00: Debug Logging Removal for Play Store Deployment
+
+### **THE REQUEST**
+
+Remove all debug logging (`println()` statements) from the codebase to prepare for Play Store deployment and prevent unnecessary logging on users' devices.
+
+### **THE PROBLEM**
+
+The app contained 46 active `println()` debug statements across 7 Kotlin files used during development for debugging:
+- UI state changes
+- Gesture detection
+- Alarm and meditation state transitions
+- File loading operations
+- TTS initialization
+
+**Impact:**
+- Unnecessary string allocations and I/O operations on users' devices
+- Cluttered logcat output on production builds
+- Increased APK size due to debug strings
+- Not production-ready for Play Store submission
+
+### **THE SOLUTION**
+
+Systematically removed all 46 `println()` statements across the codebase:
+
+**Files Modified:**
+1. **ContentView.kt** - 17 statements removed
+   - Alarm selection state changes
+   - Sheet state changes
+   - Swipe gesture detection
+   - Fixed unused parameter warnings
+
+2. **ExpandingView.kt** - 13 statements removed
+   - Room entry animations
+   - Swipe/tap gesture detection
+   - Alarm state changes
+   - UI button interactions
+
+3. **AlarmSelectionView.kt** - 10 statements removed
+   - Sheet state changes
+   - Alarm tile selection
+   - Fixed unused parameter warnings
+
+4. **TextToSpeechManager.kt** - 3 statements removed
+   - Meditation file loading
+   - Replaced with silent error handling
+
+5. **MainActivity.kt** - 1 statement removed
+   - onCreate lifecycle logging
+
+6. **CustomMeditationManager.kt** - 1 statement removed
+   - Default meditation loading errors
+
+7. **AlarmSelectionContent.kt** - 1 statement removed
+   - Alarm tile tap detection
+
+### **BENEFITS**
+
+✅ **Reduced app size** - No debug strings in production build
+✅ **Improved performance** - No unnecessary logging operations on users' devices
+✅ **Cleaner logs** - Users won't see debug output
+✅ **Play Store ready** - Professional production build without debug clutter
+
+All changes preserve the original functionality while removing the debug logging overhead.
+
+---
+
+## 2024-12-26 00:15: Voice Settings UI Simplification
 
 ### **THE REQUEST**
 

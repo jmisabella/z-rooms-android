@@ -162,10 +162,7 @@ class TextToSpeechManager(
         if (!isInitialized) return null
 
         // Try to load a random meditation file
-        val meditationText = loadRandomMeditationFile() ?: run {
-            println("No meditation files found")
-            return null
-        }
+        val meditationText = loadRandomMeditationFile() ?: return null
 
         startSpeakingWithPauses(meditationText)
         return meditationText
@@ -303,7 +300,7 @@ class TextToSpeechManager(
                     allMeditations.add(text)
                 }
             } catch (e: Exception) {
-                println("Could not read preset meditation $i: ${e.message}")
+                // Silently skip meditation files that can't be read
             }
             i++
         }
@@ -317,7 +314,6 @@ class TextToSpeechManager(
 
         // 3. Check if we have any meditations at all
         if (allMeditations.isEmpty()) {
-            println("No meditation files found (neither preset nor custom)")
             return null
         }
 

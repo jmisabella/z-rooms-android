@@ -276,7 +276,6 @@ fun ExpandingView(
     // Initial dimming on room entry
     LaunchedEffect(Unit) {
         if (dimMode is DimMode.Duration) {
-            println("Room entered, starting initial dim animation over ${dimSeconds}s")
             currentDimSpec = snap()
             dimTarget = 0f
             dimKey += 1
@@ -332,12 +331,10 @@ fun ExpandingView(
                 .windowInsetsPadding(WindowInsets.navigationBars)
                 .pointerInput(Unit) {
                     detectDragGestures(
-                        onDragStart = { offset ->
-                            println("ExpandingView swipe area drag started at offset: $offset")
+                        onDragStart = { _ ->
                             dragOffset = Offset.Zero
                         },
                         onDragEnd = {
-                            println("ExpandingView swipe area drag ended, dragOffset=$dragOffset")
                             val dx = dragOffset.x
                             val dy = dragOffset.y
                             if (abs(dx) > abs(dy)) {
@@ -347,35 +344,28 @@ fun ExpandingView(
                                 }
                             } else {
                                 if (dy < -swipeThresholdPx) {
-                                    println("Swipe up detected in ExpandingView swipe area")
                                     selectAlarm()
                                 } else if (dy > swipeThresholdPx) {
-                                    println("Swipe down detected in ExpandingView swipe area")
                                     dismiss()
                                 }
                             }
                             dragOffset = Offset.Zero
                         },
                         onDragCancel = {
-                            println("ExpandingView swipe area drag cancelled")
                             dragOffset = Offset.Zero
                         },
                         onDrag = { change, dragAmount ->
                             change.consume()
                             dragOffset += dragAmount
-                            println("ExpandingView swipe area drag detected, dragAmount=$dragAmount, dragOffset=$dragOffset")
                         }
                     )
                 }
-                .pointerInput(Unit) {  // <-- Add this new pointerInput for taps
-                    detectTapGestures { offset ->
-                        println("Tap detected in ExpandingView at offset: $offset")
+                .pointerInput(Unit) {
+                    detectTapGestures { _ ->
                         if (isAlarmActive.value) {
-                            // Stop alarm without exiting the room
-                            audioService?.stopAll()  // Or audioService?.stopAlarm() if you implement a specific method
+                            audioService?.stopAll()
                             isAlarmActive.value = false
                         } else {
-                            // Exit the room
                             dismiss()
                         }
                     }
@@ -781,7 +771,6 @@ fun ExpandingView(
 
     LaunchedEffect(sunTrigger) {
         if (sunTrigger > 0) {
-            println("Sun button clicked, sunTrigger=$sunTrigger, dimTarget=$dimTarget")
             currentFlashSpec = snap()
             flashTarget = 0.8f
             currentDimSpec = snap()
@@ -797,7 +786,6 @@ fun ExpandingView(
 
     LaunchedEffect(nightsTrigger) {
         if (nightsTrigger > 0) {
-            println("Moon button clicked, nightsTrigger=$nightsTrigger, dimTarget=$dimTarget")
             currentDimSpec = snap()
             dimTarget = 0f
             dimKey += 1
@@ -810,7 +798,6 @@ fun ExpandingView(
 
     LaunchedEffect(roomChangeTrigger) {
         if (roomChangeTrigger > 0) {
-            println("Room change triggered, roomChangeTrigger=$roomChangeTrigger")
             currentFlashSpec = snap()
             flashTarget = 0.8f
             flashKey += 1
@@ -828,11 +815,9 @@ fun ExpandingView(
 
     LaunchedEffect(isAlarmActive.value) {
         if (isAlarmActive.value) {
-            println("Alarm active, starting alarm animation")
             preAlarmDimOpacity = animatedDimOpacity
             isAlarmAnimating = true
         } else {
-            println("Alarm inactive, stopping alarm animation")
             isAlarmAnimating = false
             if (dimMode !is DimMode.Bright && dimMode !is DimMode.Dark) {
                 currentDimSpec = snap()

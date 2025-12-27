@@ -176,11 +176,17 @@ class VoiceManager private constructor(private val context: Context) {
 
     /**
      * Sets the preferred voice and persists the selection
+     * Automatically enables enhanced voice when a voice is selected
      */
     fun setPreferredVoice(voice: Voice?) {
         selectedVoice.value = voice
         if (voice != null) {
-            prefs.edit().putString(PREF_PREFERRED_VOICE_NAME, voice.name).apply()
+            // Automatically enable enhanced voice when a voice is selected
+            useEnhancedVoice.value = true
+            prefs.edit()
+                .putString(PREF_PREFERRED_VOICE_NAME, voice.name)
+                .putBoolean(PREF_USE_ENHANCED_VOICE, true)
+                .apply()
         } else {
             prefs.edit().remove(PREF_PREFERRED_VOICE_NAME).apply()
         }
