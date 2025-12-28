@@ -589,18 +589,14 @@ fun ExpandingView(
             }
         }
 
-        // Meditation text display at bottom (with click-through enabled)
-        val configuration = androidx.compose.ui.platform.LocalConfiguration.current
-        val isPortrait = configuration.orientation == android.content.res.Configuration.ORIENTATION_PORTRAIT
-
+        // Meditation text display in modal window above room label and buttons
         MeditationTextDisplay(
             currentPhrase = ttsManager.currentPhrase,
             previousPhrase = ttsManager.previousPhrase,
             isVisible = showMeditationText.value && isMeditationPlaying,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .padding(bottom = if (isPortrait) 48.dp else 0.dp)
+                .padding(bottom = 140.dp) // Position clearly above buttons and room label
         )
     }
 

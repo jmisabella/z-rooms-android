@@ -1,5 +1,168 @@
 # Z Rooms Android - Change Log
 
+## 2025-12-27 14:30 EST: UX Pivot - Closed Captioning Modal Window Design
+
+### **THE REQUEST**
+
+Replace the gradient-based closed captioning design with a semi-transparent dark modal window, positioned in the lower portion of the screen above the "room #" label. This is a strategic UX pivot after multiple failed attempts across several sessions to make the gradient extend properly to the bottom of the screen.
+
+### **THE PROBLEM**
+
+**Multiple Failed Gradient Attempts:**
+Over several conversation threads, we attempted to fix the closed captioning gradient positioning issues:
+- Attempted to move the gradient to the actual bottom of the screen
+- Attempted to make the area below the closed caption black
+- Multiple iterations of padding adjustments (96dp bottom, restructured padding from Box to Column, orientation-aware padding)
+- Issues persisted with either gaps between gradient and screen edge (landscape) or overlap with navigation buttons (portrait)
+
+**Root Issue:**
+The gradient-based approach proved unreliable on Android. While this gradient design works well in the iOS version of the app, achieving the same polished look on Android was not feasible despite multiple attempts.
+
+**Strategic Decision:**
+Rather than continue attempting to fix the gradient approach, we pivoted to a different UX design that is more reliable and maintainable while still providing an excellent user experience.
+
+### **THE SOLUTION**
+
+**New Design: Semi-Transparent Dark Modal Window**
+
+Replaced the edge-to-edge gradient background with a rounded, semi-transparent dark modal window that:
+1. Contains the closed captioning text (previous line + current line)
+2. Has rounded corners (16dp) consistent with other UI cards in the app
+3. Uses medium transparency (55% opacity) for good readability while letting background show through
+4. Has 24dp horizontal margins from screen edges (floating appearance)
+5. Positioned in lower portion of screen, above the "room #" label
+6. Maintains all existing animations (fade + slide effects)
+7. Maintains existing text styling (previous phrase faded/smaller, current phrase bold/larger)
+
+**Visual Appearance:**
+```
+┌─────────────────────────────────────┐
+│         Room Background             │
+│                                     │
+│                                     │
+│    ╭──────────────────────────╮   │ ← Modal window
+│    │ [prev phrase - faded]    │   │
+│    │ [current phrase - bold]  │   │
+│    ╰──────────────────────────╯   │
+│    room 12                         │ ← Room label
+│    [gear] [quote] [clock] [leaf]   │ ← Button row
+└─────────────────────────────────────┘
+```
+
+**Code Changes:**
+
+**MeditationTextDisplay.kt:**
+```kotlin
+// BEFORE (Gradient approach):
+Box(
+    modifier = Modifier
+        .fillMaxWidth()
+        .wrapContentHeight()
+        .background(
+            brush = Brush.verticalGradient(
+                colors = listOf(
+                    Color.Transparent,
+                    Color.Black.copy(alpha = 0.4f),
+                    Color.Black.copy(alpha = 0.7f)
+                ),
+                startY = 0f,
+                endY = Float.POSITIVE_INFINITY
+            )
+        ),
+    contentAlignment = Alignment.BottomCenter
+)
+
+// AFTER (Modal window approach):
+Box(
+    modifier = Modifier
+        .wrapContentHeight()
+        .padding(horizontal = 24.dp) // Margins from screen edges
+        .background(
+            color = Color.Black.copy(alpha = 0.55f), // Semi-transparent dark modal
+            shape = RoundedCornerShape(16.dp)        // Rounded corners
+        ),
+    contentAlignment = Alignment.Center
+)
+```
+
+**ExpandingView.kt:**
+```kotlin
+// BEFORE:
+MeditationTextDisplay(
+    modifier = Modifier
+        .align(Alignment.BottomCenter)
+        .fillMaxWidth()
+        .padding(bottom = if (isPortrait) 48.dp else 0.dp)
+)
+
+// AFTER:
+MeditationTextDisplay(
+    modifier = Modifier
+        .align(Alignment.BottomCenter)
+        .padding(bottom = 90.dp) // Position above room label and buttons
+)
+```
+
+### **FILES MODIFIED**
+
+- [app/src/main/java/com/jmisabella/zrooms/MeditationTextDisplay.kt](app/src/main/java/com/jmisabella/zrooms/MeditationTextDisplay.kt):
+  - Removed `Brush` import (no longer needed)
+  - Added `RoundedCornerShape` import
+  - Replaced gradient background with rounded semi-transparent dark modal (Color.Black.copy(alpha = 0.55f))
+  - Added 24dp horizontal margins to create floating modal appearance
+  - Changed contentAlignment from `Alignment.BottomCenter` to `Alignment.Center`
+  - Simplified internal padding to uniform 16dp on all sides
+  - Updated documentation comment to reflect modal window design
+
+- [app/src/main/java/com/jmisabella/zrooms/ExpandingView.kt](app/src/main/java/com/jmisabella/zrooms/ExpandingView.kt):
+  - Removed orientation-aware padding logic (no longer needed)
+  - Removed `.fillMaxWidth()` modifier (modal sizes itself with margins)
+  - Changed bottom padding to fixed 90dp to position modal above room label
+  - Updated comment to reflect modal window positioning
+
+### **USER EXPERIENCE IMPROVEMENTS**
+
+**Before (Gradient approach):**
+- Gradient sometimes had gaps at screen bottom (landscape)
+- Gradient sometimes overlapped navigation buttons (portrait)
+- Required complex orientation-specific padding logic
+- Multiple failed attempts to achieve polished look
+- Inconsistent behavior across orientations
+
+**After (Modal window approach):**
+- Clean, distinct visual separation from background
+- Reliable positioning above room label in all orientations
+- Rounded corners match other UI elements (consistent design language)
+- Semi-transparent background provides excellent readability
+- Simplified positioning logic (no orientation-specific code needed)
+- Floating appearance (24dp margins) creates modern, polished look
+
+**Benefits:**
+- ✅ **Reliable** - No more gradient positioning issues
+- ✅ **Consistent** - Works the same way in all orientations
+- ✅ **Maintainable** - Simpler code, easier to understand and modify
+- ✅ **Polished** - Rounded corners and floating appearance match app design
+- ✅ **Readable** - Semi-transparent dark background ensures good text contrast
+- ✅ **Future-proof** - No complex edge cases or orientation-specific logic
+
+**Preserved Features:**
+- ✅ Same smooth animations (fade + slide)
+- ✅ Same text styling (previous phrase faded/smaller, current phrase bold/larger)
+- ✅ Same two-line display format
+- ✅ Same show/hide behavior based on meditation state
+
+### **DESIGN RATIONALE**
+
+While the iOS version of the app uses an edge-to-edge gradient for closed captioning, this Android version now uses a modal window approach. This is a pragmatic decision based on:
+1. Multiple failed attempts to achieve the gradient look on Android
+2. Time investment vs. diminishing returns
+3. The modal window approach provides an equally good (arguably better) user experience
+4. The modal design is more maintainable and reliable
+
+Sometimes the best solution is to pivot to a different approach rather than continue fighting with a problematic implementation. The modal window design is a strategic win.
+
+---
+
 ## 2025-12-27 10:45: UX Improvement - Default Ambient Audio Volume Reduced to 80%
 
 ### **THE REQUEST**
