@@ -23,8 +23,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.preference.PreferenceManager
 
 @Composable
-fun CustomMeditationListView(
-    manager: CustomMeditationManager,
+fun CustomPoemListView(
+    manager: CustomPoetryManager,
     onDismiss: () -> Unit,
     onPlay: (String) -> Unit
 ) {
@@ -46,7 +46,7 @@ fun CustomMeditationListView(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Custom Meditations",
+                        text = "Custom Poems",
                         style = MaterialTheme.typography.h6,
                         color = Color.White
                     )
@@ -63,7 +63,7 @@ fun CustomMeditationListView(
                 Divider(color = Color(0xFF424242))
 
                 // Reuse content component
-                CustomMeditationListContent(
+                CustomPoemListContent(
                     manager = manager,
                     onPlay = { text ->
                         onPlay(text)
@@ -76,17 +76,17 @@ fun CustomMeditationListView(
 }
 
 /**
- * Reusable content component for meditation list (used in both dialog and tab views)
+ * Reusable content component for poem list (used in both dialog and tab views)
  */
 @Composable
-fun CustomMeditationListContent(
-    manager: CustomMeditationManager,
+fun CustomPoemListContent(
+    manager: CustomPoetryManager,
     onPlay: (String) -> Unit
 ) {
     val context = LocalContext.current
     val prefs = PreferenceManager.getDefaultSharedPreferences(context)
 
-    var editingMeditation by remember { mutableStateOf<CustomMeditation?>(null) }
+    var editingPoem by remember { mutableStateOf<CustomPoem?>(null) }
     var showMeditationText by remember {
         mutableStateOf(prefs.getBoolean("showMeditationText", true))
     }
@@ -100,11 +100,11 @@ fun CustomMeditationListContent(
             horizontalArrangement = Arrangement.End,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            if (manager.meditations.isNotEmpty()) {
+            if (manager.poems.isNotEmpty()) {
                 IconButton(
                     onClick = {
-                        manager.getRandomMeditation()?.let { meditation ->
-                            onPlay(meditation.text)
+                        manager.getRandomPoem()?.let { poem ->
+                            onPlay(poem.text)
                         }
                     }
                 ) {
@@ -126,7 +126,7 @@ fun CustomMeditationListContent(
             ) {
                 Icon(
                     Icons.Filled.ClosedCaption,
-                    contentDescription = if (showMeditationText) "Hide Meditation Text" else "Show Meditation Text",
+                    contentDescription = if (showMeditationText) "Hide Poem Text" else "Show Poem Text",
                     tint = if (showMeditationText) Color(0xFF64B5F6) else Color(0xFF757575)
                 )
             }
@@ -134,34 +134,34 @@ fun CustomMeditationListContent(
 
         Divider(color = Color(0xFF424242))
 
-        // Add New Meditation button (always visible)
+        // Add New Poem button (always visible)
         if (manager.canAddMore) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable {
-                        editingMeditation = CustomMeditation(title = "", text = "")
+                        editingPoem = CustomPoem(title = "", text = "")
                     }
                     .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
                     Icons.Filled.AddCircle,
-                    contentDescription = "Add New Meditation",
-                    tint = Color(0xFF4CAF50)
+                    contentDescription = "Add New Poem",
+                    tint = Color(0xFFAB47BC)
                 )
                 Spacer(Modifier.width(8.dp))
                 Text(
-                    "Add New Meditation",
-                    color = Color(0xFF4CAF50),
+                    "Add New Poem",
+                    color = Color(0xFFAB47BC),
                     style = MaterialTheme.typography.body1
                 )
             }
             Divider(color = Color(0xFF424242))
         }
 
-        // Meditation List
-        if (manager.meditations.isEmpty()) {
+        // Poem List
+        if (manager.poems.isEmpty()) {
             // Empty state
             Column(
                 modifier = Modifier
@@ -171,7 +171,7 @@ fun CustomMeditationListContent(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Icon(
-                    Icons.Filled.FormatQuote,
+                    Icons.Filled.TheaterComedy,
                     contentDescription = null,
                     modifier = Modifier.size(60.dp),
                     tint = Color.Gray
@@ -180,7 +180,7 @@ fun CustomMeditationListContent(
                 Spacer(Modifier.height(16.dp))
 
                 Text(
-                    text = "No Custom Meditations",
+                    text = "No Custom Poems",
                     style = MaterialTheme.typography.h6,
                     color = Color.Gray
                 )
@@ -188,7 +188,7 @@ fun CustomMeditationListContent(
                 Spacer(Modifier.height(8.dp))
 
                 Text(
-                    text = "Create your own guided meditation\nwith custom pauses and pacing",
+                    text = "Create your own poetry reading\nwith custom pauses and pacing",
                     style = MaterialTheme.typography.body2,
                     color = Color.Gray,
                     fontSize = 12.sp
@@ -198,33 +198,33 @@ fun CustomMeditationListContent(
 
                 Button(
                     onClick = {
-                        editingMeditation = CustomMeditation(title = "", text = "")
+                        editingPoem = CustomPoem(title = "", text = "")
                     },
-                    colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF4CAF50))
+                    colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFAB47BC))
                 ) {
                     Icon(Icons.Filled.AddCircle, contentDescription = null)
                     Spacer(Modifier.width(8.dp))
-                    Text("Create First Meditation", color = Color.White)
+                    Text("Create First Poem", color = Color.White)
                 }
             }
         } else {
             LazyColumn(
                 modifier = Modifier.fillMaxSize()
             ) {
-                items(manager.meditations) { meditation ->
-                    MeditationRow(
-                        meditation = meditation,
+                items(manager.poems) { poem ->
+                    PoemRow(
+                        poem = poem,
                         onPlay = {
-                            onPlay(meditation.text)
+                            onPlay(poem.text)
                         },
                         onEdit = {
-                            editingMeditation = meditation
+                            editingPoem = poem
                         },
                         onDuplicate = {
-                            manager.duplicateMeditation(meditation)
+                            manager.duplicatePoem(poem)
                         },
                         onDelete = {
-                            manager.deleteMeditation(meditation)
+                            manager.deletePoem(poem)
                         }
                     )
                     Divider(color = Color(0xFF424242))
@@ -234,18 +234,18 @@ fun CustomMeditationListContent(
     }
 
     // Editor dialog
-    editingMeditation?.let { meditation ->
-        CustomMeditationEditorView(
+    editingPoem?.let { poem ->
+        CustomPoemEditorView(
             manager = manager,
-            meditation = meditation,
-            onDismiss = { editingMeditation = null }
+            poem = poem,
+            onDismiss = { editingPoem = null }
         )
     }
 }
 
 @Composable
-fun MeditationRow(
-    meditation: CustomMeditation,
+fun PoemRow(
+    poem: CustomPoem,
     onPlay: () -> Unit,
     onEdit: () -> Unit,
     onDuplicate: () -> Unit,
@@ -264,7 +264,7 @@ fun MeditationRow(
             modifier = Modifier.weight(1f)
         ) {
             Text(
-                text = if (meditation.title.isEmpty()) "Untitled" else meditation.title,
+                text = if (poem.title.isEmpty()) "Untitled" else poem.title,
                 style = MaterialTheme.typography.body1,
                 color = Color.White
             )
@@ -272,7 +272,7 @@ fun MeditationRow(
             Spacer(Modifier.height(4.dp))
 
             Text(
-                text = meditation.text.take(60) + if (meditation.text.length > 60) "..." else "",
+                text = poem.text.take(60) + if (poem.text.length > 60) "..." else "",
                 style = MaterialTheme.typography.caption,
                 color = Color.Gray,
                 maxLines = 2,
@@ -305,7 +305,7 @@ fun MeditationRow(
             Icon(
                 Icons.Filled.PlayCircle,
                 contentDescription = "Play",
-                tint = Color(0xFF4CAF50),
+                tint = Color(0xFFAB47BC),
                 modifier = Modifier.size(32.dp)
             )
         }
@@ -315,8 +315,8 @@ fun MeditationRow(
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
-            title = { Text("Delete Meditation?") },
-            text = { Text("Are you sure you want to delete this meditation?") },
+            title = { Text("Delete Poem?") },
+            text = { Text("Are you sure you want to delete this poem?") },
             confirmButton = {
                 TextButton(
                     onClick = {

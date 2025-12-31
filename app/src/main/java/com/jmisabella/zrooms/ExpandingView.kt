@@ -42,6 +42,8 @@ import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.Eco
 import androidx.compose.material.icons.outlined.FormatQuote
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.filled.TheaterComedy
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -69,6 +71,7 @@ import java.util.Date
 import kotlin.math.max
 import kotlin.math.min
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import android.text.format.DateFormat
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.setValue
@@ -120,14 +123,20 @@ fun ExpandingView(
         Color(0xFFE0E0E0) // Light grey for dark backgrounds
     }
 
-    // Custom meditation manager (must be created first)
+    // Custom meditation and poetry managers (must be created first)
     val meditationManager = remember { CustomMeditationManager(context) }
+    val poetryManager = remember { CustomPoetryManager(context) }
 
-    // Text-to-speech manager (needs meditationManager for random meditation selection)
-    val ttsManager = remember { TextToSpeechManager(context, meditationManager) }
+    // Text-to-speech manager (needs both managers for random content selection)
+    val ttsManager = remember {
+        TextToSpeechManager(context, meditationManager, poetryManager)
+    }
     val voiceManager = remember { VoiceManager.getInstance(context) }
-    var isMeditationPlaying by remember { mutableStateOf(false) }
-    var showMeditationList by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+
+    var contentMode by remember { mutableStateOf(ttsManager.contentMode) }
+    var isLoading by remember { mutableStateOf(ttsManager.isLoading) }
+    var showContentBrowser by remember { mutableStateOf(false) }
     var showVoiceSettings by remember { mutableStateOf(false) }
 
     // Meditation text display settings
@@ -176,9 +185,13 @@ fun ExpandingView(
         }
     }
 
-    // Track meditation playing state
-    LaunchedEffect(ttsManager.isPlayingMeditation) {
-        isMeditationPlaying = ttsManager.isPlayingMeditation
+    // Track content mode and loading state
+    LaunchedEffect(ttsManager.contentMode) {
+        contentMode = ttsManager.contentMode
+    }
+
+    LaunchedEffect(ttsManager.isLoading) {
+        isLoading = ttsManager.isLoading
     }
 
     // Ambient volume state (0.0 to 0.6)
@@ -503,7 +516,7 @@ fun ExpandingView(
                     Box(
                         modifier = Modifier
                             .clickable {
-                                showMeditationList = true
+                                showContentBrowser = true
                             }
                             .background(Color.Black.copy(alpha = 0.5f), CircleShape)
                             .padding(12.dp),
@@ -511,7 +524,7 @@ fun ExpandingView(
                     ) {
                         Icon(
                             Icons.Outlined.FormatQuote,
-                            contentDescription = "Custom Meditations",
+                            contentDescription = "Meditations & Poems",
                             tint = Color(0xFF9E9E9E),
                             modifier = Modifier.size(28.dp)
                         )
@@ -538,25 +551,43 @@ fun ExpandingView(
 
                     Spacer(Modifier.width(40.dp))
 
+                    // 3-State Content Button: OFF → MEDITATION → POETRY → OFF
                     Box(
                         modifier = Modifier
                             .clickable {
-                                if (isMeditationPlaying) {
-                                    ttsManager.stopSpeaking()
-                                } else {
-                                    ttsManager.startSpeakingRandomMeditation()
+                                scope.launch {
+                                    ttsManager.cycleContentMode()
                                 }
                             }
                             .background(Color.Black.copy(alpha = 0.5f), CircleShape)
                             .padding(12.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(
-                            Icons.Outlined.Eco,
-                            contentDescription = if (isMeditationPlaying) "Stop Meditation" else "Play Meditation",
-                            tint = if (isMeditationPlaying) Color(0xFF4CAF50) else Color(0xFF9E9E9E),
-                            modifier = Modifier.size(28.dp)
-                        )
+                        // Show loading indicator during meditation→poetry transition
+                        if (isLoading) {
+                            LoadingDotsIndicator(
+                                color = Color(0xFFFFB74D)  // Orange/amber color
+                            )
+                        } else {
+                            Icon(
+                                imageVector = when (contentMode) {
+                                    ContentMode.MEDITATION -> Icons.Outlined.Eco
+                                    ContentMode.POETRY -> Icons.Filled.TheaterComedy
+                                    ContentMode.OFF -> Icons.Outlined.Eco
+                                },
+                                contentDescription = when (contentMode) {
+                                    ContentMode.MEDITATION -> "Stop Meditation"
+                                    ContentMode.POETRY -> "Stop Poetry"
+                                    ContentMode.OFF -> "Start Content"
+                                },
+                                tint = when (contentMode) {
+                                    ContentMode.MEDITATION -> Color(0xFF4CAF50)  // Green
+                                    ContentMode.POETRY -> Color(0xFFAB47BC)      // Purple
+                                    ContentMode.OFF -> Color(0xFF9E9E9E)         // Gray
+                                },
+                                modifier = Modifier.size(28.dp)
+                            )
+                        }
                     }
 
 //                    Spacer(Modifier.width(40.dp))
@@ -593,7 +624,7 @@ fun ExpandingView(
         MeditationTextDisplay(
             currentPhrase = ttsManager.currentPhrase,
             previousPhrase = ttsManager.previousPhrase,
-            isVisible = showMeditationText.value && isMeditationPlaying,
+            isVisible = showMeditationText.value && contentMode != ContentMode.OFF,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = 140.dp) // Position clearly above buttons and room label
@@ -742,13 +773,19 @@ fun ExpandingView(
         }
     }
 
-    // Custom meditation list dialog
-    if (showMeditationList) {
-        CustomMeditationListView(
-            manager = meditationManager,
-            onDismiss = { showMeditationList = false },
-            onPlay = { meditationText ->
-                ttsManager.startSpeakingWithPauses(meditationText)
+    // Content browser dialog (meditations and poems)
+    if (showContentBrowser) {
+        ContentBrowserView(
+            meditationManager = meditationManager,
+            poetryManager = poetryManager,
+            onDismiss = { showContentBrowser = false },
+            onPlayMeditation = { text ->
+                ttsManager.startSpeakingWithPauses(text)
+                ttsManager.contentMode = ContentMode.MEDITATION
+            },
+            onPlayPoem = { text ->
+                ttsManager.startSpeakingWithPauses(text)
+                ttsManager.contentMode = ContentMode.POETRY
             }
         )
     }

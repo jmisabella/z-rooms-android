@@ -371,7 +371,7 @@ class AudioService : Service() {
 
         // Check if we should play wake-up greeting
         val prefs = PreferenceManager.getDefaultSharedPreferences(this)
-        val meditationCompleted = prefs.getBoolean(TextToSpeechManager.PREF_MEDITATION_COMPLETED, false)
+        val contentCompleted = prefs.getBoolean(TextToSpeechManager.PREF_CONTENT_COMPLETED, false)
 
         val alarmRes = getAlarmResource(selectedAlarmIndex)
         alarmPlayer = ExoPlayer.Builder(this@AudioService).build().apply {
@@ -388,8 +388,8 @@ class AudioService : Service() {
                         fadeAlarmVolume(1f, 500L)
                         removeListener(this)
 
-                        // Schedule wake-up greeting if meditation was completed
-                        if (meditationCompleted) {
+                        // Schedule wake-up greeting if content was completed
+                        if (contentCompleted) {
                             scheduleWakeUpGreeting()
                         }
                     }
@@ -451,9 +451,9 @@ class AudioService : Service() {
         // Speak the greeting
         greetingTts?.speak(greeting, TextToSpeech.QUEUE_FLUSH, params)
 
-        // Clear the meditation completion flag after greeting plays
+        // Clear the content completion flag after greeting plays
         val prefs = PreferenceManager.getDefaultSharedPreferences(this)
-        prefs.edit().putBoolean(TextToSpeechManager.PREF_MEDITATION_COMPLETED, false).apply()
+        prefs.edit().putBoolean(TextToSpeechManager.PREF_CONTENT_COMPLETED, false).apply()
     }
 
     fun fadeAlarmVolume(target: Float, duration: Long, completion: () -> Unit = {}) {

@@ -1,0 +1,22 @@
+Stopping by Woods on a Snowy Evening (0.3s)
+by Robert Frost (2s)
+
+Whose woods these are I think I know. (0.8s)
+His house is in the village though; (0.8s)
+He will not see me stopping here (0.6s)
+To watch his woods fill up with snow. (2s)
+
+My little horse must think it queer (0.6s)
+To stop without a farmhouse near (0.6s)
+Between the woods and frozen lake (0.6s)
+The darkest evening of the year. (2s)
+
+He gives his harness bells a shake (0.6s)
+To ask if there is some mistake. (0.8s)
+The only other sound's the sweep (0.6s)
+Of easy wind and downy flake. (2s)
+
+The woods are lovely, dark and deep, (0.8s)
+But I have promises to keep, (0.8s)
+And miles to go before I sleep, (0.8s)
+And miles to go before I sleep. (4s)
