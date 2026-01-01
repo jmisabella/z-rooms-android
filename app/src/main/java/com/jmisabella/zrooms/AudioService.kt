@@ -136,9 +136,23 @@ class AudioService : Service() {
         // Initialize wake-up greeting TTS
         greetingTts = TextToSpeech(this) { status ->
             if (status == TextToSpeech.SUCCESS) {
-                greetingTts?.language = Locale.US
-                greetingTts?.setSpeechRate(0.6f) // Same as meditation speech rate
-                greetingTts?.setPitch(0.58f) // Same as meditation pitch
+                // Apply user's selected voice settings using VoiceManager
+                val voiceManager = VoiceManager.getInstance(this)
+                val preferredVoice = voiceManager.getPreferredVoice()
+
+                if (preferredVoice != null) {
+                    greetingTts?.setVoice(preferredVoice)
+                } else {
+                    // Fallback to default US English
+                    greetingTts?.language = Locale.US
+                }
+
+                // Apply dynamic speech rate based on voice quality
+                val speechRate = voiceManager.getSpeechRateMultiplier(preferredVoice)
+                greetingTts?.setSpeechRate(speechRate)
+
+                // Use natural pitch for all voices
+                greetingTts?.setPitch(1.0f)
                 isGreetingTtsInitialized = true
             }
         }
@@ -439,6 +453,20 @@ class AudioService : Service() {
      */
     private fun playWakeUpGreeting() {
         if (!isGreetingTtsInitialized) return
+
+        // Refresh voice settings to match current user selection
+        val voiceManager = VoiceManager.getInstance(this)
+        val preferredVoice = voiceManager.getPreferredVoice()
+
+        if (preferredVoice != null) {
+            greetingTts?.setVoice(preferredVoice)
+        } else {
+            greetingTts?.language = Locale.US
+        }
+
+        val speechRate = voiceManager.getSpeechRateMultiplier(preferredVoice)
+        greetingTts?.setSpeechRate(speechRate)
+        greetingTts?.setPitch(1.0f)
 
         // Select a random greeting phrase
         val greeting = GREETING_PHRASES.random()

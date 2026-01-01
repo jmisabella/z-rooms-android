@@ -1,5 +1,67 @@
 # Z Rooms Android - Change Log
 
+## 2025-12-31 20:43 EST: Fixed Wake-Up Greeting Voice Selection
+
+### **THE BUG**
+
+When users set a waking alarm sound and enable meditation mode or poetry mode, the app plays a brief greeting ("Welcome back", etc.) when the alarm goes off. However, this greeting was always spoken using the default woman's voice, even when the user had selected a different voice (such as one of the male voices) for their meditation/poetry narration.
+
+**User Impact:**
+Users who selected a specific voice (e.g., Alex, Daniel, Michael) for their meditation or poetry narration would hear the default voice for the wake-up greeting instead of their chosen voice, creating an inconsistent experience.
+
+### **THE CAUSE**
+
+In [AudioService.kt](app/src/main/java/com/jmisabella/zrooms/AudioService.kt), the `greetingTts` TextToSpeech instance was initialized with hardcoded settings:
+- Language was hardcoded to `Locale.US` (default system voice)
+- Speech rate was hardcoded to `0.6f`
+- Pitch was hardcoded to `0.58f`
+
+The greeting TTS initialization did not use the `VoiceManager` to apply the user's selected voice preferences, unlike the main meditation/poetry TTS which correctly uses `VoiceManager.getPreferredVoice()`.
+
+### **THE FIX**
+
+Modified the `playWakeUpGreeting()` method in [AudioService.kt:454-480](app/src/main/java/com/jmisabella/zrooms/AudioService.kt#L454-L480) to refresh voice settings **at playback time** instead of only at service initialization.
+
+**Key Insight:** The original fix attempted to set the voice during service initialization, but those settings could become stale by the time the greeting actually played. The correct solution is to refresh the voice settings immediately before speaking the greeting.
+
+**Code Changes:**
+```kotlin
+private fun playWakeUpGreeting() {
+    if (!isGreetingTtsInitialized) return
+
+    // NEW: Refresh voice settings to match current user selection
+    val voiceManager = VoiceManager.getInstance(this)
+    val preferredVoice = voiceManager.getPreferredVoice()
+
+    if (preferredVoice != null) {
+        greetingTts?.setVoice(preferredVoice)
+    } else {
+        greetingTts?.language = Locale.US
+    }
+
+    val speechRate = voiceManager.getSpeechRateMultiplier(preferredVoice)
+    greetingTts?.setSpeechRate(speechRate)
+    greetingTts?.setPitch(1.0f)
+
+    // Select greeting and speak...
+}
+```
+
+Also updated the initialization in [AudioService.kt:137-158](app/src/main/java/com/jmisabella/zrooms/AudioService.kt#L137-L158) to set initial voice preferences, though the playback-time refresh is what ensures the correct voice is always used.
+
+### **THE RESULT**
+
+The wake-up greeting now respects the user's voice selection:
+- Users who select Alex, Daniel, Michael, or any other voice will hear that same voice for the "Welcome back" greeting
+- Voice settings are refreshed at playback time, ensuring the greeting always uses the current selection
+- Speech rate automatically adjusts based on voice quality (enhanced voices at natural speed, default voice slightly slower)
+- Consistent voice experience throughout the entire meditation/poetry alarm workflow
+
+**Files Modified:**
+- [app/src/main/java/com/jmisabella/zrooms/AudioService.kt](app/src/main/java/com/jmisabella/zrooms/AudioService.kt) (lines 137-158, 454-480)
+
+---
+
 ## 2025-12-27 14:30 EST: UX Pivot - Closed Captioning Modal Window Design
 
 ### **THE REQUEST**
