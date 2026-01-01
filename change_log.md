@@ -1,5 +1,68 @@
 # Z Rooms Android - Change Log
 
+## 2025-12-31 20:55 EST: Fixed Closed Caption Box Remaining Visible After Narration Ends
+
+### **THE BUG**
+
+When meditation or poetry narration completes, the closed caption box (semi-transparent dark modal window) remains visible on screen even though there's no text being spoken. The caption text itself disappears, but the empty dark background box persists.
+
+**User Impact:**
+After listening to a meditation or poem in its entirety, users see an empty dark box floating at the bottom of the screen, which looks unprofessional and confusing. The box should disappear completely when narration ends.
+
+### **THE CAUSE**
+
+The `MeditationTextDisplay` component was already correctly implemented with conditional rendering logic (line 33):
+```kotlin
+visible = isVisible && (currentPhrase.isNotEmpty() || previousPhrase.isNotEmpty())
+```
+
+However, in [TextToSpeechManager.kt](app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt), when narration completed successfully (in the `didFinishSpeaking()` method around line 531), the code was NOT clearing the `currentPhrase` and `previousPhrase` variables. These variables remained populated with the last spoken text, causing the caption box to stay visible.
+
+**What was happening:**
+1. Narration completes → `isSpeaking` set to false
+2. `contentMode` kept as MEDITATION/POETRY (intentionally, so button stays colored)
+3. `utteranceQueue` cleared
+4. ❌ BUT `currentPhrase` and `previousPhrase` were NOT cleared
+5. Result: Caption box condition `(currentPhrase.isNotEmpty() || previousPhrase.isNotEmpty())` still true → box stays visible
+
+### **THE FIX**
+
+Modified the `didFinishSpeaking()` method in [TextToSpeechManager.kt:540-543](app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt#L540-L543) to clear caption text when narration completes:
+
+**Code Changes:**
+```kotlin
+} else {
+    // All done - content completed successfully
+    isSpeaking = false
+    isCustomMode = false
+    utteranceQueue.clear()
+    currentUtteranceIndex = 0
+
+    // NEW: Clear caption text so the closed caption box disappears
+    currentPhrase = ""
+    previousPhrase = ""
+    pendingPhrase = null
+
+    // Set the content completion flag for wake-up greeting
+    prefs.edit().putBoolean(PREF_CONTENT_COMPLETED, true).apply()
+}
+```
+
+### **THE RESULT**
+
+The closed caption box now properly disappears when meditation/poetry narration completes:
+- Narration ends → Caption text cleared → Entire caption box (including background) disappears ✅
+- Wake-up greeting functionality still works correctly (relies on `PREF_CONTENT_COMPLETED` flag, not caption text)
+- Content mode button stays colored (MEDITATION/POETRY mode remains active until user manually toggles it off)
+- Clean, professional UI when narration finishes
+
+**Files Modified:**
+- [app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt](app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt) (lines 540-543)
+
+**Note:** This fix was already implemented in the iOS version. Reference: [IMPLEMENTATION_GUIDE_ANDROID_CAPTION_FIX.md](IMPLEMENTATION_GUIDE_ANDROID_CAPTION_FIX.md)
+
+---
+
 ## 2025-12-31 20:43 EST: Fixed Wake-Up Greeting Voice Selection
 
 ### **THE BUG**

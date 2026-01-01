@@ -537,6 +537,11 @@ class TextToSpeechManager(
             utteranceQueue.clear()
             currentUtteranceIndex = 0
 
+            // Clear caption text so the closed caption box disappears
+            currentPhrase = ""
+            previousPhrase = ""
+            pendingPhrase = null
+
             // Set the content completion flag for wake-up greeting
             prefs.edit().putBoolean(PREF_CONTENT_COMPLETED, true).apply()
         }
