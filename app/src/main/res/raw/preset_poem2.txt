@@ -1,24 +1,31 @@
 Sleep (3s)
 
 You are my perfect escape (1s)
-A mirage on the horizon (1s)
+A mirage on the horizon (2s)
+
 I've been chasing you for hours now (1s)
 Turning over the same warm spot (1s)
-Again and again (1s)
+Again and again (2s)
+
 Trying to find the exact position (1s)
 The perfect arrangement of limbs (1s)
-That will finally let you in (1s)
+That will finally let you in (2s)
+
 But you only come (0.15s) when I stop looking (1s)
-When I forget (0.15s) I'm supposed to want you (1s)
+When I forget (0.15s) I'm supposed to want you (2s)
+
 You arrive on your own terms (1s)
 Uninvited, unannounced (1s)
 Slipping through the door I left open (1s)
-While I was thinking about something else entirely (1s)
+While I was thinking about something else entirely (2s)
+
 The harder I reach for you (1s)
 The further you drift (1s)
-Like trying to hold water in open palms (1s)
+Like trying to hold water in open palms (2s)
+
 You were never meant to be caught (1s)
-Only received (1s)
+Only received (2s)
+
 And I keep forgetting (1s)
 That the only way to find you (1s)
-Is to stop searching (1s)
+Is to stop searching (3s)
