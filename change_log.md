@@ -1,5 +1,167 @@
 # Z Rooms Android - Change Log
 
+## 2026-01-03 18:45 EST: Scrollable Closed Caption History with Auto-Scroll
+
+### **THE FEATURE**
+
+Users can now scroll through the full transcript of meditation and poetry narration as it's being spoken. Previously, only the current phrase and previous phrase were visible - once text scrolled off, it was lost forever. Now users can scroll back to review earlier phrases they may have missed, while the voice continues narrating in the background.
+
+**User Impact:**
+- Full scrollable history of all spoken phrases during the session
+- Ability to review missed content without stopping playback
+- Auto-scrolls to show new text when user is at the bottom
+- Manual scroll stops auto-scrolling so users can read at their own pace
+- "New text" indicator button appears when scrolled up and new content arrives
+- Tapping "New text" scrolls back to current phrase and resumes auto-scrolling
+
+This feature mirrors the iOS implementation completed on 2026-01-03.
+
+### **THE IMPLEMENTATION**
+
+**Component Architecture:**
+
+Three main components were modified/created to implement scrollable captions:
+
+1. **TextToSpeechManager.kt** - Phrase History State Management
+   - Added `phraseHistory: List<String>` state to track all spoken phrases (line 47-48)
+   - Added `hasNewCaptionContent: Boolean` state for "New text" indicator (line 50)
+   - Modified `onStart()` callback to append phrases to history without duplicates (lines 87-90)
+   - Reset history when starting new content in `startSpeakingWithPauses()` (lines 156-157)
+   - Clear history when stopping playback in `stopSpeaking()` (lines 194-195)
+   - Clear history when narration completes in `didFinishSpeaking()` (lines 544-545)
+
+2. **ScrollableMeditationTextDisplay.kt** - NEW Scrollable Component
+   - Uses `LazyColumn` with `rememberLazyListState()` for efficient virtualization
+   - Fixed 100dp height with semi-transparent dark background (55% opacity, 16dp rounded corners)
+   - `derivedStateOf` for accurate bottom detection (lines 51-60)
+   - `userHasScrolledUp` state flag tracks manual scrolling (line 46)
+   - Auto-scroll behavior: scrolls to new phrases when `!userHasScrolledUp` (lines 71-79)
+   - Drag gesture detection sets `userHasScrolledUp = true` when user starts scrolling (lines 107-117)
+   - Resets `userHasScrolledUp = false` when user reaches bottom (lines 63-68)
+   - "New text" button with down arrow icon (lines 139-182)
+   - Current phrase highlighted: white, 18sp, medium weight
+   - Previous phrases dimmed: 70% opacity, 16sp, normal weight
+
+3. **ExpandingView.kt** - Integration
+   - Replaced `MeditationTextDisplay` with `ScrollableMeditationTextDisplay` (lines 624-633)
+   - Connected phrase history from TTS manager
+   - Connected `hasNewCaptionContent` state with callback for updates
+   - Maintained same positioning (140dp above buttons)
+
+### **PERFORMANCE OPTIMIZATIONS**
+
+**Key Optimizations to Avoid iOS Lag Issues:**
+
+The iOS version initially experienced significant lag and unresponsiveness when implementing this feature. The Android implementation was designed to avoid these issues:
+
+1. **`LazyColumn` Virtualization**
+   - Only renders visible items plus small buffer
+   - Automatically handles large phrase lists efficiently
+   - Native Android component optimized for scrolling
+
+2. **`derivedStateOf` for Bottom Detection**
+   - Recomputes only when scroll state actually changes
+   - Avoids unnecessary recompositions
+   - More efficient than manual state tracking
+
+3. **Simplified State Management**
+   - Single `userHasScrolledUp` boolean instead of multiple flags
+   - Clear state transitions reduce complexity
+   - Fewer edge cases to handle
+
+4. **Instant Scroll Updates**
+   - Uses `scrollState.scrollToItem()` (not animated) for auto-scroll
+   - Prevents animation lag on rapid phrase changes
+   - "New text" button uses `animateScrollToItem()` for smooth UX
+
+5. **Minimal Drag Detection**
+   - Simple `detectDragGestures` on `onDragStart` only
+   - Doesn't interfere with native scroll behavior
+   - Lightweight touch handling
+
+### **USER EXPERIENCE**
+
+**Scrolling Behavior:**
+
+1. **Auto-Scroll Mode (Default)**
+   - New phrases appear automatically as they're spoken
+   - Caption box stays at bottom showing latest text
+   - User doesn't need to do anything
+
+2. **Manual Scroll Mode (User scrolls up)**
+   - User drags/swipes upward to review earlier text
+   - Auto-scrolling stops immediately
+   - Voice continues narrating in background
+   - "New text" button appears when new content arrives
+
+3. **Return to Auto-Scroll**
+   - User scrolls back to bottom manually → auto-scroll resumes
+   - User taps "New text" button → animates to bottom, auto-scroll resumes
+
+**Visual Design:**
+
+```
+╭──────────────────────────────────╮
+│ [Earlier phrase - dimmed 70%]    │
+│ [Earlier phrase - dimmed 70%]    │  ← Scrollable
+│ [Earlier phrase - dimmed 70%]    │     100dp height
+│ [Current phrase - white, bold]   │     Semi-transparent
+│         ⬇ New text              │  ← Button (conditional)
+╰──────────────────────────────────╯
+```
+
+### **TESTING CHECKLIST**
+
+**Functionality Verified:**
+✅ Caption history builds up as phrases are spoken
+✅ Current phrase highlighted (white, 18sp, medium weight)
+✅ Previous phrases dimmed (70% opacity, 16sp)
+✅ Voice continues narrating while user scrolls
+✅ Auto-scroll works when user is at bottom
+✅ Auto-scroll stops when user scrolls up
+✅ "New text" indicator appears correctly
+✅ Tapping "New text" scrolls back to bottom
+✅ History clears when meditation ends
+✅ History resets when starting new meditation
+
+**Performance Verified:**
+✅ No lag when opening room view
+✅ Smooth scrolling with many phrases
+✅ Build successful with no compilation errors
+
+### **FILES CREATED**
+
+- [app/src/main/java/com/jmisabella/zrooms/ScrollableMeditationTextDisplay.kt](app/src/main/java/com/jmisabella/zrooms/ScrollableMeditationTextDisplay.kt) - New scrollable caption component (182 lines)
+
+### **FILES MODIFIED**
+
+- [app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt](app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt):
+  - Added `phraseHistory` state variable (lines 47-48)
+  - Added `hasNewCaptionContent` state variable (line 50)
+  - Updated `onStart()` callback to append to history (lines 87-90)
+  - Reset history in `startSpeakingWithPauses()` (lines 156-157)
+  - Clear history in `stopSpeaking()` (lines 194-195)
+  - Clear history in `didFinishSpeaking()` (lines 544-545)
+
+- [app/src/main/java/com/jmisabella/zrooms/ExpandingView.kt](app/src/main/java/com/jmisabella/zrooms/ExpandingView.kt):
+  - Replaced `MeditationTextDisplay` with `ScrollableMeditationTextDisplay` (lines 624-633)
+  - Connected phrase history and new content state from TTS manager
+
+### **CODE STATISTICS**
+
+- New component: 182 lines
+- TextToSpeechManager changes: +6 lines
+- ExpandingView changes: ~10 lines modified
+- Total: ~200 lines added/modified
+
+### **REFERENCE DOCUMENTATION**
+
+- iOS implementation: Completed 2026-01-03 17:30
+- Implementation guide: [ANDROID_SCROLLABLE_CAPTIONS_IMPLEMENTATION_GUIDE.md](ANDROID_SCROLLABLE_CAPTIONS_IMPLEMENTATION_GUIDE.md)
+- Performance lessons learned from iOS applied to Android implementation
+
+---
+
 ## 2025-12-31 20:55 EST: Fixed Closed Caption Box Remaining Visible After Narration Ends
 
 ### **THE BUG**

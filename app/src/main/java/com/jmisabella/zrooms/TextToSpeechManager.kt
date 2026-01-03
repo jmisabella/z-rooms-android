@@ -44,6 +44,11 @@ class TextToSpeechManager(
     var previousPhrase by mutableStateOf("")
         private set
 
+    var phraseHistory by mutableStateOf(listOf<String>())
+        private set
+
+    var hasNewCaptionContent by mutableStateOf(false)
+
     private var tts: TextToSpeech? = null
     private var isInitialized = false
     private val scope = CoroutineScope(Dispatchers.Main + Job())
@@ -83,6 +88,11 @@ class TextToSpeechManager(
                             previousPhrase = currentPhrase
                             currentPhrase = phrase
                             pendingPhrase = null
+
+                            // Add to phrase history (avoid duplicates)
+                            if (phraseHistory.isEmpty() || phraseHistory.last() != phrase) {
+                                phraseHistory = phraseHistory + phrase
+                            }
                         }
                     }
 
@@ -152,6 +162,10 @@ class TextToSpeechManager(
         isSpeaking = true
         isCustomMode = true
 
+        // Reset phrase history and new content indicator when starting new content
+        phraseHistory = emptyList()
+        hasNewCaptionContent = false
+
         // Check if text has any pause markers
         val hasPauseMarkers = Regex("""\(\d+(?:\.\d+)?[sm]\)""").containsMatchIn(text)
 
@@ -191,6 +205,8 @@ class TextToSpeechManager(
         currentPhrase = ""
         previousPhrase = ""
         pendingPhrase = null
+        phraseHistory = emptyList()
+        hasNewCaptionContent = false
 
         // Clear the content completion flag when manually stopping
         prefs.edit().putBoolean(PREF_CONTENT_COMPLETED, false).apply()
@@ -541,6 +557,8 @@ class TextToSpeechManager(
             currentPhrase = ""
             previousPhrase = ""
             pendingPhrase = null
+            phraseHistory = emptyList()
+            hasNewCaptionContent = false
 
             // Set the content completion flag for wake-up greeting
             prefs.edit().putBoolean(PREF_CONTENT_COMPLETED, true).apply()

@@ -620,10 +620,12 @@ fun ExpandingView(
             }
         }
 
-        // Meditation text display in modal window above room label and buttons
-        MeditationTextDisplay(
+        // Scrollable meditation text display with phrase history
+        ScrollableMeditationTextDisplay(
+            phraseHistory = ttsManager.phraseHistory,
             currentPhrase = ttsManager.currentPhrase,
-            previousPhrase = ttsManager.previousPhrase,
+            hasNewContent = ttsManager.hasNewCaptionContent,
+            onHasNewContentChange = { newValue -> ttsManager.hasNewCaptionContent = newValue },
             isVisible = showMeditationText.value && contentMode != ContentMode.OFF,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
