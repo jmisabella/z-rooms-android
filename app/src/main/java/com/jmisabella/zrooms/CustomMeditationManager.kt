@@ -55,7 +55,7 @@ class CustomMeditationManager(private val context: Context) {
             meditations.add(defaultMeditation)
             saveMeditations()
         } catch (e: Exception) {
-            println("Could not load default meditation: ${e.message}")
+            // Silently handle failure to load default meditation
         }
     }
 

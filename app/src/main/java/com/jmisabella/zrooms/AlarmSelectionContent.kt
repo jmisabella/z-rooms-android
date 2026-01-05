@@ -86,8 +86,7 @@ fun AlarmSelectionContent(
                                 shape = RoundedCornerShape(8.dp)
                             )
                             .pointerInput(Unit) {
-                                detectTapGestures { offset ->
-                                    println("Alarm tile tapped at offset: $offset, index=$index, isSelected=$isSelected")
+                                detectTapGestures { _ ->
                                     if (isSelected) {
                                         onSelect(null)
                                         audioService?.stopPreview()

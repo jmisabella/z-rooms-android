@@ -42,6 +42,8 @@ import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.Eco
 import androidx.compose.material.icons.outlined.FormatQuote
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.filled.TheaterComedy
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -69,6 +71,7 @@ import java.util.Date
 import kotlin.math.max
 import kotlin.math.min
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import android.text.format.DateFormat
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.setValue
@@ -120,14 +123,20 @@ fun ExpandingView(
         Color(0xFFE0E0E0) // Light grey for dark backgrounds
     }
 
-    // Custom meditation manager (must be created first)
+    // Custom meditation and poetry managers (must be created first)
     val meditationManager = remember { CustomMeditationManager(context) }
+    val poetryManager = remember { CustomPoetryManager(context) }
 
-    // Text-to-speech manager (needs meditationManager for random meditation selection)
-    val ttsManager = remember { TextToSpeechManager(context, meditationManager) }
+    // Text-to-speech manager (needs both managers for random content selection)
+    val ttsManager = remember {
+        TextToSpeechManager(context, meditationManager, poetryManager)
+    }
     val voiceManager = remember { VoiceManager.getInstance(context) }
-    var isMeditationPlaying by remember { mutableStateOf(false) }
-    var showMeditationList by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+
+    var contentMode by remember { mutableStateOf(ttsManager.contentMode) }
+    var isLoading by remember { mutableStateOf(ttsManager.isLoading) }
+    var showContentBrowser by remember { mutableStateOf(false) }
     var showVoiceSettings by remember { mutableStateOf(false) }
 
     // Meditation text display settings
@@ -176,9 +185,13 @@ fun ExpandingView(
         }
     }
 
-    // Track meditation playing state
-    LaunchedEffect(ttsManager.isPlayingMeditation) {
-        isMeditationPlaying = ttsManager.isPlayingMeditation
+    // Track content mode and loading state
+    LaunchedEffect(ttsManager.contentMode) {
+        contentMode = ttsManager.contentMode
+    }
+
+    LaunchedEffect(ttsManager.isLoading) {
+        isLoading = ttsManager.isLoading
     }
 
     // Ambient volume state (0.0 to 0.6)
@@ -276,7 +289,6 @@ fun ExpandingView(
     // Initial dimming on room entry
     LaunchedEffect(Unit) {
         if (dimMode is DimMode.Duration) {
-            println("Room entered, starting initial dim animation over ${dimSeconds}s")
             currentDimSpec = snap()
             dimTarget = 0f
             dimKey += 1
@@ -332,12 +344,10 @@ fun ExpandingView(
                 .windowInsetsPadding(WindowInsets.navigationBars)
                 .pointerInput(Unit) {
                     detectDragGestures(
-                        onDragStart = { offset ->
-                            println("ExpandingView swipe area drag started at offset: $offset")
+                        onDragStart = { _ ->
                             dragOffset = Offset.Zero
                         },
                         onDragEnd = {
-                            println("ExpandingView swipe area drag ended, dragOffset=$dragOffset")
                             val dx = dragOffset.x
                             val dy = dragOffset.y
                             if (abs(dx) > abs(dy)) {
@@ -347,35 +357,28 @@ fun ExpandingView(
                                 }
                             } else {
                                 if (dy < -swipeThresholdPx) {
-                                    println("Swipe up detected in ExpandingView swipe area")
                                     selectAlarm()
                                 } else if (dy > swipeThresholdPx) {
-                                    println("Swipe down detected in ExpandingView swipe area")
                                     dismiss()
                                 }
                             }
                             dragOffset = Offset.Zero
                         },
                         onDragCancel = {
-                            println("ExpandingView swipe area drag cancelled")
                             dragOffset = Offset.Zero
                         },
                         onDrag = { change, dragAmount ->
                             change.consume()
                             dragOffset += dragAmount
-                            println("ExpandingView swipe area drag detected, dragAmount=$dragAmount, dragOffset=$dragOffset")
                         }
                     )
                 }
-                .pointerInput(Unit) {  // <-- Add this new pointerInput for taps
-                    detectTapGestures { offset ->
-                        println("Tap detected in ExpandingView at offset: $offset")
+                .pointerInput(Unit) {
+                    detectTapGestures { _ ->
                         if (isAlarmActive.value) {
-                            // Stop alarm without exiting the room
-                            audioService?.stopAll()  // Or audioService?.stopAlarm() if you implement a specific method
+                            audioService?.stopAll()
                             isAlarmActive.value = false
                         } else {
-                            // Exit the room
                             dismiss()
                         }
                     }
@@ -513,7 +516,7 @@ fun ExpandingView(
                     Box(
                         modifier = Modifier
                             .clickable {
-                                showMeditationList = true
+                                showContentBrowser = true
                             }
                             .background(Color.Black.copy(alpha = 0.5f), CircleShape)
                             .padding(12.dp),
@@ -521,7 +524,7 @@ fun ExpandingView(
                     ) {
                         Icon(
                             Icons.Outlined.FormatQuote,
-                            contentDescription = "Custom Meditations",
+                            contentDescription = "Meditations & Poems",
                             tint = Color(0xFF9E9E9E),
                             modifier = Modifier.size(28.dp)
                         )
@@ -548,25 +551,43 @@ fun ExpandingView(
 
                     Spacer(Modifier.width(40.dp))
 
+                    // 3-State Content Button: OFF → MEDITATION → POETRY → OFF
                     Box(
                         modifier = Modifier
                             .clickable {
-                                if (isMeditationPlaying) {
-                                    ttsManager.stopSpeaking()
-                                } else {
-                                    ttsManager.startSpeakingRandomMeditation()
+                                scope.launch {
+                                    ttsManager.cycleContentMode()
                                 }
                             }
                             .background(Color.Black.copy(alpha = 0.5f), CircleShape)
                             .padding(12.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(
-                            Icons.Outlined.Eco,
-                            contentDescription = if (isMeditationPlaying) "Stop Meditation" else "Play Meditation",
-                            tint = if (isMeditationPlaying) Color(0xFF4CAF50) else Color(0xFF9E9E9E),
-                            modifier = Modifier.size(28.dp)
-                        )
+                        // Show loading indicator during meditation→poetry transition
+                        if (isLoading) {
+                            LoadingDotsIndicator(
+                                color = Color(0xFFFFB74D)  // Orange/amber color
+                            )
+                        } else {
+                            Icon(
+                                imageVector = when (contentMode) {
+                                    ContentMode.MEDITATION -> Icons.Outlined.Eco
+                                    ContentMode.POETRY -> Icons.Filled.TheaterComedy
+                                    ContentMode.OFF -> Icons.Outlined.Eco
+                                },
+                                contentDescription = when (contentMode) {
+                                    ContentMode.MEDITATION -> "Stop Meditation"
+                                    ContentMode.POETRY -> "Stop Poetry"
+                                    ContentMode.OFF -> "Start Content"
+                                },
+                                tint = when (contentMode) {
+                                    ContentMode.MEDITATION -> Color(0xFF4CAF50)  // Green
+                                    ContentMode.POETRY -> Color(0xFFAB47BC)      // Purple
+                                    ContentMode.OFF -> Color(0xFF9E9E9E)         // Gray
+                                },
+                                modifier = Modifier.size(28.dp)
+                            )
+                        }
                     }
 
 //                    Spacer(Modifier.width(40.dp))
@@ -599,18 +620,16 @@ fun ExpandingView(
             }
         }
 
-        // Meditation text display at bottom (with click-through enabled)
-        val configuration = androidx.compose.ui.platform.LocalConfiguration.current
-        val isPortrait = configuration.orientation == android.content.res.Configuration.ORIENTATION_PORTRAIT
-
-        MeditationTextDisplay(
+        // Scrollable meditation text display with phrase history
+        ScrollableMeditationTextDisplay(
+            phraseHistory = ttsManager.phraseHistory,
             currentPhrase = ttsManager.currentPhrase,
-            previousPhrase = ttsManager.previousPhrase,
-            isVisible = showMeditationText.value && isMeditationPlaying,
+            hasNewContent = ttsManager.hasNewCaptionContent,
+            onHasNewContentChange = { newValue -> ttsManager.hasNewCaptionContent = newValue },
+            isVisible = showMeditationText.value && contentMode != ContentMode.OFF,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .padding(bottom = if (isPortrait) 48.dp else 0.dp)
+                .padding(bottom = 140.dp) // Position clearly above buttons and room label
         )
     }
 
@@ -756,13 +775,19 @@ fun ExpandingView(
         }
     }
 
-    // Custom meditation list dialog
-    if (showMeditationList) {
-        CustomMeditationListView(
-            manager = meditationManager,
-            onDismiss = { showMeditationList = false },
-            onPlay = { meditationText ->
-                ttsManager.startSpeakingWithPauses(meditationText)
+    // Content browser dialog (meditations and poems)
+    if (showContentBrowser) {
+        ContentBrowserView(
+            meditationManager = meditationManager,
+            poetryManager = poetryManager,
+            onDismiss = { showContentBrowser = false },
+            onPlayMeditation = { text ->
+                ttsManager.startSpeakingWithPauses(text)
+                ttsManager.contentMode = ContentMode.MEDITATION
+            },
+            onPlayPoem = { text ->
+                ttsManager.startSpeakingWithPauses(text)
+                ttsManager.contentMode = ContentMode.POETRY
             }
         )
     }
@@ -781,7 +806,6 @@ fun ExpandingView(
 
     LaunchedEffect(sunTrigger) {
         if (sunTrigger > 0) {
-            println("Sun button clicked, sunTrigger=$sunTrigger, dimTarget=$dimTarget")
             currentFlashSpec = snap()
             flashTarget = 0.8f
             currentDimSpec = snap()
@@ -797,7 +821,6 @@ fun ExpandingView(
 
     LaunchedEffect(nightsTrigger) {
         if (nightsTrigger > 0) {
-            println("Moon button clicked, nightsTrigger=$nightsTrigger, dimTarget=$dimTarget")
             currentDimSpec = snap()
             dimTarget = 0f
             dimKey += 1
@@ -810,7 +833,6 @@ fun ExpandingView(
 
     LaunchedEffect(roomChangeTrigger) {
         if (roomChangeTrigger > 0) {
-            println("Room change triggered, roomChangeTrigger=$roomChangeTrigger")
             currentFlashSpec = snap()
             flashTarget = 0.8f
             flashKey += 1
@@ -828,11 +850,9 @@ fun ExpandingView(
 
     LaunchedEffect(isAlarmActive.value) {
         if (isAlarmActive.value) {
-            println("Alarm active, starting alarm animation")
             preAlarmDimOpacity = animatedDimOpacity
             isAlarmAnimating = true
         } else {
-            println("Alarm inactive, stopping alarm animation")
             isAlarmAnimating = false
             if (dimMode !is DimMode.Bright && dimMode !is DimMode.Dark) {
                 currentDimSpec = snap()

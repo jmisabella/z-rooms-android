@@ -1,5 +1,795 @@
 # Z Rooms Android - Change Log
 
+## 2026-01-03 18:45 EST: Scrollable Closed Caption History with Auto-Scroll
+
+### **THE FEATURE**
+
+Users can now scroll through the full transcript of meditation and poetry narration as it's being spoken. Previously, only the current phrase and previous phrase were visible - once text scrolled off, it was lost forever. Now users can scroll back to review earlier phrases they may have missed, while the voice continues narrating in the background.
+
+**User Impact:**
+- Full scrollable history of all spoken phrases during the session
+- Ability to review missed content without stopping playback
+- Auto-scrolls to show new text when user is at the bottom
+- Manual scroll stops auto-scrolling so users can read at their own pace
+- "New text" indicator button appears when scrolled up and new content arrives
+- Tapping "New text" scrolls back to current phrase and resumes auto-scrolling
+
+This feature mirrors the iOS implementation completed on 2026-01-03.
+
+### **THE IMPLEMENTATION**
+
+**Component Architecture:**
+
+Three main components were modified/created to implement scrollable captions:
+
+1. **TextToSpeechManager.kt** - Phrase History State Management
+   - Added `phraseHistory: List<String>` state to track all spoken phrases (line 47-48)
+   - Added `hasNewCaptionContent: Boolean` state for "New text" indicator (line 50)
+   - Modified `onStart()` callback to append phrases to history without duplicates (lines 87-90)
+   - Reset history when starting new content in `startSpeakingWithPauses()` (lines 156-157)
+   - Clear history when stopping playback in `stopSpeaking()` (lines 194-195)
+   - Clear history when narration completes in `didFinishSpeaking()` (lines 544-545)
+
+2. **ScrollableMeditationTextDisplay.kt** - NEW Scrollable Component
+   - Uses `LazyColumn` with `rememberLazyListState()` for efficient virtualization
+   - Fixed 100dp height with semi-transparent dark background (55% opacity, 16dp rounded corners)
+   - `derivedStateOf` for accurate bottom detection (lines 51-60)
+   - `userHasScrolledUp` state flag tracks manual scrolling (line 46)
+   - Auto-scroll behavior: scrolls to new phrases when `!userHasScrolledUp` (lines 71-79)
+   - Drag gesture detection sets `userHasScrolledUp = true` when user starts scrolling (lines 107-117)
+   - Resets `userHasScrolledUp = false` when user reaches bottom (lines 63-68)
+   - "New text" button with down arrow icon (lines 139-182)
+   - Current phrase highlighted: white, 18sp, medium weight
+   - Previous phrases dimmed: 70% opacity, 16sp, normal weight
+
+3. **ExpandingView.kt** - Integration
+   - Replaced `MeditationTextDisplay` with `ScrollableMeditationTextDisplay` (lines 624-633)
+   - Connected phrase history from TTS manager
+   - Connected `hasNewCaptionContent` state with callback for updates
+   - Maintained same positioning (140dp above buttons)
+
+### **PERFORMANCE OPTIMIZATIONS**
+
+**Key Optimizations to Avoid iOS Lag Issues:**
+
+The iOS version initially experienced significant lag and unresponsiveness when implementing this feature. The Android implementation was designed to avoid these issues:
+
+1. **`LazyColumn` Virtualization**
+   - Only renders visible items plus small buffer
+   - Automatically handles large phrase lists efficiently
+   - Native Android component optimized for scrolling
+
+2. **`derivedStateOf` for Bottom Detection**
+   - Recomputes only when scroll state actually changes
+   - Avoids unnecessary recompositions
+   - More efficient than manual state tracking
+
+3. **Simplified State Management**
+   - Single `userHasScrolledUp` boolean instead of multiple flags
+   - Clear state transitions reduce complexity
+   - Fewer edge cases to handle
+
+4. **Instant Scroll Updates**
+   - Uses `scrollState.scrollToItem()` (not animated) for auto-scroll
+   - Prevents animation lag on rapid phrase changes
+   - "New text" button uses `animateScrollToItem()` for smooth UX
+
+5. **Minimal Drag Detection**
+   - Simple `detectDragGestures` on `onDragStart` only
+   - Doesn't interfere with native scroll behavior
+   - Lightweight touch handling
+
+### **USER EXPERIENCE**
+
+**Scrolling Behavior:**
+
+1. **Auto-Scroll Mode (Default)**
+   - New phrases appear automatically as they're spoken
+   - Caption box stays at bottom showing latest text
+   - User doesn't need to do anything
+
+2. **Manual Scroll Mode (User scrolls up)**
+   - User drags/swipes upward to review earlier text
+   - Auto-scrolling stops immediately
+   - Voice continues narrating in background
+   - "New text" button appears when new content arrives
+
+3. **Return to Auto-Scroll**
+   - User scrolls back to bottom manually → auto-scroll resumes
+   - User taps "New text" button → animates to bottom, auto-scroll resumes
+
+**Visual Design:**
+
+```
+╭──────────────────────────────────╮
+│ [Earlier phrase - dimmed 70%]    │
+│ [Earlier phrase - dimmed 70%]    │  ← Scrollable
+│ [Earlier phrase - dimmed 70%]    │     100dp height
+│ [Current phrase - white, bold]   │     Semi-transparent
+│         ⬇ New text              │  ← Button (conditional)
+╰──────────────────────────────────╯
+```
+
+### **TESTING CHECKLIST**
+
+**Functionality Verified:**
+✅ Caption history builds up as phrases are spoken
+✅ Current phrase highlighted (white, 18sp, medium weight)
+✅ Previous phrases dimmed (70% opacity, 16sp)
+✅ Voice continues narrating while user scrolls
+✅ Auto-scroll works when user is at bottom
+✅ Auto-scroll stops when user scrolls up
+✅ "New text" indicator appears correctly
+✅ Tapping "New text" scrolls back to bottom
+✅ History clears when meditation ends
+✅ History resets when starting new meditation
+
+**Performance Verified:**
+✅ No lag when opening room view
+✅ Smooth scrolling with many phrases
+✅ Build successful with no compilation errors
+
+### **FILES CREATED**
+
+- [app/src/main/java/com/jmisabella/zrooms/ScrollableMeditationTextDisplay.kt](app/src/main/java/com/jmisabella/zrooms/ScrollableMeditationTextDisplay.kt) - New scrollable caption component (182 lines)
+
+### **FILES MODIFIED**
+
+- [app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt](app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt):
+  - Added `phraseHistory` state variable (lines 47-48)
+  - Added `hasNewCaptionContent` state variable (line 50)
+  - Updated `onStart()` callback to append to history (lines 87-90)
+  - Reset history in `startSpeakingWithPauses()` (lines 156-157)
+  - Clear history in `stopSpeaking()` (lines 194-195)
+  - Clear history in `didFinishSpeaking()` (lines 544-545)
+
+- [app/src/main/java/com/jmisabella/zrooms/ExpandingView.kt](app/src/main/java/com/jmisabella/zrooms/ExpandingView.kt):
+  - Replaced `MeditationTextDisplay` with `ScrollableMeditationTextDisplay` (lines 624-633)
+  - Connected phrase history and new content state from TTS manager
+
+### **CODE STATISTICS**
+
+- New component: 182 lines
+- TextToSpeechManager changes: +6 lines
+- ExpandingView changes: ~10 lines modified
+- Total: ~200 lines added/modified
+
+### **REFERENCE DOCUMENTATION**
+
+- iOS implementation: Completed 2026-01-03 17:30
+- Implementation guide: [ANDROID_SCROLLABLE_CAPTIONS_IMPLEMENTATION_GUIDE.md](ANDROID_SCROLLABLE_CAPTIONS_IMPLEMENTATION_GUIDE.md)
+- Performance lessons learned from iOS applied to Android implementation
+
+---
+
+## 2025-12-31 20:55 EST: Fixed Closed Caption Box Remaining Visible After Narration Ends
+
+### **THE BUG**
+
+When meditation or poetry narration completes, the closed caption box (semi-transparent dark modal window) remains visible on screen even though there's no text being spoken. The caption text itself disappears, but the empty dark background box persists.
+
+**User Impact:**
+After listening to a meditation or poem in its entirety, users see an empty dark box floating at the bottom of the screen, which looks unprofessional and confusing. The box should disappear completely when narration ends.
+
+### **THE CAUSE**
+
+The `MeditationTextDisplay` component was already correctly implemented with conditional rendering logic (line 33):
+```kotlin
+visible = isVisible && (currentPhrase.isNotEmpty() || previousPhrase.isNotEmpty())
+```
+
+However, in [TextToSpeechManager.kt](app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt), when narration completed successfully (in the `didFinishSpeaking()` method around line 531), the code was NOT clearing the `currentPhrase` and `previousPhrase` variables. These variables remained populated with the last spoken text, causing the caption box to stay visible.
+
+**What was happening:**
+1. Narration completes → `isSpeaking` set to false
+2. `contentMode` kept as MEDITATION/POETRY (intentionally, so button stays colored)
+3. `utteranceQueue` cleared
+4. ❌ BUT `currentPhrase` and `previousPhrase` were NOT cleared
+5. Result: Caption box condition `(currentPhrase.isNotEmpty() || previousPhrase.isNotEmpty())` still true → box stays visible
+
+### **THE FIX**
+
+Modified the `didFinishSpeaking()` method in [TextToSpeechManager.kt:540-543](app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt#L540-L543) to clear caption text when narration completes:
+
+**Code Changes:**
+```kotlin
+} else {
+    // All done - content completed successfully
+    isSpeaking = false
+    isCustomMode = false
+    utteranceQueue.clear()
+    currentUtteranceIndex = 0
+
+    // NEW: Clear caption text so the closed caption box disappears
+    currentPhrase = ""
+    previousPhrase = ""
+    pendingPhrase = null
+
+    // Set the content completion flag for wake-up greeting
+    prefs.edit().putBoolean(PREF_CONTENT_COMPLETED, true).apply()
+}
+```
+
+### **THE RESULT**
+
+The closed caption box now properly disappears when meditation/poetry narration completes:
+- Narration ends → Caption text cleared → Entire caption box (including background) disappears ✅
+- Wake-up greeting functionality still works correctly (relies on `PREF_CONTENT_COMPLETED` flag, not caption text)
+- Content mode button stays colored (MEDITATION/POETRY mode remains active until user manually toggles it off)
+- Clean, professional UI when narration finishes
+
+**Files Modified:**
+- [app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt](app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt) (lines 540-543)
+
+**Note:** This fix was already implemented in the iOS version. Reference: [IMPLEMENTATION_GUIDE_ANDROID_CAPTION_FIX.md](IMPLEMENTATION_GUIDE_ANDROID_CAPTION_FIX.md)
+
+---
+
+## 2025-12-31 20:43 EST: Fixed Wake-Up Greeting Voice Selection
+
+### **THE BUG**
+
+When users set a waking alarm sound and enable meditation mode or poetry mode, the app plays a brief greeting ("Welcome back", etc.) when the alarm goes off. However, this greeting was always spoken using the default woman's voice, even when the user had selected a different voice (such as one of the male voices) for their meditation/poetry narration.
+
+**User Impact:**
+Users who selected a specific voice (e.g., Alex, Daniel, Michael) for their meditation or poetry narration would hear the default voice for the wake-up greeting instead of their chosen voice, creating an inconsistent experience.
+
+### **THE CAUSE**
+
+In [AudioService.kt](app/src/main/java/com/jmisabella/zrooms/AudioService.kt), the `greetingTts` TextToSpeech instance was initialized with hardcoded settings:
+- Language was hardcoded to `Locale.US` (default system voice)
+- Speech rate was hardcoded to `0.6f`
+- Pitch was hardcoded to `0.58f`
+
+The greeting TTS initialization did not use the `VoiceManager` to apply the user's selected voice preferences, unlike the main meditation/poetry TTS which correctly uses `VoiceManager.getPreferredVoice()`.
+
+### **THE FIX**
+
+Modified the `playWakeUpGreeting()` method in [AudioService.kt:454-480](app/src/main/java/com/jmisabella/zrooms/AudioService.kt#L454-L480) to refresh voice settings **at playback time** instead of only at service initialization.
+
+**Key Insight:** The original fix attempted to set the voice during service initialization, but those settings could become stale by the time the greeting actually played. The correct solution is to refresh the voice settings immediately before speaking the greeting.
+
+**Code Changes:**
+```kotlin
+private fun playWakeUpGreeting() {
+    if (!isGreetingTtsInitialized) return
+
+    // NEW: Refresh voice settings to match current user selection
+    val voiceManager = VoiceManager.getInstance(this)
+    val preferredVoice = voiceManager.getPreferredVoice()
+
+    if (preferredVoice != null) {
+        greetingTts?.setVoice(preferredVoice)
+    } else {
+        greetingTts?.language = Locale.US
+    }
+
+    val speechRate = voiceManager.getSpeechRateMultiplier(preferredVoice)
+    greetingTts?.setSpeechRate(speechRate)
+    greetingTts?.setPitch(1.0f)
+
+    // Select greeting and speak...
+}
+```
+
+Also updated the initialization in [AudioService.kt:137-158](app/src/main/java/com/jmisabella/zrooms/AudioService.kt#L137-L158) to set initial voice preferences, though the playback-time refresh is what ensures the correct voice is always used.
+
+### **THE RESULT**
+
+The wake-up greeting now respects the user's voice selection:
+- Users who select Alex, Daniel, Michael, or any other voice will hear that same voice for the "Welcome back" greeting
+- Voice settings are refreshed at playback time, ensuring the greeting always uses the current selection
+- Speech rate automatically adjusts based on voice quality (enhanced voices at natural speed, default voice slightly slower)
+- Consistent voice experience throughout the entire meditation/poetry alarm workflow
+
+**Files Modified:**
+- [app/src/main/java/com/jmisabella/zrooms/AudioService.kt](app/src/main/java/com/jmisabella/zrooms/AudioService.kt) (lines 137-158, 454-480)
+
+---
+
+## 2025-12-27 14:30 EST: UX Pivot - Closed Captioning Modal Window Design
+
+### **THE REQUEST**
+
+Replace the gradient-based closed captioning design with a semi-transparent dark modal window, positioned in the lower portion of the screen above the "room #" label. This is a strategic UX pivot after multiple failed attempts across several sessions to make the gradient extend properly to the bottom of the screen.
+
+### **THE PROBLEM**
+
+**Multiple Failed Gradient Attempts:**
+Over several conversation threads, we attempted to fix the closed captioning gradient positioning issues:
+- Attempted to move the gradient to the actual bottom of the screen
+- Attempted to make the area below the closed caption black
+- Multiple iterations of padding adjustments (96dp bottom, restructured padding from Box to Column, orientation-aware padding)
+- Issues persisted with either gaps between gradient and screen edge (landscape) or overlap with navigation buttons (portrait)
+
+**Root Issue:**
+The gradient-based approach proved unreliable on Android. While this gradient design works well in the iOS version of the app, achieving the same polished look on Android was not feasible despite multiple attempts.
+
+**Strategic Decision:**
+Rather than continue attempting to fix the gradient approach, we pivoted to a different UX design that is more reliable and maintainable while still providing an excellent user experience.
+
+### **THE SOLUTION**
+
+**New Design: Semi-Transparent Dark Modal Window**
+
+Replaced the edge-to-edge gradient background with a rounded, semi-transparent dark modal window that:
+1. Contains the closed captioning text (previous line + current line)
+2. Has rounded corners (16dp) consistent with other UI cards in the app
+3. Uses medium transparency (55% opacity) for good readability while letting background show through
+4. Has 24dp horizontal margins from screen edges (floating appearance)
+5. Positioned in lower portion of screen, above the "room #" label
+6. Maintains all existing animations (fade + slide effects)
+7. Maintains existing text styling (previous phrase faded/smaller, current phrase bold/larger)
+
+**Visual Appearance:**
+```
+┌─────────────────────────────────────┐
+│         Room Background             │
+│                                     │
+│                                     │
+│    ╭──────────────────────────╮   │ ← Modal window
+│    │ [prev phrase - faded]    │   │
+│    │ [current phrase - bold]  │   │
+│    ╰──────────────────────────╯   │
+│    room 12                         │ ← Room label
+│    [gear] [quote] [clock] [leaf]   │ ← Button row
+└─────────────────────────────────────┘
+```
+
+**Code Changes:**
+
+**MeditationTextDisplay.kt:**
+```kotlin
+// BEFORE (Gradient approach):
+Box(
+    modifier = Modifier
+        .fillMaxWidth()
+        .wrapContentHeight()
+        .background(
+            brush = Brush.verticalGradient(
+                colors = listOf(
+                    Color.Transparent,
+                    Color.Black.copy(alpha = 0.4f),
+                    Color.Black.copy(alpha = 0.7f)
+                ),
+                startY = 0f,
+                endY = Float.POSITIVE_INFINITY
+            )
+        ),
+    contentAlignment = Alignment.BottomCenter
+)
+
+// AFTER (Modal window approach):
+Box(
+    modifier = Modifier
+        .wrapContentHeight()
+        .padding(horizontal = 24.dp) // Margins from screen edges
+        .background(
+            color = Color.Black.copy(alpha = 0.55f), // Semi-transparent dark modal
+            shape = RoundedCornerShape(16.dp)        // Rounded corners
+        ),
+    contentAlignment = Alignment.Center
+)
+```
+
+**ExpandingView.kt:**
+```kotlin
+// BEFORE:
+MeditationTextDisplay(
+    modifier = Modifier
+        .align(Alignment.BottomCenter)
+        .fillMaxWidth()
+        .padding(bottom = if (isPortrait) 48.dp else 0.dp)
+)
+
+// AFTER:
+MeditationTextDisplay(
+    modifier = Modifier
+        .align(Alignment.BottomCenter)
+        .padding(bottom = 90.dp) // Position above room label and buttons
+)
+```
+
+### **FILES MODIFIED**
+
+- [app/src/main/java/com/jmisabella/zrooms/MeditationTextDisplay.kt](app/src/main/java/com/jmisabella/zrooms/MeditationTextDisplay.kt):
+  - Removed `Brush` import (no longer needed)
+  - Added `RoundedCornerShape` import
+  - Replaced gradient background with rounded semi-transparent dark modal (Color.Black.copy(alpha = 0.55f))
+  - Added 24dp horizontal margins to create floating modal appearance
+  - Changed contentAlignment from `Alignment.BottomCenter` to `Alignment.Center`
+  - Simplified internal padding to uniform 16dp on all sides
+  - Updated documentation comment to reflect modal window design
+
+- [app/src/main/java/com/jmisabella/zrooms/ExpandingView.kt](app/src/main/java/com/jmisabella/zrooms/ExpandingView.kt):
+  - Removed orientation-aware padding logic (no longer needed)
+  - Removed `.fillMaxWidth()` modifier (modal sizes itself with margins)
+  - Changed bottom padding to fixed 90dp to position modal above room label
+  - Updated comment to reflect modal window positioning
+
+### **USER EXPERIENCE IMPROVEMENTS**
+
+**Before (Gradient approach):**
+- Gradient sometimes had gaps at screen bottom (landscape)
+- Gradient sometimes overlapped navigation buttons (portrait)
+- Required complex orientation-specific padding logic
+- Multiple failed attempts to achieve polished look
+- Inconsistent behavior across orientations
+
+**After (Modal window approach):**
+- Clean, distinct visual separation from background
+- Reliable positioning above room label in all orientations
+- Rounded corners match other UI elements (consistent design language)
+- Semi-transparent background provides excellent readability
+- Simplified positioning logic (no orientation-specific code needed)
+- Floating appearance (24dp margins) creates modern, polished look
+
+**Benefits:**
+- ✅ **Reliable** - No more gradient positioning issues
+- ✅ **Consistent** - Works the same way in all orientations
+- ✅ **Maintainable** - Simpler code, easier to understand and modify
+- ✅ **Polished** - Rounded corners and floating appearance match app design
+- ✅ **Readable** - Semi-transparent dark background ensures good text contrast
+- ✅ **Future-proof** - No complex edge cases or orientation-specific logic
+
+**Preserved Features:**
+- ✅ Same smooth animations (fade + slide)
+- ✅ Same text styling (previous phrase faded/smaller, current phrase bold/larger)
+- ✅ Same two-line display format
+- ✅ Same show/hide behavior based on meditation state
+
+### **DESIGN RATIONALE**
+
+While the iOS version of the app uses an edge-to-edge gradient for closed captioning, this Android version now uses a modal window approach. This is a pragmatic decision based on:
+1. Multiple failed attempts to achieve the gradient look on Android
+2. Time investment vs. diminishing returns
+3. The modal window approach provides an equally good (arguably better) user experience
+4. The modal design is more maintainable and reliable
+
+Sometimes the best solution is to pivot to a different approach rather than continue fighting with a problematic implementation. The modal window design is a strategic win.
+
+---
+
+## 2025-12-27 10:45: UX Improvement - Default Ambient Audio Volume Reduced to 80%
+
+### **THE REQUEST**
+
+Change the default ambient audio volume from 100% to 80% to provide a better balance between the meditation voice narration and ambient background audio.
+
+### **THE PROBLEM**
+
+**User Experience Issue:**
+At the default 100% ambient volume level, the meditation voice (fixed at 23% volume) was too quiet relative to the ambient background audio. This created a suboptimal listening experience where users had to manually adjust the ambient slider down to hear the meditation guidance clearly.
+
+**Testing Results:**
+After testing across all ambient audio track types (white noise, dark ambient, bright ambient, and classical compositions), the user found that 80% ambient volume provided the ideal ratio between voice clarity and ambient atmosphere.
+
+### **THE SOLUTION**
+
+Updated the default ambient volume from 100% (1.0f) to 80% (0.8f) in both TextToSpeechManager and AudioService. This change:
+1. Provides better out-of-box experience for new users
+2. Ensures meditation voice narration is clearly audible over ambient audio
+3. Maintains full user control (slider still allows 0-100% adjustment)
+4. Works well across all ambient track styles
+
+**Code Changes:**
+
+**TextToSpeechManager.kt** - Updated default ambient volume:
+```kotlin
+// Before:
+var ambientVolume by mutableStateOf(1.0f) // default to 100%
+
+// After:
+var ambientVolume by mutableStateOf(0.8f) // default to 80%
+```
+
+**AudioService.kt** - Updated target ambient volume to match:
+```kotlin
+// Before:
+private var targetAmbientVolume: Float = 1.0f // default to 100%
+
+// After:
+private var targetAmbientVolume: Float = 0.8f // default to 80%
+```
+
+### **FILES MODIFIED**
+
+- [app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt](app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt#L30) - Changed default `ambientVolume` from 1.0f to 0.8f
+- [app/src/main/java/com/jmisabella/zrooms/AudioService.kt](app/src/main/java/com/jmisabella/zrooms/AudioService.kt#L42) - Changed default `targetAmbientVolume` from 1.0f to 0.8f
+
+### **USER IMPACT**
+
+**Positive Changes:**
+- Better default experience - voice narration is clearly audible without manual adjustment
+- Improved meditation quality with optimal voice-to-ambient ratio
+- Tested and verified across all 4 ambient audio styles
+
+**No Breaking Changes:**
+- Users can still adjust ambient volume from 0-100% using the slider
+- Setting is not persisted, so always resets to the new 80% default on app launch
+- Meditation voice volume remains unchanged at 23%
+
+---
+
+## 2024-12-26 16:30: Bug Fix - Voice Settings Not Applied to Meditations
+
+### **THE REQUEST**
+
+User reported that when selecting a different voice in the Voice Settings dialog, the selected voice was not being applied to guided meditations. The meditation would continue using the default system voice instead of the user's chosen voice.
+
+### **THE PROBLEM**
+
+**Root Cause:**
+The `VoiceManager.setPreferredVoice()` method was saving the voice selection to preferences but was not enabling the `useEnhancedVoice` flag. The `getPreferredVoice()` method checks if enhanced voice is enabled, and returns `null` (default system voice) when disabled, even if a voice has been selected.
+
+**Impact:**
+- Users could select enhanced voices but they would not be used for meditation playback
+- Voice previews worked correctly (they used their own TTS instance)
+- Actual meditation playback ignored the voice selection and used the default system voice
+- User experience was confusing as the settings appeared to save but had no effect
+
+**Code Flow Analysis:**
+1. User selects voice in VoiceSettingsView → calls `voiceManager.setPreferredVoice(voice)`
+2. `setPreferredVoice()` saves voice name to preferences but doesn't enable enhanced voice
+3. When meditation plays → `TextToSpeechManager.applyVoiceSettings()` calls `voiceManager.getPreferredVoice()`
+4. `getPreferredVoice()` checks `if (!useEnhancedVoice.value)` and returns `null`
+5. TTS engine uses default system voice instead of selected voice
+
+### **THE SOLUTION**
+
+Modified `VoiceManager.setPreferredVoice()` to automatically enable `useEnhancedVoice` when a voice is selected. This ensures that:
+1. When user selects a voice, the enhanced voice feature is automatically enabled
+2. The selected voice is properly saved to SharedPreferences
+3. Both preferences (`PREF_PREFERRED_VOICE_NAME` and `PREF_USE_ENHANCED_VOICE`) are updated atomically in a single transaction
+
+**Code Changes:**
+```kotlin
+// Before (BUGGY):
+fun setPreferredVoice(voice: Voice?) {
+    selectedVoice.value = voice
+    if (voice != null) {
+        prefs.edit().putString(PREF_PREFERRED_VOICE_NAME, voice.name).apply()
+    } else {
+        prefs.edit().remove(PREF_PREFERRED_VOICE_NAME).apply()
+    }
+}
+
+// After (FIXED):
+fun setPreferredVoice(voice: Voice?) {
+    selectedVoice.value = voice
+    if (voice != null) {
+        // Automatically enable enhanced voice when a voice is selected
+        useEnhancedVoice.value = true
+        prefs.edit()
+            .putString(PREF_PREFERRED_VOICE_NAME, voice.name)
+            .putBoolean(PREF_USE_ENHANCED_VOICE, true)
+            .apply()
+    } else {
+        prefs.edit().remove(PREF_PREFERRED_VOICE_NAME).apply()
+    }
+}
+```
+
+### **FILES CHANGED**
+
+- `app/src/main/java/com/jmisabella/zrooms/VoiceManager.kt` - Fixed `setPreferredVoice()` method
+- `BUGS.md` - New file created to track bugs and their resolutions
+- `change_log.md` - This entry
+
+### **TESTING**
+
+To verify the fix:
+1. Open a room
+2. Tap the Voice Settings button (gear icon)
+3. Select a different voice from the list (e.g., "Alex" or "Samantha")
+4. Close the Voice Settings dialog
+5. Tap the meditation button (leaf icon) to play a guided meditation
+6. Verify the meditation uses the selected voice (not the default system voice)
+
+### **DEPLOYMENT NOTE**
+
+This fix is critical for Play Store release as it affects a core user-facing feature. Users expect voice selection to work immediately and intuitively.
+
+---
+
+## 2024-12-26 14:00: Debug Logging Removal for Play Store Deployment
+
+### **THE REQUEST**
+
+Remove all debug logging (`println()` statements) from the codebase to prepare for Play Store deployment and prevent unnecessary logging on users' devices.
+
+### **THE PROBLEM**
+
+The app contained 46 active `println()` debug statements across 7 Kotlin files used during development for debugging:
+- UI state changes
+- Gesture detection
+- Alarm and meditation state transitions
+- File loading operations
+- TTS initialization
+
+**Impact:**
+- Unnecessary string allocations and I/O operations on users' devices
+- Cluttered logcat output on production builds
+- Increased APK size due to debug strings
+- Not production-ready for Play Store submission
+
+### **THE SOLUTION**
+
+Systematically removed all 46 `println()` statements across the codebase:
+
+**Files Modified:**
+1. **ContentView.kt** - 17 statements removed
+   - Alarm selection state changes
+   - Sheet state changes
+   - Swipe gesture detection
+   - Fixed unused parameter warnings
+
+2. **ExpandingView.kt** - 13 statements removed
+   - Room entry animations
+   - Swipe/tap gesture detection
+   - Alarm state changes
+   - UI button interactions
+
+3. **AlarmSelectionView.kt** - 10 statements removed
+   - Sheet state changes
+   - Alarm tile selection
+   - Fixed unused parameter warnings
+
+4. **TextToSpeechManager.kt** - 3 statements removed
+   - Meditation file loading
+   - Replaced with silent error handling
+
+5. **MainActivity.kt** - 1 statement removed
+   - onCreate lifecycle logging
+
+6. **CustomMeditationManager.kt** - 1 statement removed
+   - Default meditation loading errors
+
+7. **AlarmSelectionContent.kt** - 1 statement removed
+   - Alarm tile tap detection
+
+### **BENEFITS**
+
+✅ **Reduced app size** - No debug strings in production build
+✅ **Improved performance** - No unnecessary logging operations on users' devices
+✅ **Cleaner logs** - Users won't see debug output
+✅ **Play Store ready** - Professional production build without debug clutter
+
+All changes preserve the original functionality while removing the debug logging overhead.
+
+---
+
+## 2024-12-26 00:15: Voice Settings UI Simplification
+
+### **THE REQUEST**
+
+The user requested simplification of the Voice Settings interface to make voice selection more straightforward and reduce UI clutter. Specific changes requested:
+
+1. Remove the Enhanced Voice toggle button - all voices should display all the time instead of requiring toggle activation
+2. Move the "About Enhanced Voices" section to the top of Voice Settings
+3. Change the section title from "About Enhanced Voices" to "About Voices"
+4. Remove the last sentence: "Enhanced voiced do not increase app size and are stored in your device's system storage"
+5. Make the "About Voices" section scrollable so it doesn't permanently occupy screen space when browsing voices
+6. Remove the "Get More Voices" button and simplify the About Voices description
+
+### **THE PROBLEM**
+
+The original Voice Settings interface had several UX issues:
+
+1. **Two-Step Activation**: Users had to toggle Enhanced Voice ON before they could see and select available voices, adding unnecessary friction
+2. **Fixed Info Section**: The "About Voices" information card stayed fixed at the top while scrolling, taking up valuable screen real estate and minimizing the number of visible voice options
+3. **Redundant Title**: "About Enhanced Voices" was redundant since the context already made it clear these were enhanced voices
+4. **Unnecessary Information**: The sentence about app size and system storage was more technical detail than users needed
+5. **Get More Voices Button**: The deep-link to TTS settings added complexity without clear benefit, and instructions for downloading voices were unnecessarily detailed for a meditation app
+
+### **THE SOLUTION**
+
+**Implementation Changes:**
+
+1. **Removed Enhanced Voice Toggle** (lines 75-113):
+   - Deleted the entire Card component containing the toggle switch
+   - Removed the `useEnhancedVoice` variable that was no longer needed
+   - Eliminated conditional rendering - voice list now always displays
+
+2. **Repositioned About Section** (lines 79-109):
+   - Moved "About Voices" card inside the LazyColumn as the first `item`
+   - Changed from fixed position to scrollable item
+   - Users can now scroll past it to see more voices
+
+3. **Simplified Title and Content**:
+   - Changed title from "ℹ️ About Enhanced Voices" to "ℹ️ About Voices" (line 91)
+   - Replaced detailed 3-paragraph description with simple 2-sentence explanation (lines 98-102)
+   - Old text: Explained voice management, download sizes (100-500MB), step-by-step settings navigation, and storage details
+   - New text: "Voices are provided by your device's Text-to-Speech engine. The voices shown here are currently available on your device."
+
+4. **Removed "Get More Voices" Button**:
+   - Deleted entire OutlinedButton component and deep-link logic (~30 lines)
+   - Removed unused `context` variable (LocalContext.current)
+   - Removed unused Intent imports
+   - Rationale: Users can still access TTS settings through device settings if needed, but this complexity doesn't belong in a meditation app's voice selector
+
+5. **Reorganized Layout Structure**:
+   - "About Voices" section (scrollable)
+   - "Voice Selection" header (scrollable)
+   - Voice list items (scrollable)
+
+### **USER EXPERIENCE IMPROVEMENTS**
+
+**Before:**
+- Toggle Enhanced Voice ON → Wait for voice list to appear → Scroll through voices with fixed info card taking up space → "Get More Voices" button at bottom
+- Limited voice options visible at once due to fixed "About Enhanced Voices" section
+- Three-step process to select a voice
+- Verbose instructions about downloading voices, file sizes, and navigation paths
+
+**After:**
+- Open Voice Settings → Immediately see all available voices
+- Scroll past simple "About Voices" card to maximize visible voice options
+- Two-step process to select a voice (simpler, more direct)
+- Clean, minimal explanation: just what users need to know
+
+**Benefits:**
+- More voices visible on screen at once when browsing
+- Faster voice selection workflow
+- Cleaner, less cluttered interface
+- Information available when needed but not intrusive
+- Removed unnecessary technical details and complexity
+- Focus on meditation experience rather than TTS management
+
+### **CHANGES MADE**
+
+**VoiceSettingsView.kt Structure (Before):**
+```
+Header
+├── Enhanced Voice Toggle Card (always visible)
+├── IF Enhanced Voice ON:
+│   ├── Voice Selection Header (fixed)
+│   ├── LazyColumn:
+│   │   ├── Voice List Items
+│   │   ├── Get More Voices Button
+│   │   └── About Enhanced Voices Card (verbose, 3 paragraphs)
+│   ELSE:
+│   └── About Enhanced Voices Card (fixed, verbose)
+```
+
+**VoiceSettingsView.kt Structure (After):**
+```
+Header
+└── LazyColumn:
+    ├── About Voices Card (scrollable, 2 sentences)
+    ├── Voice Selection Header (scrollable)
+    └── Voice List Items (scrollable)
+```
+
+### **FILES MODIFIED**
+
+- [app/src/main/java/com/jmisabella/zrooms/VoiceSettingsView.kt](app/src/main/java/com/jmisabella/zrooms/VoiceSettingsView.kt):
+  - Removed Enhanced Voice toggle Card (deleted ~40 lines)
+  - Removed `useEnhancedVoice` variable declaration
+  - Removed conditional `if (useEnhancedVoice)` branching logic (deleted ~150 lines)
+  - Removed "Get More Voices" button and deep-link logic (deleted ~30 lines)
+  - Removed unused `context` variable (LocalContext.current)
+  - Moved "About Voices" into LazyColumn as first item (lines 80-105)
+  - Simplified section title from "About Enhanced Voices" to "About Voices" (line 92)
+  - Replaced verbose 3-paragraph description with concise 2-sentence explanation (lines 98-102)
+  - Voice list now always displays without toggle requirement
+
+**Text Changes:**
+
+Old "About Enhanced Voices" content:
+> "Higher quality voices are managed by your device's Text-to-Speech engine. Many voices come pre-installed on newer devices, while others may require download (100-500MB each).
+>
+> To manage voices:
+> Settings → Accessibility → Text-to-Speech → Speech Services by Google → Settings icon → Voice selection
+>
+> Enhanced voices do not increase app size and are stored in your device's system storage."
+
+New "About Voices" content:
+> "Voices are provided by your device's Text-to-Speech engine. The voices shown here are currently available on your device."
+
+**Code Reduction:** ~220 lines removed, ~5 lines added = ~215 net line reduction
+
+**Total Lines:** 159 lines (down from ~370 lines)
+
 ## 2025-12-25 23:27: Enhanced Opening Phrase Variety in Preset Meditations
 
 ### **THE REQUEST**

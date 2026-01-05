@@ -39,7 +39,7 @@ class AudioService : Service() {
     private var alarmPlayer: ExoPlayer? = null
     private var previewPlayer: ExoPlayer? = null
     private var ambientVolume: Float = 0f
-    private var targetAmbientVolume: Float = 1.0f // User's preferred ambient volume (default to 100%)
+    private var targetAmbientVolume: Float = 0.8f // User's preferred ambient volume (default to 80%)
     private var alarmVolume: Float = 0f
     private var previewVolume: Float = 0f
     private var currentAmbientFile: String? = null
@@ -136,9 +136,23 @@ class AudioService : Service() {
         // Initialize wake-up greeting TTS
         greetingTts = TextToSpeech(this) { status ->
             if (status == TextToSpeech.SUCCESS) {
-                greetingTts?.language = Locale.US
-                greetingTts?.setSpeechRate(0.6f) // Same as meditation speech rate
-                greetingTts?.setPitch(0.58f) // Same as meditation pitch
+                // Apply user's selected voice settings using VoiceManager
+                val voiceManager = VoiceManager.getInstance(this)
+                val preferredVoice = voiceManager.getPreferredVoice()
+
+                if (preferredVoice != null) {
+                    greetingTts?.setVoice(preferredVoice)
+                } else {
+                    // Fallback to default US English
+                    greetingTts?.language = Locale.US
+                }
+
+                // Apply dynamic speech rate based on voice quality
+                val speechRate = voiceManager.getSpeechRateMultiplier(preferredVoice)
+                greetingTts?.setSpeechRate(speechRate)
+
+                // Use natural pitch for all voices
+                greetingTts?.setPitch(1.0f)
                 isGreetingTtsInitialized = true
             }
         }
@@ -371,7 +385,7 @@ class AudioService : Service() {
 
         // Check if we should play wake-up greeting
         val prefs = PreferenceManager.getDefaultSharedPreferences(this)
-        val meditationCompleted = prefs.getBoolean(TextToSpeechManager.PREF_MEDITATION_COMPLETED, false)
+        val contentCompleted = prefs.getBoolean(TextToSpeechManager.PREF_CONTENT_COMPLETED, false)
 
         val alarmRes = getAlarmResource(selectedAlarmIndex)
         alarmPlayer = ExoPlayer.Builder(this@AudioService).build().apply {
@@ -388,8 +402,8 @@ class AudioService : Service() {
                         fadeAlarmVolume(1f, 500L)
                         removeListener(this)
 
-                        // Schedule wake-up greeting if meditation was completed
-                        if (meditationCompleted) {
+                        // Schedule wake-up greeting if content was completed
+                        if (contentCompleted) {
                             scheduleWakeUpGreeting()
                         }
                     }
@@ -440,6 +454,20 @@ class AudioService : Service() {
     private fun playWakeUpGreeting() {
         if (!isGreetingTtsInitialized) return
 
+        // Refresh voice settings to match current user selection
+        val voiceManager = VoiceManager.getInstance(this)
+        val preferredVoice = voiceManager.getPreferredVoice()
+
+        if (preferredVoice != null) {
+            greetingTts?.setVoice(preferredVoice)
+        } else {
+            greetingTts?.language = Locale.US
+        }
+
+        val speechRate = voiceManager.getSpeechRateMultiplier(preferredVoice)
+        greetingTts?.setSpeechRate(speechRate)
+        greetingTts?.setPitch(1.0f)
+
         // Select a random greeting phrase
         val greeting = GREETING_PHRASES.random()
 
@@ -451,9 +479,9 @@ class AudioService : Service() {
         // Speak the greeting
         greetingTts?.speak(greeting, TextToSpeech.QUEUE_FLUSH, params)
 
-        // Clear the meditation completion flag after greeting plays
+        // Clear the content completion flag after greeting plays
         val prefs = PreferenceManager.getDefaultSharedPreferences(this)
-        prefs.edit().putBoolean(TextToSpeechManager.PREF_MEDITATION_COMPLETED, false).apply()
+        prefs.edit().putBoolean(TextToSpeechManager.PREF_CONTENT_COMPLETED, false).apply()
     }
 
     fun fadeAlarmVolume(target: Float, duration: Long, completion: () -> Unit = {}) {

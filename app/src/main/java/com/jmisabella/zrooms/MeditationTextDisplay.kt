@@ -8,18 +8,18 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 /**
- * Displays meditation text with a semi-transparent gradient overlay at the bottom of the screen.
+ * Displays meditation text in a semi-transparent dark modal window in the lower portion of the screen.
  * Shows current and previous phrases with fade animations, similar to Apple Music lyrics.
  */
 @Composable
@@ -37,29 +37,20 @@ fun MeditationTextDisplay(
     ) {
         Box(
             modifier = Modifier
-                .fillMaxWidth()
                 .wrapContentHeight()
+                .padding(horizontal = 24.dp) // Margins from screen edges
                 .background(
-                    // Semi-transparent gradient overlay (dark at bottom, fading to transparent at top)
-                    brush = Brush.verticalGradient(
-                        colors = listOf(
-                            Color.Transparent,
-                            Color.Black.copy(alpha = 0.4f),
-                            Color.Black.copy(alpha = 0.7f)
-                        ),
-                        startY = 0f,
-                        endY = Float.POSITIVE_INFINITY
-                    )
+                    color = Color.Black.copy(alpha = 0.55f), // Semi-transparent dark modal
+                    shape = RoundedCornerShape(16.dp)        // Rounded corners
                 ),
-            contentAlignment = Alignment.BottomCenter
+            contentAlignment = Alignment.Center
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier
                     .fillMaxWidth()
-                    // Add padding to text content, not the gradient box
-                    .padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 24.dp)
+                    .padding(horizontal = 16.dp, vertical = 16.dp) // Internal padding for modal content
             ) {
                 // Previous phrase (faded out)
                 AnimatedVisibility(

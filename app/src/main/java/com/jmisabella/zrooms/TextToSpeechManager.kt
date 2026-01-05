@@ -19,15 +19,23 @@ import java.util.Locale
  */
 class TextToSpeechManager(
     private val context: Context,
-    private val customMeditationManager: CustomMeditationManager? = null
+    private val customMeditationManager: CustomMeditationManager? = null,
+    private val customPoetryManager: CustomPoetryManager? = null
 ) {
     var isSpeaking by mutableStateOf(false)
         private set
 
-    var isPlayingMeditation by mutableStateOf(false)
+    var contentMode by mutableStateOf(ContentMode.OFF)
+
+    var isLoading by mutableStateOf(false)  // For 3-dot pulsing indicator during transitions
         private set
 
-    var ambientVolume by mutableStateOf(1.0f) // 0.0 (silent) to 1.0 (full ambient), default to 100%
+    // Deprecated - use contentMode instead
+    @Deprecated("Use contentMode instead")
+    val isPlayingMeditation: Boolean
+        get() = contentMode == ContentMode.MEDITATION
+
+    var ambientVolume by mutableStateOf(0.8f) // 0.0 (silent) to 1.0 (full ambient), default to 80%
         private set
 
     var currentPhrase by mutableStateOf("")
@@ -35,6 +43,11 @@ class TextToSpeechManager(
 
     var previousPhrase by mutableStateOf("")
         private set
+
+    var phraseHistory by mutableStateOf(listOf<String>())
+        private set
+
+    var hasNewCaptionContent by mutableStateOf(false)
 
     private var tts: TextToSpeech? = null
     private var isInitialized = false
@@ -44,6 +57,7 @@ class TextToSpeechManager(
     private var isCustomMode = false
     private var pendingPhrase: String? = null // Phrase waiting to be displayed when TTS starts
     private var lastPlayedMeditation: String? = null // Track last meditation to avoid repeats
+    private var lastPlayedPoem: String? = null // Track last poem to avoid repeats
     private val prefs = androidx.preference.PreferenceManager.getDefaultSharedPreferences(context)
     private val voiceManager = VoiceManager.getInstance(context)
 
@@ -53,6 +67,9 @@ class TextToSpeechManager(
     companion object {
         private const val MEDITATION_PITCH = 1.0f // Natural pitch for all voices
         const val MAX_AMBIENT_VOLUME = 1.0f // Maximum ambient volume
+        const val PREF_CONTENT_MODE = "contentMode"
+        const val PREF_CONTENT_COMPLETED = "contentCompletedSuccessfully"
+        @Deprecated("Use PREF_CONTENT_COMPLETED instead")
         const val PREF_MEDITATION_COMPLETED = "meditationCompletedSuccessfully"
     }
 
@@ -71,6 +88,11 @@ class TextToSpeechManager(
                             previousPhrase = currentPhrase
                             currentPhrase = phrase
                             pendingPhrase = null
+
+                            // Add to phrase history (avoid duplicates)
+                            if (phraseHistory.isEmpty() || phraseHistory.last() != phrase) {
+                                phraseHistory = phraseHistory + phrase
+                            }
                         }
                     }
 
@@ -80,7 +102,7 @@ class TextToSpeechManager(
 
                     override fun onError(utteranceId: String?) {
                         isSpeaking = false
-                        isPlayingMeditation = false
+                        contentMode = ContentMode.OFF
                         pendingPhrase = null
                     }
                 })
@@ -134,12 +156,15 @@ class TextToSpeechManager(
         // Stop any existing speech first to ensure clean state
         stopSpeaking()
 
-        // Clear the meditation completion flag when starting a new meditation
-        prefs.edit().putBoolean(PREF_MEDITATION_COMPLETED, false).apply()
+        // Clear the content completion flag when starting new content
+        prefs.edit().putBoolean(PREF_CONTENT_COMPLETED, false).apply()
 
         isSpeaking = true
-        isPlayingMeditation = true
         isCustomMode = true
+
+        // Reset phrase history and new content indicator when starting new content
+        phraseHistory = emptyList()
+        hasNewCaptionContent = false
 
         // Check if text has any pause markers
         val hasPauseMarkers = Regex("""\(\d+(?:\.\d+)?[sm]\)""").containsMatchIn(text)
@@ -162,10 +187,7 @@ class TextToSpeechManager(
         if (!isInitialized) return null
 
         // Try to load a random meditation file
-        val meditationText = loadRandomMeditationFile() ?: run {
-            println("No meditation files found")
-            return null
-        }
+        val meditationText = loadRandomMeditationFile() ?: return null
 
         startSpeakingWithPauses(meditationText)
         return meditationText
@@ -177,15 +199,17 @@ class TextToSpeechManager(
     fun stopSpeaking() {
         tts?.stop()
         isSpeaking = false
-        isPlayingMeditation = false
+        contentMode = ContentMode.OFF
         utteranceQueue.clear()
         currentUtteranceIndex = 0
         currentPhrase = ""
         previousPhrase = ""
         pendingPhrase = null
+        phraseHistory = emptyList()
+        hasNewCaptionContent = false
 
-        // Clear the meditation completion flag when manually stopping
-        prefs.edit().putBoolean(PREF_MEDITATION_COMPLETED, false).apply()
+        // Clear the content completion flag when manually stopping
+        prefs.edit().putBoolean(PREF_CONTENT_COMPLETED, false).apply()
     }
 
     /**
@@ -303,7 +327,7 @@ class TextToSpeechManager(
                     allMeditations.add(text)
                 }
             } catch (e: Exception) {
-                println("Could not read preset meditation $i: ${e.message}")
+                // Silently skip meditation files that can't be read
             }
             i++
         }
@@ -317,7 +341,6 @@ class TextToSpeechManager(
 
         // 3. Check if we have any meditations at all
         if (allMeditations.isEmpty()) {
-            println("No meditation files found (neither preset nor custom)")
             return null
         }
 
@@ -343,12 +366,137 @@ class TextToSpeechManager(
     }
 
     /**
+     * Loads a random poem from both preset files and custom poems
+     */
+    private fun loadRandomPoemFile(): String? {
+        val allPoems = mutableListOf<String>()
+
+        // 1. Load all preset poem files (preset_poem1 through preset_poem35)
+        var i = 1
+        while (true) {
+            val resId = context.resources.getIdentifier(
+                "preset_poem$i",
+                "raw",
+                context.packageName
+            )
+            if (resId == 0) break
+            try {
+                val text = context.resources.openRawResource(resId)
+                    .bufferedReader()
+                    .use { it.readText() }
+                    .trim()
+                if (text.isNotEmpty()) {
+                    allPoems.add(text)
+                }
+            } catch (e: Exception) {
+                // Silently skip poems that can't be read
+            }
+            i++
+        }
+
+        // 2. Add all custom poems
+        customPoetryManager?.poems?.forEach { poem ->
+            if (poem.text.isNotEmpty()) {
+                allPoems.add(poem.text)
+            }
+        }
+
+        // 3. Check if we have any poems at all
+        if (allPoems.isEmpty()) return null
+
+        // 4. Pick random poem, avoiding last played
+        val selectedPoem = if (allPoems.size > 1 && lastPlayedPoem != null) {
+            val availablePoems = allPoems.filter { it != lastPlayedPoem }
+            if (availablePoems.isNotEmpty()) {
+                availablePoems.random()
+            } else {
+                allPoems.random()
+            }
+        } else {
+            allPoems.random()
+        }
+
+        lastPlayedPoem = selectedPoem
+        return selectedPoem
+    }
+
+    /**
+     * Starts speaking a random poem from preset files and custom poems
+     */
+    fun startSpeakingRandomPoem(): String? {
+        if (!isInitialized) return null
+
+        val poemText = loadRandomPoemFile() ?: return null
+        startSpeakingWithPauses(poemText)
+        return poemText
+    }
+
+    /**
+     * Cycles through content modes: OFF → MEDITATION → POETRY → OFF
+     * Includes crossfade loading state when transitioning from MEDITATION → POETRY
+     */
+    suspend fun cycleContentMode() {
+        when (contentMode) {
+            ContentMode.OFF -> {
+                // OFF → MEDITATION (immediate, green)
+                startSpeakingRandomMeditation()
+                contentMode = ContentMode.MEDITATION
+                saveContentMode()
+            }
+            ContentMode.MEDITATION -> {
+                // MEDITATION → POETRY (with loading transition)
+                isLoading = true
+                stopSpeaking()
+
+                // Crossfade delay (matches animation duration)
+                delay(500)
+
+                startSpeakingRandomPoem()
+                contentMode = ContentMode.POETRY
+                saveContentMode()
+                isLoading = false
+            }
+            ContentMode.POETRY -> {
+                // POETRY → OFF (immediate)
+                stopSpeaking()
+                contentMode = ContentMode.OFF
+                saveContentMode()
+            }
+        }
+    }
+
+    /**
+     * Saves current content mode to SharedPreferences
+     */
+    private fun saveContentMode() {
+        prefs.edit().putString(PREF_CONTENT_MODE, contentMode.name).apply()
+    }
+
+    /**
+     * Restores content mode from SharedPreferences on app restart
+     */
+    fun restoreContentMode() {
+        val savedMode = prefs.getString(PREF_CONTENT_MODE, ContentMode.OFF.name)
+        contentMode = try {
+            ContentMode.valueOf(savedMode ?: "OFF")
+        } catch (e: IllegalArgumentException) {
+            ContentMode.OFF
+        }
+
+        // If mode was active, restart playback
+        when (contentMode) {
+            ContentMode.MEDITATION -> startSpeakingRandomMeditation()
+            ContentMode.POETRY -> startSpeakingRandomPoem()
+            ContentMode.OFF -> { /* Do nothing */ }
+        }
+    }
+
+    /**
      * Speaks the next phrase in the queue
      */
     private fun speakNextPhrase() {
         if (!isCustomMode || currentUtteranceIndex >= utteranceQueue.size) {
             isSpeaking = false
-            isPlayingMeditation = false
             previousPhrase = currentPhrase
             currentPhrase = ""
             pendingPhrase = null
@@ -397,16 +545,23 @@ class TextToSpeechManager(
                 speakNextPhrase()
             }
         } else {
-            // All done - meditation completed successfully
+            // All done - content completed successfully
             isSpeaking = false
-            // KEEP isPlayingMeditation = true so leaf stays green
+            // KEEP contentMode as is (MEDITATION or POETRY) so button stays colored
             // (User can manually toggle it off if desired)
             isCustomMode = false
             utteranceQueue.clear()
             currentUtteranceIndex = 0
 
-            // Set the meditation completion flag for wake-up greeting
-            prefs.edit().putBoolean(PREF_MEDITATION_COMPLETED, true).apply()
+            // Clear caption text so the closed caption box disappears
+            currentPhrase = ""
+            previousPhrase = ""
+            pendingPhrase = null
+            phraseHistory = emptyList()
+            hasNewCaptionContent = false
+
+            // Set the content completion flag for wake-up greeting
+            prefs.edit().putBoolean(PREF_CONTENT_COMPLETED, true).apply()
         }
     }
 

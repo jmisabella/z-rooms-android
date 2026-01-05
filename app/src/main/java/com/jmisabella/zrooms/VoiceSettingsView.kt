@@ -33,8 +33,6 @@ fun VoiceSettingsView(
     voiceManager: VoiceManager,
     onDismiss: () -> Unit
 ) {
-    val context = LocalContext.current
-    val useEnhancedVoice by voiceManager.useEnhancedVoice
     val selectedVoice by voiceManager.selectedVoice
     val availableVoices by voiceManager.availableVoices
 
@@ -72,201 +70,88 @@ fun VoiceSettingsView(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Enhanced Voice Toggle
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                backgroundColor = Color(0xFF2C2C2E),
-                elevation = 0.dp,
-                shape = RoundedCornerShape(12.dp)
+            LazyColumn(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = "Enhanced Voice",
-                            color = Color.White,
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Medium
-                        )
-                        Text(
-                            text = "Use higher-quality meditation voice",
-                            color = Color.Gray,
-                            fontSize = 14.sp
-                        )
+                // Info Section at the top (scrollable)
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        backgroundColor = Color(0xFF2C2C2E),
+                        elevation = 0.dp,
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp)
+                        ) {
+                            Text(
+                                text = "ℹ️ About Voices",
+                                color = Color.White,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "Voices are provided by your device's Text-to-Speech engine. The voices shown here are currently available on your device.",
+                                color = Color.Gray,
+                                fontSize = 14.sp,
+                                lineHeight = 20.sp
+                            )
+                        }
                     }
-                    Switch(
-                        checked = useEnhancedVoice,
-                        onCheckedChange = { enabled ->
-                            voiceManager.setUseEnhancedVoice(enabled)
-                        },
-                        colors = SwitchDefaults.colors(
-                            checkedThumbColor = Color.White,
-                            checkedTrackColor = Color(0xFF4CAF50)
-                        )
-                    )
+                    Spacer(modifier = Modifier.height(24.dp))
                 }
-            }
 
-            Spacer(modifier = Modifier.height(24.dp))
+                // Voice Selection header
+                item {
+                    Text(
+                        text = "Voice Selection",
+                        color = Color.White,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
 
-            // Content area - either voice list or info section
-            if (useEnhancedVoice) {
-                // Voice Selection with scrollable list
-                Text(
-                    text = "Voice Selection",
-                    color = Color.White,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                LazyColumn(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth()
-                ) {
-                    items(availableVoices) { voice ->
-                        val isThisVoicePreviewing = voice == previewingVoice
-                        VoiceListItem(
-                            voice = voice,
-                            voiceManager = voiceManager,
-                            isSelected = voice == selectedVoice,
-                            isPreviewing = isThisVoicePreviewing,
-                            onSelect = {
-                                voiceManager.setPreferredVoice(voice)
-                            },
-                            onPreview = {
-                                if (isThisVoicePreviewing) {
-                                    // Stop current preview
-                                    voiceManager.stopPreview()
-                                    previewingVoice = null
-                                } else {
-                                    // Stop any previous preview and start new one
-                                    voiceManager.stopPreview()
-                                    previewingVoice = voice
-                                    voiceManager.previewVoice(
-                                        voice = voice,
-                                        text = "Welcome to your meditation practice. Take a deep breath and relax.",
-                                        onComplete = {
-                                            if (previewingVoice == voice) {
-                                                previewingVoice = null
-                                            }
-                                        }
-                                    )
-                                }
-                            },
-                            onStopPreview = {
+                items(availableVoices) { voice ->
+                    val isThisVoicePreviewing = voice == previewingVoice
+                    VoiceListItem(
+                        voice = voice,
+                        voiceManager = voiceManager,
+                        isSelected = voice == selectedVoice,
+                        isPreviewing = isThisVoicePreviewing,
+                        onSelect = {
+                            voiceManager.setPreferredVoice(voice)
+                        },
+                        onPreview = {
+                            if (isThisVoicePreviewing) {
+                                // Stop current preview
                                 voiceManager.stopPreview()
                                 previewingVoice = null
-                            }
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                    }
-
-                    // "Get More Voices" button
-                    item {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        OutlinedButton(
-                            onClick = {
-                                try {
-                                    val intent = Intent()
-                                    intent.action = "com.android.settings.TTS_SETTINGS"
-                                    context.startActivity(intent)
-                                } catch (e: Exception) {
-                                    // Fallback to general settings if TTS settings not available
-                                    try {
-                                        val intent = Intent(android.provider.Settings.ACTION_SETTINGS)
-                                        context.startActivity(intent)
-                                    } catch (e: Exception) {
-                                        // Ignore if settings cannot be opened
+                            } else {
+                                // Stop any previous preview and start new one
+                                voiceManager.stopPreview()
+                                previewingVoice = voice
+                                voiceManager.previewVoice(
+                                    voice = voice,
+                                    text = "Welcome to your meditation practice. Take a deep breath and relax.",
+                                    onComplete = {
+                                        if (previewingVoice == voice) {
+                                            previewingVoice = null
+                                        }
                                     }
-                                }
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = ButtonDefaults.outlinedButtonColors(
-                                contentColor = Color(0xFF4CAF50)
-                            )
-                        ) {
-                            Icon(
-                                Icons.Default.Download,
-                                contentDescription = null,
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Get More Voices")
-                        }
-                        Spacer(modifier = Modifier.height(16.dp))
-                    }
-
-                    // Info Section at the bottom of the list
-                    item {
-                        Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            backgroundColor = Color(0xFF2C2C2E),
-                            elevation = 0.dp,
-                            shape = RoundedCornerShape(12.dp)
-                        ) {
-                            Column(
-                                modifier = Modifier.padding(16.dp)
-                            ) {
-                                Text(
-                                    text = "ℹ️ About Enhanced Voices",
-                                    color = Color.White,
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.SemiBold
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text(
-                                    text = "Higher quality voices are managed by your device's Text-to-Speech engine. " +
-                                            "Many voices come pre-installed on newer devices, while others may require download (100-500MB each).\n\n" +
-                                            "To manage voices:\n" +
-                                            "Settings → Accessibility → Text-to-Speech → Speech Services by Google → Settings icon → Voice selection\n\n" +
-                                            "Enhanced voices do not increase app size and are stored in your device's system storage.",
-                                    color = Color.Gray,
-                                    fontSize = 14.sp,
-                                    lineHeight = 20.sp
                                 )
                             }
+                        },
+                        onStopPreview = {
+                            voiceManager.stopPreview()
+                            previewingVoice = null
                         }
-                    }
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
                 }
-            } else {
-                // Only show info section when enhanced voice is disabled
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    backgroundColor = Color(0xFF2C2C2E),
-                    elevation = 0.dp,
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp)
-                    ) {
-                        Text(
-                            text = "ℹ️ About Enhanced Voices",
-                            color = Color.White,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "Higher quality voices are managed by your device's Text-to-Speech engine. " +
-                                    "Many voices come pre-installed on newer devices, while others may require download (100-500MB each).\n\n" +
-                                    "To manage voices:\n" +
-                                    "Settings → Accessibility → Text-to-Speech → Speech Services by Google → Settings icon → Voice selection\n\n" +
-                                    "Enhanced voices do not increase app size and are stored in your device's system storage.",
-                            color = Color.Gray,
-                            fontSize = 14.sp,
-                            lineHeight = 20.sp
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.weight(1f))
             }
         }
     }
