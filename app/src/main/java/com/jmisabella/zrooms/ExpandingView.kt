@@ -43,6 +43,9 @@ import androidx.compose.material.icons.outlined.Eco
 import androidx.compose.material.icons.outlined.FormatQuote
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.filled.TheaterComedy
+import androidx.compose.material.icons.filled.ChevronLeft
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Composable
@@ -631,6 +634,50 @@ fun ExpandingView(
                 .align(Alignment.BottomCenter)
                 .padding(bottom = 140.dp) // Position clearly above buttons and room label
         )
+
+        // Skip buttons - only visible in MEDITATION mode (story chapters)
+        if (contentMode == ContentMode.MEDITATION) {
+            Row(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp)
+                    .padding(bottom = 250.dp), // Position above closed captions
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                // Previous chapter button (left edge)
+                Box(
+                    modifier = Modifier
+                        .clickable { ttsManager.skipToPreviousChapter() }
+                        .background(Color.Black.copy(alpha = 0.3f), CircleShape)
+                        .padding(8.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        Icons.Filled.ChevronLeft,
+                        contentDescription = "Previous Chapter",
+                        tint = Color.White.copy(alpha = 0.7f),
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+
+                // Next chapter button (right edge)
+                Box(
+                    modifier = Modifier
+                        .clickable { ttsManager.skipToNextChapter() }
+                        .background(Color.Black.copy(alpha = 0.3f), CircleShape)
+                        .padding(8.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        Icons.Filled.ChevronRight,
+                        contentDescription = "Next Chapter",
+                        tint = Color.White.copy(alpha = 0.7f),
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
+        }
     }
 
     // Hide alarm state label after 2 seconds

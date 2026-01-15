@@ -1,5 +1,109 @@
 # Z Rooms Android - Change Log
 
+## 2026-01-14: Story Chapter Mode - Sequential Playback with Navigation
+
+### **OVERVIEW**
+
+Major feature pivot: The guided meditation feature (Leaf button) has been repurposed to play sequential story chapters instead of random meditations. This aligns the Android app with corresponding iOS changes.
+
+### **CHANGES IMPLEMENTED**
+
+#### 1. TTS Pause Timing Adjustments
+
+**File:** [TextToSpeechManager.kt:245-285](app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt#L245-L285)
+
+- **Removed** automatic 2-second pauses after sentences
+- **Reduced** paragraph pauses from 4 seconds to 2 seconds
+- **Added** `(0s)` markers between sentences to create closed caption breaks without actual audio pauses
+- Manual pause markers like `(2s)` or `(1.5m)` in content files still work as expected
+
+**Result:** Narration flows more naturally with shorter pauses, while closed captions update sentence-by-sentence.
+
+#### 2. Preset-Only Random Selection
+
+**Files Modified:** [TextToSpeechManager.kt:335-336, 418-419](app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt#L335-L336)
+
+- **Removed** custom meditations from the random meditation pool
+- **Removed** custom poems from the random poetry pool
+- Custom content remains accessible through the dedicated content browser (quote button)
+
+**Rationale:** The Leaf button and Poetry mode now only play preset content for consistent story/poem experience.
+
+#### 3. Sequential Story Chapter Playback
+
+**File:** [TextToSpeechManager.kt](app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt)
+
+New properties and methods added:
+
+- `currentChapterIndex` - Persisted to SharedPreferences, tracks which chapter the user is on (lines 64-66)
+- `totalPresetMeditations` - Cached count of available chapters (line 68)
+- `countPresetMeditations()` - Dynamically counts preset files (lines 126-136)
+- `getSequentialMeditation()` - Loads current chapter by index (lines 393-406)
+- `startSpeakingSequentialMeditation()` - Starts playing current chapter (lines 474-479)
+- `skipToNextChapter()` - Advances to next chapter if available (lines 485-495)
+- `skipToPreviousChapter()` - Goes back to previous chapter if available (lines 501-510)
+
+**Behavior Changes:**
+
+- Leaf button now plays chapters sequentially starting from chapter 1 (or last saved position)
+- Chapter progress persists across app restarts via SharedPreferences
+- Auto-advances to next chapter when current chapter completes (with 1-second pause)
+- Poetry mode remains random (not sequential)
+
+#### 4. Skip Button UI
+
+**File:** [ExpandingView.kt:638-680](app/src/main/java/com/jmisabella/zrooms/ExpandingView.kt#L638-L680)
+
+Added `<` and `>` navigation buttons:
+
+- **Position:** Above closed caption area (`bottom = 250.dp`)
+- **Visibility:** Only appear when in MEDITATION mode (story chapters)
+- **Styling:** Semi-transparent black circles with chevron icons
+- Left button calls `skipToPreviousChapter()`
+- Right button calls `skipToNextChapter()`
+
+#### 5. TTS Character Filtering
+
+**File:** [TextToSpeechManager.kt:595-607](app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt#L595-L607)
+
+Fixed issue where TTS was literally saying "dash" and "hash" for `-` and `#` characters:
+
+```kotlin
+val cleanedPhrase = phrase
+    .replace("-", " ")   // Dash becomes space (natural for hyphenated words)
+    .replace("#", "")    // Hash removed
+    .replace("*", "")    // Asterisk removed
+    .replace("_", "")    // Underscore removed
+    .replace("~", "")    // Tilde removed
+```
+
+**Note:** Closed captions still display the original text with these characters - only the TTS audio is cleaned.
+
+### **FILES MODIFIED**
+
+| File | Changes |
+|------|---------|
+| [TextToSpeechManager.kt](app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt) | Pause timing, preset-only selection, sequential playback, chapter navigation, TTS character filtering |
+| [ExpandingView.kt](app/src/main/java/com/jmisabella/zrooms/ExpandingView.kt) | Added skip button UI with < > navigation |
+
+### **TESTING CHECKLIST**
+
+- [x] Build compiles successfully
+- [ ] TTS plays without sentence pauses, 2s pauses between paragraphs
+- [ ] Manual pause markers `(2s)` still work
+- [ ] Leaf button only plays preset meditations (not custom)
+- [ ] Poetry button only plays preset poems (not custom)
+- [ ] Meditation plays sequentially from chapter 1
+- [ ] Chapter progress persists after app restart
+- [ ] Skip buttons appear only in MEDITATION mode
+- [ ] < and > buttons navigate chapters correctly
+- [ ] Auto-advance works when chapter completes
+- [ ] Closed captions update sentence-by-sentence
+- [ ] TTS does not say "dash" or "hash" for - and # characters
+- [ ] Skip buttons don't overlap with other UI elements
+
+---
+
 ## 2026-01-03 18:45 EST: Scrollable Closed Caption History with Auto-Scroll
 
 ### **THE FEATURE**

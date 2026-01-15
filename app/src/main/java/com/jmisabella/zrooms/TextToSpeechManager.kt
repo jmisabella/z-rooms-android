@@ -59,6 +59,13 @@ class TextToSpeechManager(
     private var lastPlayedMeditation: String? = null // Track last meditation to avoid repeats
     private var lastPlayedPoem: String? = null // Track last poem to avoid repeats
     private val prefs = androidx.preference.PreferenceManager.getDefaultSharedPreferences(context)
+
+    // Sequential chapter playback
+    private var currentChapterIndex: Int
+        get() = prefs.getInt("currentChapterIndex", 0)
+        set(value) = prefs.edit().putInt("currentChapterIndex", value).apply()
+
+    private var totalPresetMeditations: Int = 0
     private val voiceManager = VoiceManager.getInstance(context)
 
     // Callback to notify when ambient volume changes
@@ -106,8 +113,26 @@ class TextToSpeechManager(
                         pendingPhrase = null
                     }
                 })
+
+                // Initialize chapter count after TTS is ready
+                totalPresetMeditations = countPresetMeditations()
             }
         }
+    }
+
+    /**
+     * Counts total available preset meditation files
+     */
+    private fun countPresetMeditations(): Int {
+        var count = 0
+        var i = 1
+        while (true) {
+            val resId = context.resources.getIdentifier("preset_meditation$i", "raw", context.packageName)
+            if (resId == 0) break
+            count++
+            i++
+        }
+        return count
     }
 
     /**
@@ -213,7 +238,9 @@ class TextToSpeechManager(
     }
 
     /**
-     * Automatically adds pauses to text: 2s after sentences, 4s after paragraphs
+     * Automatically adds pauses to text for closed caption sentence breaks and paragraph pauses.
+     * Uses (0s) markers between sentences to create caption breaks without actual pauses.
+     * Uses (2s) markers between paragraphs for natural reading flow.
      */
     private fun addAutomaticPauses(text: String): String {
         val result = StringBuilder()
@@ -228,26 +255,29 @@ class TextToSpeechManager(
                 continue
             }
 
-            // Split into sentences
-            val sentences = trimmed.split(Regex("[.!?]"))
+            // Split into sentences while preserving the punctuation
+            val sentencePattern = Regex("""[^.!?]+[.!?]+""")
+            val sentences = sentencePattern.findAll(trimmed).map { it.value.trim() }.toList()
 
-            for (sentence in sentences) {
-                val trimmedSentence = sentence.trim()
-                if (trimmedSentence.isEmpty()) continue
+            // If no sentences found with punctuation, treat the whole paragraph as one sentence
+            val sentencesToProcess = if (sentences.isEmpty()) listOf(trimmed) else sentences
 
-                // Check if this sentence already has a pause marker
-                if (!Regex("""\(\d+(?:\.\d+)?s\)\s*${'$'}""").containsMatchIn(trimmedSentence)) {
-                    // No pause found, add automatic 2s pause
-                    result.append(trimmedSentence).append(" (2s)\n")
+            for (sentence in sentencesToProcess) {
+                if (sentence.isEmpty()) continue
+
+                // Check if this sentence already has a pause marker at the end
+                if (!Regex("""\(\d+(?:\.\d+)?s\)\s*${'$'}""").containsMatchIn(sentence)) {
+                    // Add (0s) marker after each sentence for caption break (no actual pause)
+                    result.append(sentence).append(" (0s)\n")
                 } else {
                     // Already has a pause, keep it
-                    result.append(trimmedSentence).append("\n")
+                    result.append(sentence).append("\n")
                 }
             }
 
-            // Add longer pause between paragraphs (except after the last one)
+            // Add 2s pause between paragraphs (except after the last one)
             if (index < paragraphs.size - 1) {
-                result.append("(4s)\n")
+                result.append("(2s)\n")
             }
         }
 
@@ -332,14 +362,10 @@ class TextToSpeechManager(
             i++
         }
 
-        // 2. Add all custom meditations
-        customMeditationManager?.meditations?.forEach { meditation ->
-            if (meditation.text.isNotEmpty()) {
-                allMeditations.add(meditation.text)
-            }
-        }
+        // Custom meditations excluded from random selection - only presets play via Leaf button
+        // Custom content remains accessible through dedicated list views
 
-        // 3. Check if we have any meditations at all
+        // 2. Check if we have any meditations at all
         if (allMeditations.isEmpty()) {
             return null
         }
@@ -366,7 +392,27 @@ class TextToSpeechManager(
     }
 
     /**
-     * Loads a random poem from both preset files and custom poems
+     * Loads the current chapter meditation sequentially (1-indexed files)
+     * File naming: preset_meditation1.txt, preset_meditation2.txt, etc.
+     */
+    private fun getSequentialMeditation(): String? {
+        if (totalPresetMeditations == 0) totalPresetMeditations = countPresetMeditations()
+        if (totalPresetMeditations == 0) return null
+
+        // currentChapterIndex is 0-based, file names are 1-based
+        val fileIndex = currentChapterIndex + 1
+        val resId = context.resources.getIdentifier("preset_meditation$fileIndex", "raw", context.packageName)
+        if (resId == 0) return null
+
+        return try {
+            context.resources.openRawResource(resId).bufferedReader().use { it.readText() }.trim()
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    /**
+     * Loads a random poem from preset files only
      */
     private fun loadRandomPoemFile(): String? {
         val allPoems = mutableListOf<String>()
@@ -394,17 +440,13 @@ class TextToSpeechManager(
             i++
         }
 
-        // 2. Add all custom poems
-        customPoetryManager?.poems?.forEach { poem ->
-            if (poem.text.isNotEmpty()) {
-                allPoems.add(poem.text)
-            }
-        }
+        // Custom poems excluded from random selection - only presets play via Poetry button
+        // Custom content remains accessible through dedicated list views
 
-        // 3. Check if we have any poems at all
+        // 2. Check if we have any poems at all
         if (allPoems.isEmpty()) return null
 
-        // 4. Pick random poem, avoiding last played
+        // 3. Pick random poem, avoiding last played
         val selectedPoem = if (allPoems.size > 1 && lastPlayedPoem != null) {
             val availablePoems = allPoems.filter { it != lastPlayedPoem }
             if (availablePoems.isNotEmpty()) {
@@ -421,7 +463,7 @@ class TextToSpeechManager(
     }
 
     /**
-     * Starts speaking a random poem from preset files and custom poems
+     * Starts speaking a random poem from preset files only
      */
     fun startSpeakingRandomPoem(): String? {
         if (!isInitialized) return null
@@ -432,14 +474,55 @@ class TextToSpeechManager(
     }
 
     /**
+     * Starts speaking the current sequential meditation chapter
+     */
+    fun startSpeakingSequentialMeditation(): String? {
+        if (!isInitialized) return null
+        val meditationText = getSequentialMeditation() ?: return null
+        startSpeakingWithPauses(meditationText)
+        return meditationText
+    }
+
+    /**
+     * Skips to the next chapter if available
+     * Returns true if successful, false if already at last chapter
+     */
+    fun skipToNextChapter(): Boolean {
+        if (totalPresetMeditations == 0) totalPresetMeditations = countPresetMeditations()
+        if (currentChapterIndex < totalPresetMeditations - 1) {
+            currentChapterIndex++
+            if (contentMode == ContentMode.MEDITATION) {
+                startSpeakingSequentialMeditation()
+            }
+            return true
+        }
+        return false
+    }
+
+    /**
+     * Skips to the previous chapter if available
+     * Returns true if successful, false if already at first chapter
+     */
+    fun skipToPreviousChapter(): Boolean {
+        if (currentChapterIndex > 0) {
+            currentChapterIndex--
+            if (contentMode == ContentMode.MEDITATION) {
+                startSpeakingSequentialMeditation()
+            }
+            return true
+        }
+        return false
+    }
+
+    /**
      * Cycles through content modes: OFF → MEDITATION → POETRY → OFF
      * Includes crossfade loading state when transitioning from MEDITATION → POETRY
      */
     suspend fun cycleContentMode() {
         when (contentMode) {
             ContentMode.OFF -> {
-                // OFF → MEDITATION (immediate, green)
-                startSpeakingRandomMeditation()
+                // OFF → MEDITATION (immediate, green) - use sequential playback
+                startSpeakingSequentialMeditation()
                 contentMode = ContentMode.MEDITATION
                 saveContentMode()
             }
@@ -485,7 +568,7 @@ class TextToSpeechManager(
 
         // If mode was active, restart playback
         when (contentMode) {
-            ContentMode.MEDITATION -> startSpeakingRandomMeditation()
+            ContentMode.MEDITATION -> startSpeakingSequentialMeditation()
             ContentMode.POETRY -> startSpeakingRandomPoem()
             ContentMode.OFF -> { /* Do nothing */ }
         }
@@ -509,11 +592,19 @@ class TextToSpeechManager(
         // Store phrase to be displayed when TTS actually starts (in onStart callback)
         pendingPhrase = phrase
 
+        // Clean the phrase for TTS - remove characters that get spoken literally
+        val cleanedPhrase = phrase
+            .replace("-", " ")
+            .replace("#", "")
+            .replace("*", "")
+            .replace("_", "")
+            .replace("~", "")
+
         val params = HashMap<String, String>()
         params[TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID] = "utterance_$currentUtteranceIndex"
         params[TextToSpeech.Engine.KEY_PARAM_VOLUME] = VoiceManager.VOICE_VOLUME.toString()
 
-        tts?.speak(phrase, TextToSpeech.QUEUE_FLUSH, params)
+        tts?.speak(cleanedPhrase, TextToSpeech.QUEUE_FLUSH, params)
 
         // Schedule next phrase after this one completes (handled in onDone callback)
         // The delay will be applied there
@@ -562,6 +653,18 @@ class TextToSpeechManager(
 
             // Set the content completion flag for wake-up greeting
             prefs.edit().putBoolean(PREF_CONTENT_COMPLETED, true).apply()
+
+            // Auto-advance to next chapter for meditation mode
+            if (contentMode == ContentMode.MEDITATION) {
+                if (totalPresetMeditations == 0) totalPresetMeditations = countPresetMeditations()
+                if (currentChapterIndex < totalPresetMeditations - 1) {
+                    currentChapterIndex++
+                    scope.launch {
+                        delay(1000) // 1 second pause before next chapter
+                        startSpeakingSequentialMeditation()
+                    }
+                }
+            }
         }
     }
 

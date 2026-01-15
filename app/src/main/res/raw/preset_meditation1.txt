@@ -1,106 +1,47 @@
-In the words of William Wordsworth, (0.15s) from I Wandered Lonely As A Cloud (2s)
+# PRELUDE
 
-For oft when on my couch I lie (0.7s)
-In vacant or in pensive mood, (1.2s)
-They flash upon that inward eye (0.8s)
-Which is the bliss of solitude, (1.3s)
-And then my heart with pleasure fills, (1s)
-And dances with the Daffodils. (2.5s)
+You sign the contract because you need to eat. Because the rent on your compartment in the Ganymede hab-ring is three weeks overdue. Because your daughter needs new pressure seals for her school suit, or your sister needs surgery, or your parents want to move back to Earth before they die. The reasons vary. The outcome does not.
 
-Settle into a place where you feel safe... (0.6s) Whether sitting or lying down... (0.8s) And gently let your eyes close. (4.5s)
+The contract is forty-seven pages of legal text optimized for corporate liability protection. You scroll through terms like "acceptable casualty rates" and "postmortem contractor obligations" and "next-of-kin waiver clauses." The death rate for salvage crews hovers between fifteen and twenty percent. The pay is mediocre. The jobs are scarce. You sign anyway.
 
-Just take a moment to notice that you've arrived here… (0.5s) a small pause just for you. (3.5s)
+Someone has to pick through the ruins.
 
-Today might have been full… (0.35s) busy… (0.5s) or quiet… (1s)
-Whatever it was (0.4s) it's okay. (0.8s)
-There's nothing to fix right now. (6s)
+The colonies fail more often than the recruitment ads suggest. Atmospheric processors malfunction. Reactor shielding degrades. Pathogens evolve. Supply chains collapse. People go silent. Six months later, or six years, or sixty, a salvage contract gets posted on the job boards. Benson-class vessels depart Ganymede or Ceres or Titan, skeleton crews strapped into hibernation pods, heading toward places where people used to be.
 
-Let's begin with the breath. (1.5s)
-Inhale slowly (0.5s) through the nose… (0.5s)
-Filling the belly first, (0.5s) then the chest… (2s)
-And exhale just as slowly, (0.5s) letting everything soften. (3s)
+You do not think of yourself as a scavenger. The company prefers the term "recovery specialist" or "reclamation technician." The contracts call you an "independent corporate contractor." You call yourself employed.
 
-Again… (0.5s) breathe in… (3.5s) and breathe out… (4.5s)
-Slowly, (0.5s) no rush. (2s)
-Breathe in (4s) and breathe out (4.5s)
-In (4s) and out (5s)
+The work is simple in theory. Travel to the dead colony. Assess structural integrity. Document salvageable equipment. File reports. Extract anything worth the cargo space. Avoid thinking too hard about the personal effects you find in the habitation modules—the photos, the children's drawings, the half-written messages that end mid-sentence.
 
-If the mind is replaying the day, (0.5s) that's perfectly normal. (1s)
-Just notice it… (0.5s) like watching clouds drift across the sky… (1.5s)
-No need to chase them… (1s)
-Gently come back to the breath. (8s)
+Most colonies die quietly. Equipment failure. Supply shortage. Slow economic strangulation. Bodies in beds, or empty corridors, or careful graves outside the airlocks. Clean deaths, in the catalog language. Quick reports. Acceptable salvage yields.
 
-Now we'll do a few rounds of box breathing together. (1.5s)
-Just follow my voice. (1.2s)
-Inhale for four… (0.2s)
-One (1.0s)
-Two (1.0s)
-Three (1.0s)
-Four (2s)
+Some colonies are harder to categorize.
 
-Hold (0.3s)
-One (1.0s)
-Two (1.0s)
-Three (1.0s)
-Four (2s)
+---
 
-Exhale (0.3s)
-One (1.0s)
-Two (1.0s)
-Three (1.0s)
-Four (2s)
+Tantalus V went silent forty years ago. The colony was eighteen months old—past the high-mortality initialization phase, well into stable operations. One hundred forty-seven colonists. Mining operation, modest but profitable. Then nothing. No distress call. No evacuation beacon. Just silence.
 
-And hold it empty, (0.5s)
-Three (1.0s)
-Four (2s)
+The company wrote it off. Forty years passed.
 
-Again. (0.3s)
-In… (1.0s)
-Two… (1.0s)
-Three… (1.0s)
-Four… (2s)
+Six months ago, the distress beacon reactivated.
 
-Hold… (1.0s)
-Two… (1.0s)
-Three… (1.0s)
-Four… (2s)
+No explanation. No follow-up communication. Just the automated signal, pulsing through the void with the regularity of a heartbeat. The company ran cost-benefit analyses. Crew availability assessments. Insurance risk calculations. Three weeks ago, the salvage contract was posted.
 
-Out… (1.0s)
-Two… (1.0s)
-Three… (1.0s)
-Four… (2s)
+The MSCS *Goliath* is a Benson-class salvage vessel, one hundred twenty meters of reinforced hull and cargo space. Crew capacity rated for five to eight. Current complement: five. Minimal configuration. The ship launched from Ganymede six standard months ago—one hundred eighty-six days of sublight transit, most of it spent in hibernation while the ship's ion drives burn through the dark.
 
-Empty… (1.0s)
-Two… (1.0s)
-Three… (1.0s)
-Four… (5s)
+Commander Lian Chen, forty-four. Former military, now corporate crew lead. She needs the money for her son's education, for her partner's medical expenses. She has the command experience to keep four people alive in a hostile environment. She has led crews before. Most of them survived.
 
-Good. (0.5s) Now let the breath find its own natural rhythm. (1s)
-Observe each breath. (12s)
+Dmitri Volkov, thirty-eight. Ship engineer. He is paying off his sister's debts to avoid her entering the same contracts he is trapped in. He can fix anything with moving parts and most things without. Fifteen years' experience. The ship will function. Probably.
 
-Let's gently scan the body, (0.5s) starting at the top of the head… (2s)
-Noticing any tension in the scalp… (2s)
-The forehead… (2s)
-Let it melt… (2s)
-The eyes soft… (2s)
-Jaw unclenched… (2.5s)
-Shoulders drop away from the ears… (2s)
-Arms heavy… (2s)
-Hands resting… (2.5s)
-Chest open… (2s)
-Belly soft… (2.5s)
-Legs heavy… (2s)
-Feet grounded. (8s)
+Dr. Amara Osei, thirty-two. Medic and biologist. Student loans and family obligations. She chose salvage over research because field work pays better and the job market for xenobiology PhDs remains catastrophically oversaturated. She will keep the crew healthy. That is the theory.
 
-Wherever you notice tightness, (0.5s) breathe into it… (0.5s)
-And on the out-breath, (0.5s) let it go. (10s)
+Jordan Kim, twenty-seven. Pilot. Saves to relocate parents from the Martian arcologies to Earth before the atmospheric stabilization fails. Young, optimistic, competent. The ship will reach its destination. The landing will be clean.
 
-Your only job right now is to rest here… (0.5s) nothing to do… (0.5s) nowhere to go. (12s)
+Dr. Marcus Reeves, thirty-five. Salvage assessment specialist. Gambling debts, primarily. He has the academic training to appraise what they find, the practical greed to maximize salvage yields, and the cynical awareness that none of this matters unless they survive to collect payment.
 
-The day can wait a little longer. (2s) You've given yourself this gift. (16s)
+Five people. One hundred eighty-six days to Tantalus V. Forty-eight hours planetside for assessment and initial salvage. One hundred eighty-six days return to Ganymede. Payment on delivery. Penalties for early abort: eighteen months' salary per contractor.
 
-And when you're ready… (2s)
-Bring a little movement to the fingers and toes… (2s)
-Take a deeper breath… (1s)
-If there's more to your day, (0.8s) gently open your eyes to greet it… (2s)
-But if sleep is calling, (0.85s) simply remain here… (1s) drifting peacefully into rest. (4s)
+The *Goliath*'s med bay contains five hibernation pods. Life support reduces to minimal power. Neural monitors track brain activity. Medical systems maintain homeostasis. You sleep through the dark. Six months compressed to unconscious void.
+
+The pods seal with a hiss like an apology.
+
+The ship burns outward, trailing fusion fire, a pinprick of light swallowed by the vast and patient dark.
