@@ -484,34 +484,49 @@ class TextToSpeechManager(
     }
 
     /**
-     * Skips to the next chapter if available
-     * Returns true if successful, false if already at last chapter
+     * Skips to the next chapter with circular navigation
+     * Wraps to first chapter when at last chapter
      */
     fun skipToNextChapter(): Boolean {
         if (totalPresetMeditations == 0) totalPresetMeditations = countPresetMeditations()
-        if (currentChapterIndex < totalPresetMeditations - 1) {
-            currentChapterIndex++
-            if (contentMode == ContentMode.MEDITATION) {
-                startSpeakingSequentialMeditation()
-            }
-            return true
+        if (totalPresetMeditations == 0) return false
+
+        // Circular navigation: wrap to first chapter if at last chapter
+        currentChapterIndex = if (currentChapterIndex < totalPresetMeditations - 1) {
+            currentChapterIndex + 1
+        } else {
+            0 // Wrap to first chapter
         }
-        return false
+
+        if (contentMode == ContentMode.MEDITATION) {
+            val preservedMode = contentMode
+            startSpeakingSequentialMeditation()
+            contentMode = preservedMode // Restore contentMode after startSpeaking clears it
+        }
+        return true
     }
 
     /**
-     * Skips to the previous chapter if available
-     * Returns true if successful, false if already at first chapter
+     * Skips to the previous chapter with circular navigation
+     * Wraps to last chapter when at first chapter
      */
     fun skipToPreviousChapter(): Boolean {
-        if (currentChapterIndex > 0) {
-            currentChapterIndex--
-            if (contentMode == ContentMode.MEDITATION) {
-                startSpeakingSequentialMeditation()
-            }
-            return true
+        if (totalPresetMeditations == 0) totalPresetMeditations = countPresetMeditations()
+        if (totalPresetMeditations == 0) return false
+
+        // Circular navigation: wrap to last chapter if at first chapter
+        currentChapterIndex = if (currentChapterIndex > 0) {
+            currentChapterIndex - 1
+        } else {
+            totalPresetMeditations - 1 // Wrap to last chapter
         }
-        return false
+
+        if (contentMode == ContentMode.MEDITATION) {
+            val preservedMode = contentMode
+            startSpeakingSequentialMeditation()
+            contentMode = preservedMode // Restore contentMode after startSpeaking clears it
+        }
+        return true
     }
 
     /**

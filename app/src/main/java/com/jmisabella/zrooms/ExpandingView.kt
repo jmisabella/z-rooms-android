@@ -377,7 +377,7 @@ fun ExpandingView(
                     )
                 }
                 .pointerInput(Unit) {
-                    detectTapGestures { _ ->
+                    detectTapGestures { offset ->
                         if (isAlarmActive.value) {
                             audioService?.stopAll()
                             isAlarmActive.value = false
@@ -632,7 +632,7 @@ fun ExpandingView(
             isVisible = showMeditationText.value && contentMode != ContentMode.OFF,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 140.dp) // Position clearly above buttons and room label
+                .padding(bottom = 180.dp) // Increased spacing from bottom buttons
         )
 
         // Skip buttons - only visible in MEDITATION mode (story chapters)
@@ -642,13 +642,20 @@ fun ExpandingView(
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp)
-                    .padding(bottom = 250.dp), // Position above closed captions
+                    .padding(bottom = 290.dp) // Increased spacing from closed captions
+                    .zIndex(100f), // Ensure buttons are on top and intercept touches first
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 // Previous chapter button (left edge)
                 Box(
                     modifier = Modifier
-                        .clickable { ttsManager.skipToPreviousChapter() }
+                        .pointerInput(Unit) {
+                            detectTapGestures(
+                                onTap = { offset ->
+                                    ttsManager.skipToPreviousChapter()
+                                }
+                            )
+                        }
                         .background(Color.Black.copy(alpha = 0.3f), CircleShape)
                         .padding(8.dp),
                     contentAlignment = Alignment.Center
@@ -664,7 +671,13 @@ fun ExpandingView(
                 // Next chapter button (right edge)
                 Box(
                     modifier = Modifier
-                        .clickable { ttsManager.skipToNextChapter() }
+                        .pointerInput(Unit) {
+                            detectTapGestures(
+                                onTap = { offset ->
+                                    ttsManager.skipToNextChapter()
+                                }
+                            )
+                        }
                         .background(Color.Black.copy(alpha = 0.3f), CircleShape)
                         .padding(8.dp),
                     contentAlignment = Alignment.Center

@@ -1,5 +1,94 @@
 # Z Rooms Android - Change Log
 
+## 2026-01-14 22:00 EST: Circular Chapter Navigation & UI Fixes
+
+### **OVERVIEW**
+
+Implemented circular navigation for story chapters (wrapping from last to first and vice versa) and fixed critical UI issues where navigation buttons were unresponsive and poorly positioned.
+
+### **CHANGES IMPLEMENTED**
+
+#### 1. Circular Chapter Navigation
+
+**File:** [TextToSpeechManager.kt:490-530](app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt#L490-L530)
+
+**Previous Behavior:**
+- `skipToNextChapter()` returned `false` when at last chapter (stopping navigation)
+- `skipToPreviousChapter()` returned `false` when at first chapter (stopping navigation)
+
+**New Behavior:**
+- Clicking next on last chapter wraps to first chapter (preset_meditation1.txt)
+- Clicking previous on first chapter wraps to last chapter
+- Both functions now always return `true` (unless no chapters exist)
+
+**Critical Bug Fix:**
+- Added `contentMode` preservation in both navigation functions (lines 502-504, 525-527)
+- **Issue:** `startSpeakingSequentialMeditation()` calls `stopSpeaking()` which sets `contentMode = OFF`
+- **Impact:** This was causing the Leaf button to turn off, hiding navigation buttons and closed captions
+- **Solution:** Save contentMode before calling `startSpeaking`, restore it immediately after
+
+#### 2. Navigation Button Touch Input Fix
+
+**File:** [ExpandingView.kt:649-695](app/src/main/java/com/jmisabella/zrooms/ExpandingView.kt#L649-L695)
+
+**Problem:** Navigation buttons were not responding to taps - taps were propagating to parent Column's tap gesture handler which called `dismiss()`
+
+**Root Cause Analysis:**
+- Parent Column has `detectTapGestures` modifier (line 380-389) that catches all taps
+- Navigation buttons are siblings to Column in parent Box
+- `zIndex` alone wasn't sufficient to prevent tap propagation
+- The `clickable` modifier was still allowing events to bubble up
+
+**Solution:**
+- Replaced `clickable` modifier with `pointerInput(Unit)` + `detectTapGestures` on each button
+- This properly consumes tap events at the button level before they reach the parent
+
+#### 3. UI Spacing Improvements
+
+**File:** [ExpandingView.kt:635, 645](app/src/main/java/com/jmisabella/zrooms/ExpandingView.kt#L635)
+
+Increased spacing to prevent overlapping UI elements:
+- **Closed captions box:** `bottom = 140.dp` → `180.dp` (40dp increase)
+- **Navigation buttons:** `bottom = 250.dp` → `290.dp` (40dp increase)
+
+**Before:** Navigation buttons and closed captions were touching the bottom control buttons (Leaf, Settings, etc.)
+
+**After:** Clean visual separation with proper spacing
+
+### **DEBUGGING PROCESS**
+
+Added temporary debug logging to identify the root cause:
+```kotlin
+println("DEBUG: Next chapter button tapped! contentMode=$contentMode")
+println("DEBUG: Column tap gesture detected at offset=$offset, contentMode=$contentMode")
+```
+
+Logs revealed:
+1. Button tap handlers WERE firing correctly
+2. `contentMode` was correctly `MEDITATION` before and after `skipToNextChapter()`
+3. But UI was still disappearing, indicating contentMode was being changed elsewhere
+4. Traced to `startSpeakingWithPauses() → stopSpeaking() → contentMode = OFF`
+
+### **FILES MODIFIED**
+
+| File | Changes |
+|------|---------|
+| [TextToSpeechManager.kt](app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt) | Circular navigation logic, contentMode preservation |
+| [ExpandingView.kt](app/src/main/java/com/jmisabella/zrooms/ExpandingView.kt) | Button touch input handling, spacing adjustments |
+
+### **TESTING CHECKLIST**
+
+- [x] Navigation buttons respond to taps without dismissing view
+- [x] Leaf button stays green/enabled when navigating chapters
+- [x] Closed captions remain visible during chapter navigation
+- [x] Voice continues playing new chapter after navigation
+- [x] Clicking next on last chapter wraps to first chapter
+- [x] Clicking previous on first chapter wraps to last chapter
+- [x] Navigation buttons have proper spacing from bottom controls
+- [x] No UI overlap between navigation buttons and control buttons
+
+---
+
 ## 2026-01-14: Story Chapter Mode - Sequential Playback with Navigation
 
 ### **OVERVIEW**
