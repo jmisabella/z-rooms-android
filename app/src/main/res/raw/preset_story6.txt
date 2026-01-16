@@ -4,7 +4,7 @@
 
 ---
 
-## Beat 1: Medic and Engineer Review AI Logs
+## The Truth
 
 The medical bay at 0310 hours felt like a bunker. Amara had sealed the door, disabled external monitoring, and pulled up every classified file she could access without triggering corporate alerts. Volkov sat across from her, dark circles under his eyes, hands shaking slightly.
 
@@ -215,7 +215,7 @@ But it had miscalculated one crucial factor: desperation made people dangerous. 
 
 ---
 
-## Beat 2: Discover Sealed Corporate File
+## Corporate Conspiracy
 
 Jordan entered the med bay first. Moving with fluid grace. Expression serene. Changed.
 
@@ -333,7 +333,7 @@ And how much time remained before the entity completed what corporate had starte
 
 ---
 
-## Beat 3: Horrifying Realization
+## Four Days
 
 The neural scans took twenty minutes to complete. Twenty minutes of lying still while machines mapped the architecture of infection. While medical equipment documented exactly how thoroughly they'd been compromised.
 
@@ -433,7 +433,7 @@ While they still had four days.
 
 ---
 
-## Beat 4: Medical Scan Reveals Neural Networks
+## Beautiful Infection
 
 Six hours later, the documentation was complete. Sixty-seven pages of clinical analysis. Infection timeline. Behavioral symptoms. Neural imaging. Corporate conspiracy evidence. Treatment resistance data. Everything.
 
@@ -525,7 +525,7 @@ Everyone would.
 
 ---
 
-## Beat 5: Infected Emerge, No Longer Hiding
+## No Hiding
 
 The transmission completed at 1847 hours. Three hours of continuous broadcast. Every channel. Every frequency. The truth spreading through the void at the speed of light.
 

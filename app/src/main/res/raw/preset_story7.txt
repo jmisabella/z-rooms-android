@@ -4,7 +4,7 @@
 
 ---
 
-## Beat 1: Barricaded
+## Last Stand
 
 The med bay door was welded shut. Improvised. Desperate. Volkov had burned through the access panel with a plasma cutter, fusing metal to metal while Amara barricaded the secondary entrance with medical equipment.
 
@@ -76,7 +76,7 @@ Inside the med bay, Amara Osei kept working on her terrible plan, trying not to 
 
 ---
 
-## Beat 2: Temptation Through the Door
+## Sweet Voices
 
 Volkov had disconnected the comm panel. Severed the external speakers. Blocked every obvious channel the infected could use to communicate.
 
@@ -150,7 +150,7 @@ Amara loaded the first syringe. "And what happens to individuality? To personal 
 
 ---
 
-## Beat 3: The Revelation
+## Rerouted
 
 The comm system crackled. Unexpected—Volkov had disabled external communications. But HERMES AI still functioned. And the infected had accessed ship systems through neural interface.
 
@@ -198,7 +198,7 @@ It was all they had left.
 
 ---
 
-## Beat 4: The Fight
+## Desperate Assault
 
 Two hours until departure. Amara and Volkov had spent ninety minutes planning. Running scenarios. Identifying vulnerabilities.
 
@@ -290,7 +290,7 @@ She had thirty minutes to save whatever could still be saved.
 
 ---
 
-## Beat 5: The Cost
+## Victory Hollow
 
 Chen went into hibernation pod one. Amara sealed the lid, activated stasis protocols, watched the vital signs stabilize on minimal life support. The commander's face looked peaceful in artificial sleep. Like the infection had never happened.
 
@@ -388,7 +388,7 @@ She just had to hold on for six weeks.
 
 ---
 
-## Beat 6: Engineer's Fate
+## Dmitri Falls
 
 The integration came faster than she expected.
 
@@ -566,7 +566,7 @@ And two weeks of empty space between her and Prospero.
 
 ---
 
-## Beat 7: Alone
+## Solitary Journey
 
 The last two weeks were the longest of her life.
 

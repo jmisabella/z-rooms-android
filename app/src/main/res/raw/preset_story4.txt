@@ -1,10 +1,10 @@
 # Chapter 3: Symptoms
 
-**Day 3–4 | MSCS Goliath, Tantalus V Orbit**
+**Day 3, 4 | MSCS Goliath, Tantalus V Orbit**
 
 ---
 
-## Beat 1: Return to Ship—Subtle Wrongness
+## Something Changed
 
 Amara ran the scanner across Jordan's neural pathways for the third time in six hours. The readout hadn't changed. Brain activity nominal. No inflammation. No lesions. No detectable pathogens. Everything looked exactly as it should for someone who'd just completed a routine surface mission.
 
@@ -120,7 +120,7 @@ Or sabotage.
 
 ---
 
-## Beat 2: The Briefing—Behavioral Tells Emerge
+## New Patterns
 
 The bridge felt smaller with all five crew members present. Chen stood at the command station, mission parameters displayed on the central screen. Volkov leaned against the engineering console, arms crossed. Amara had her medical tablet out, half-attention on the briefing and half on whatever data she was reviewing. Reeves stood by the salvage assessment terminal, stylus tapping against his lips in unconscious rhythm.
 
@@ -196,7 +196,7 @@ Like someone who'd found something they'd been missing and didn't know it until 
 
 ---
 
-## Beat 3: Proximity-Seeking and UV Avoidance
+## Too Close
 
 The mess hall at 0200 hours was usually empty. Chen had learned that in her years of salvage work—if you wanted solitude, you took it during the dead hours between watch shifts when everyone else was sleeping.
 
@@ -320,7 +320,7 @@ Either way, he'd know soon enough.
 
 ---
 
-## Beat 4: Found Footage Reveals "Breakthrough"
+## Colony Recordings
 
 Amara couldn't sleep. Couldn't eat. Couldn't focus on anything except the growing certainty that something was profoundly wrong and no one else seemed to notice.
 
@@ -440,7 +440,7 @@ Just in case.
 
 ---
 
-## Beat 5: Pilot Manipulates with "Corporate Value" Angle
+## The Pitch
 
 The bridge at 1600 hours should have been routine. Chen reviewing departure calculations, Reeves compiling salvage reports, Volkov monitoring ship systems. Professional. Efficient. Normal.
 

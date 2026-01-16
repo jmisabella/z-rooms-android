@@ -4,7 +4,7 @@
 
 ---
 
-## Beat 1: Systems Begin to Fail
+## Sabotage
 
 The navigation computer crashed at 0623 hours.
 
@@ -122,7 +122,7 @@ If she wasn't already too late.
 
 ---
 
-## Beat 2: Jordan Offers Help (Sabotages Further)
+## Helpful Hands
 
 Volkov had the navigation processing core in his hands when Jordan appeared in the engineering bay doorway.
 
@@ -224,7 +224,7 @@ Chen's response came immediately. "On my way."
 
 ---
 
-## Beat 3: Chen Confronts Jordan
+## The Accusation
 
 Chen stood in the engineering bay, reading Volkov's log entries on his tablet. The evidence was circumstantial. Damning, but circumstantial.
 
@@ -373,7 +373,7 @@ And the terrifying part was she didn't know if she'd made the right choice or ju
 
 ---
 
-## Beat 4: Heated Argument and Gaslighting
+## Crew Fractures
 
 The bridge at 0900 hours felt like a pressure vessel about to rupture. Chen stood at the command station. Volkov leaned against engineering console, arms crossed, expression grim. Amara sat at medical station, tablet in hand, looking like she hadn't slept in days. Reeves stood by salvage assessment terminal, carefully neutral, watching everyone with academic detachment.
 
@@ -519,7 +519,7 @@ Would hold together a fracturing crew for twenty-four more hours and hope it was
 
 ---
 
-## Beat 5: Reeves Infected Overnight
+## Midnight Conversion
 
 The ship felt different at night. Not wrong, exactly. Just liminal. Like the normal rules of physics and psychology held looser during the sleep hours. Like boundaries became negotiable.
 
@@ -611,7 +611,7 @@ And he would no longer quite remember why that should frighten him.
 
 ---
 
-## Beat 6: The New Configuration—2 Infected, 2 Uninfected, 1 Confined
+## Outnumbered
 
 Chen woke at 0600 hours to alarms she didn't remember setting. Emergency protocols. Proximity alerts. Something was wrong.
 

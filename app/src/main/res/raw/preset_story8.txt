@@ -4,7 +4,7 @@
 
 ---
 
-## Beat 1: Arrival
+## Quarantine Cleared
 
 The quarantine chamber was white and sterile and quiet.
 
@@ -42,7 +42,7 @@ She did.
 
 ---
 
-## Beat 2: Release
+## Free Walking
 
 The visitor quarters were small but comfortable. Bed, desk, terminal, shower. A window that looked out on Prospero's central hub—vast rotating cylinder, thousands of lights marking residences and businesses and the accumulated infrastructure of ten thousand human lives.
 
@@ -110,7 +110,7 @@ She didn't go back to sleep.
 
 ---
 
-## Beat 3: The Morning After
+## First Light
 
 Station morning arrived with artificial dawn—lights brightening gradually, temperature rising two degrees, the accumulated sounds of ten thousand people beginning their daily routines.
 
@@ -142,7 +142,7 @@ Then she walked inside.
 
 ---
 
-## Beat 4: The Cafeteria
+## Normal Taste
 
 The synthesized eggs looked exactly like real eggs. Golden yellow, slightly glistening, piled on a plate beside reconstituted toast and a small cup of something that might have been fruit compote.
 
@@ -218,7 +218,7 @@ The eggs tasted perfect.
 
 ---
 
-## Beat 5: Connection
+## First Touch
 
 "Mind if I sit here?"
 

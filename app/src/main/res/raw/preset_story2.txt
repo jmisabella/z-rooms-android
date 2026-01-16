@@ -1,6 +1,6 @@
-# CHAPTER 1: WAKING
+# Chapter 1: Waking
 
-## Beat 1: Hibernation Wake-Up
+## Cold Awakening
 
 The pod opened with a hiss like an apology.
 
@@ -172,7 +172,7 @@ No one had checked the reports yet.
 
 ---------------------------
 
-## Beat 2: The Disturbed Dreams Discussion
+## Shared Nightmares
 
 The mess hall smelled like recycled air and protein rations. Jordan sat at the bolted-down table, forcing down reconstituted eggs that tasted like cardboard. Not great, but not terrible. Standard ship food. They had eaten worse.
 
@@ -300,7 +300,7 @@ Probably.
 
 ---------------------------
 
-## Beat 3: Individual Losses Discovered
+## What's Missing
 
 ### Amara - Med Bay, Six Hours Post-Wake
 
@@ -632,7 +632,7 @@ For now.
 
 ---------------------------
 
-## Beat 4: Ship AI Report
+## Hidden Logs
 
 Chen sat alone in her quarters, reviewing system logs. Standard post-wake protocol. Verify all systems during hibernation performed nominally. Document any anomalies. File reports.
 
@@ -796,7 +796,7 @@ Chen activated the central display, brought up the HERMES logs. All of them. Unr
 
 ---------------------------
 
-## Beat 5: The Economic Trap—Decision to Continue
+## No Choice
 
 The bridge was silent except for the low hum of life support and the occasional beep from navigation consoles. Four people read the hibernation logs displayed on the central screen. Chen watched their faces.
 
