@@ -436,7 +436,7 @@ class AudioService : Service() {
 
     /**
      * Schedules the wake-up greeting to play 5 seconds after alarm starts
-     * Only plays once, then clears the meditation completion flag
+     * Only plays once, then clears the story completion flag
      */
     private fun scheduleWakeUpGreeting() {
         if (!isGreetingTtsInitialized) return

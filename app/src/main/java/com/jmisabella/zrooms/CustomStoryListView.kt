@@ -23,8 +23,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.preference.PreferenceManager
 
 @Composable
-fun CustomMeditationListView(
-    manager: CustomMeditationManager,
+fun CustomStoryListView(
+    manager: CustomStoryManager,
     onDismiss: () -> Unit,
     onPlay: (String) -> Unit
 ) {
@@ -46,7 +46,7 @@ fun CustomMeditationListView(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Custom Meditations",
+                        text = "Custom Stories",
                         style = MaterialTheme.typography.h6,
                         color = Color.White
                     )
@@ -63,7 +63,7 @@ fun CustomMeditationListView(
                 Divider(color = Color(0xFF424242))
 
                 // Reuse content component
-                CustomMeditationListContent(
+                CustomStoryListContent(
                     manager = manager,
                     onPlay = { text ->
                         onPlay(text)
@@ -76,19 +76,19 @@ fun CustomMeditationListView(
 }
 
 /**
- * Reusable content component for meditation list (used in both dialog and tab views)
+ * Reusable content component for story list (used in both dialog and tab views)
  */
 @Composable
-fun CustomMeditationListContent(
-    manager: CustomMeditationManager,
+fun CustomStoryListContent(
+    manager: CustomStoryManager,
     onPlay: (String) -> Unit
 ) {
     val context = LocalContext.current
     val prefs = PreferenceManager.getDefaultSharedPreferences(context)
 
-    var editingMeditation by remember { mutableStateOf<CustomMeditation?>(null) }
-    var showMeditationText by remember {
-        mutableStateOf(prefs.getBoolean("showMeditationText", true))
+    var editingStory by remember { mutableStateOf<CustomStory?>(null) }
+    var showStoryText by remember {
+        mutableStateOf(prefs.getBoolean("showStoryText", true))
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -100,11 +100,11 @@ fun CustomMeditationListContent(
             horizontalArrangement = Arrangement.End,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            if (manager.meditations.isNotEmpty()) {
+            if (manager.stories.isNotEmpty()) {
                 IconButton(
                     onClick = {
-                        manager.getRandomMeditation()?.let { meditation ->
-                            onPlay(meditation.text)
+                        manager.getRandomStory()?.let { story ->
+                            onPlay(story.text)
                         }
                     }
                 ) {
@@ -118,41 +118,41 @@ fun CustomMeditationListContent(
 
             IconButton(
                 onClick = {
-                    showMeditationText = !showMeditationText
+                    showStoryText = !showStoryText
                     prefs.edit()
-                        .putBoolean("showMeditationText", showMeditationText)
+                        .putBoolean("showStoryText", showStoryText)
                         .apply()
                 }
             ) {
                 Icon(
                     Icons.Filled.ClosedCaption,
-                    contentDescription = if (showMeditationText) "Hide Meditation Text" else "Show Meditation Text",
-                    tint = if (showMeditationText) Color(0xFF64B5F6) else Color(0xFF757575)
+                    contentDescription = if (showStoryText) "Hide Story Text" else "Show Story Text",
+                    tint = if (showStoryText) Color(0xFF64B5F6) else Color(0xFF757575)
                 )
             }
         }
 
         Divider(color = Color(0xFF424242))
 
-        // Add New Meditation button (always visible)
+        // Add New Story button (always visible)
         if (manager.canAddMore) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable {
-                        editingMeditation = CustomMeditation(title = "", text = "")
+                        editingStory = CustomStory(title = "", text = "")
                     }
                     .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
                     Icons.Filled.AddCircle,
-                    contentDescription = "Add New Meditation",
+                    contentDescription = "Add New Story",
                     tint = Color(0xFF4CAF50)
                 )
                 Spacer(Modifier.width(8.dp))
                 Text(
-                    "Add New Meditation",
+                    "Add New Story",
                     color = Color(0xFF4CAF50),
                     style = MaterialTheme.typography.body1
                 )
@@ -160,8 +160,8 @@ fun CustomMeditationListContent(
             Divider(color = Color(0xFF424242))
         }
 
-        // Meditation List
-        if (manager.meditations.isEmpty()) {
+        // Story List
+        if (manager.stories.isEmpty()) {
             // Empty state
             Column(
                 modifier = Modifier
@@ -180,7 +180,7 @@ fun CustomMeditationListContent(
                 Spacer(Modifier.height(16.dp))
 
                 Text(
-                    text = "No Custom Meditations",
+                    text = "No Custom Stories",
                     style = MaterialTheme.typography.h6,
                     color = Color.Gray
                 )
@@ -188,7 +188,7 @@ fun CustomMeditationListContent(
                 Spacer(Modifier.height(8.dp))
 
                 Text(
-                    text = "Create your own guided meditation\nwith custom pauses and pacing",
+                    text = "Create your own guided story\nwith custom pauses and pacing",
                     style = MaterialTheme.typography.body2,
                     color = Color.Gray,
                     fontSize = 12.sp
@@ -198,33 +198,33 @@ fun CustomMeditationListContent(
 
                 Button(
                     onClick = {
-                        editingMeditation = CustomMeditation(title = "", text = "")
+                        editingStory = CustomStory(title = "", text = "")
                     },
                     colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF4CAF50))
                 ) {
                     Icon(Icons.Filled.AddCircle, contentDescription = null)
                     Spacer(Modifier.width(8.dp))
-                    Text("Create First Meditation", color = Color.White)
+                    Text("Create First Story", color = Color.White)
                 }
             }
         } else {
             LazyColumn(
                 modifier = Modifier.fillMaxSize()
             ) {
-                items(manager.meditations) { meditation ->
-                    MeditationRow(
-                        meditation = meditation,
+                items(manager.stories) { story ->
+                    StoryRow(
+                        story = story,
                         onPlay = {
-                            onPlay(meditation.text)
+                            onPlay(story.text)
                         },
                         onEdit = {
-                            editingMeditation = meditation
+                            editingStory = story
                         },
                         onDuplicate = {
-                            manager.duplicateMeditation(meditation)
+                            manager.duplicateStory(story)
                         },
                         onDelete = {
-                            manager.deleteMeditation(meditation)
+                            manager.deleteStory(story)
                         }
                     )
                     Divider(color = Color(0xFF424242))
@@ -234,18 +234,18 @@ fun CustomMeditationListContent(
     }
 
     // Editor dialog
-    editingMeditation?.let { meditation ->
-        CustomMeditationEditorView(
+    editingStory?.let { story ->
+        CustomStoryEditorView(
             manager = manager,
-            meditation = meditation,
-            onDismiss = { editingMeditation = null }
+            story = story,
+            onDismiss = { editingStory = null }
         )
     }
 }
 
 @Composable
-fun MeditationRow(
-    meditation: CustomMeditation,
+fun StoryRow(
+    story: CustomStory,
     onPlay: () -> Unit,
     onEdit: () -> Unit,
     onDuplicate: () -> Unit,
@@ -264,7 +264,7 @@ fun MeditationRow(
             modifier = Modifier.weight(1f)
         ) {
             Text(
-                text = if (meditation.title.isEmpty()) "Untitled" else meditation.title,
+                text = if (story.title.isEmpty()) "Untitled" else story.title,
                 style = MaterialTheme.typography.body1,
                 color = Color.White
             )
@@ -272,7 +272,7 @@ fun MeditationRow(
             Spacer(Modifier.height(4.dp))
 
             Text(
-                text = meditation.text.take(60) + if (meditation.text.length > 60) "..." else "",
+                text = story.text.take(60) + if (story.text.length > 60) "..." else "",
                 style = MaterialTheme.typography.caption,
                 color = Color.Gray,
                 maxLines = 2,
@@ -315,8 +315,8 @@ fun MeditationRow(
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
-            title = { Text("Delete Meditation?") },
-            text = { Text("Are you sure you want to delete this meditation?") },
+            title = { Text("Delete Story?") },
+            text = { Text("Are you sure you want to delete this story?") },
             confirmButton = {
                 TextButton(
                     onClick = {

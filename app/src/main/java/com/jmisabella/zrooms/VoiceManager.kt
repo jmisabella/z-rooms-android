@@ -41,7 +41,7 @@ class VoiceManager private constructor(private val context: Context) {
         private const val DEFAULT_VOICE_RATE = 0.8f  // Slower for robotic voices
         private const val ENHANCED_VOICE_RATE = 1.0f // Natural speed for high-quality voices
 
-        // Voice volume (shared across meditation playback and preview)
+        // Voice volume (shared across story playback and preview)
         const val VOICE_VOLUME = 0.23f
 
         fun getInstance(context: Context): VoiceManager {
@@ -99,7 +99,7 @@ class VoiceManager private constructor(private val context: Context) {
     }
 
     /**
-     * Gets the preferred voice for meditation narration
+     * Gets the preferred voice for story narration
      * Priority: User's selected enhanced voice -> Any high-quality voice -> Default system voice
      */
     fun getPreferredVoice(): Voice? {

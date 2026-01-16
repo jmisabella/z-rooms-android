@@ -126,13 +126,13 @@ fun ExpandingView(
         Color(0xFFE0E0E0) // Light grey for dark backgrounds
     }
 
-    // Custom meditation and poetry managers (must be created first)
-    val meditationManager = remember { CustomMeditationManager(context) }
+    // Custom story and poetry managers (must be created first)
+    val storyManager = remember { CustomStoryManager(context) }
     val poetryManager = remember { CustomPoetryManager(context) }
 
     // Text-to-speech manager (needs both managers for random content selection)
     val ttsManager = remember {
-        TextToSpeechManager(context, meditationManager, poetryManager)
+        TextToSpeechManager(context, storyManager, poetryManager)
     }
     val voiceManager = remember { VoiceManager.getInstance(context) }
     val scope = rememberCoroutineScope()
@@ -142,10 +142,10 @@ fun ExpandingView(
     var showContentBrowser by remember { mutableStateOf(false) }
     var showVoiceSettings by remember { mutableStateOf(false) }
 
-    // Meditation text display settings
-    val showMeditationText = remember {
+    // Story text display settings
+    val showStoryText = remember {
         mutableStateOf(
-            PreferenceManager.getDefaultSharedPreferences(context).getBoolean("showMeditationText", true)
+            PreferenceManager.getDefaultSharedPreferences(context).getBoolean("showStoryText", true)
         )
     }
 
@@ -153,8 +153,8 @@ fun ExpandingView(
     LaunchedEffect(Unit) {
         while (true) {
             delay(500) // Check every 500ms for preference changes
-            showMeditationText.value = PreferenceManager.getDefaultSharedPreferences(context)
-                .getBoolean("showMeditationText", true)
+            showStoryText.value = PreferenceManager.getDefaultSharedPreferences(context)
+                .getBoolean("showStoryText", true)
         }
     }
 
@@ -515,7 +515,7 @@ fun ExpandingView(
 
                     Spacer(Modifier.width(40.dp))
 
-                    // Custom Meditations Button
+                    // Custom Storys Button
                     Box(
                         modifier = Modifier
                             .clickable {
@@ -527,7 +527,7 @@ fun ExpandingView(
                     ) {
                         Icon(
                             Icons.Outlined.FormatQuote,
-                            contentDescription = "Meditations & Poems",
+                            contentDescription = "Storys & Poems",
                             tint = Color(0xFF9E9E9E),
                             modifier = Modifier.size(28.dp)
                         )
@@ -554,7 +554,7 @@ fun ExpandingView(
 
                     Spacer(Modifier.width(40.dp))
 
-                    // 3-State Content Button: OFF → MEDITATION → POETRY → OFF
+                    // 3-State Content Button: OFF → STORY → POETRY → OFF
                     Box(
                         modifier = Modifier
                             .clickable {
@@ -566,7 +566,7 @@ fun ExpandingView(
                             .padding(12.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        // Show loading indicator during meditation→poetry transition
+                        // Show loading indicator during story→poetry transition
                         if (isLoading) {
                             LoadingDotsIndicator(
                                 color = Color(0xFFFFB74D)  // Orange/amber color
@@ -574,17 +574,17 @@ fun ExpandingView(
                         } else {
                             Icon(
                                 imageVector = when (contentMode) {
-                                    ContentMode.MEDITATION -> Icons.Outlined.Eco
+                                    ContentMode.STORY -> Icons.Outlined.Eco
                                     ContentMode.POETRY -> Icons.Filled.TheaterComedy
                                     ContentMode.OFF -> Icons.Outlined.Eco
                                 },
                                 contentDescription = when (contentMode) {
-                                    ContentMode.MEDITATION -> "Stop Meditation"
+                                    ContentMode.STORY -> "Stop Story"
                                     ContentMode.POETRY -> "Stop Poetry"
                                     ContentMode.OFF -> "Start Content"
                                 },
                                 tint = when (contentMode) {
-                                    ContentMode.MEDITATION -> Color(0xFF4CAF50)  // Green
+                                    ContentMode.STORY -> Color(0xFF4CAF50)  // Green
                                     ContentMode.POETRY -> Color(0xFFAB47BC)      // Purple
                                     ContentMode.OFF -> Color(0xFF9E9E9E)         // Gray
                                 },
@@ -623,20 +623,20 @@ fun ExpandingView(
             }
         }
 
-        // Scrollable meditation text display with phrase history
-        ScrollableMeditationTextDisplay(
+        // Scrollable story text display with phrase history
+        ScrollableStoryTextDisplay(
             phraseHistory = ttsManager.phraseHistory,
             currentPhrase = ttsManager.currentPhrase,
             hasNewContent = ttsManager.hasNewCaptionContent,
             onHasNewContentChange = { newValue -> ttsManager.hasNewCaptionContent = newValue },
-            isVisible = showMeditationText.value && contentMode != ContentMode.OFF,
+            isVisible = showStoryText.value && contentMode != ContentMode.OFF,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = 180.dp) // Increased spacing from bottom buttons
         )
 
-        // Skip buttons - only visible in MEDITATION mode (story chapters)
-        if (contentMode == ContentMode.MEDITATION) {
+        // Skip buttons - only visible in STORY mode (story chapters)
+        if (contentMode == ContentMode.STORY) {
             Row(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
@@ -835,15 +835,15 @@ fun ExpandingView(
         }
     }
 
-    // Content browser dialog (meditations and poems)
+    // Content browser dialog (storys and poems)
     if (showContentBrowser) {
         ContentBrowserView(
-            meditationManager = meditationManager,
+            storyManager = storyManager,
             poetryManager = poetryManager,
             onDismiss = { showContentBrowser = false },
-            onPlayMeditation = { text ->
+            onPlayStory = { text ->
                 ttsManager.startSpeakingWithPauses(text)
-                ttsManager.contentMode = ContentMode.MEDITATION
+                ttsManager.contentMode = ContentMode.STORY
             },
             onPlayPoem = { text ->
                 ttsManager.startSpeakingWithPauses(text)

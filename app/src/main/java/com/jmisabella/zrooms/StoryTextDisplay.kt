@@ -19,11 +19,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 /**
- * Displays meditation text in a semi-transparent dark modal window in the lower portion of the screen.
+ * Displays story text in a semi-transparent dark modal window in the lower portion of the screen.
  * Shows current and previous phrases with fade animations, similar to Apple Music lyrics.
  */
 @Composable
-fun MeditationTextDisplay(
+fun StoryTextDisplay(
     currentPhrase: String,
     previousPhrase: String,
     isVisible: Boolean,

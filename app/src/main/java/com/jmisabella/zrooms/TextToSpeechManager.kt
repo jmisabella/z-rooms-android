@@ -19,7 +19,7 @@ import java.util.Locale
  */
 class TextToSpeechManager(
     private val context: Context,
-    private val customMeditationManager: CustomMeditationManager? = null,
+    private val customStoryManager: CustomStoryManager? = null,
     private val customPoetryManager: CustomPoetryManager? = null
 ) {
     var isSpeaking by mutableStateOf(false)
@@ -32,8 +32,8 @@ class TextToSpeechManager(
 
     // Deprecated - use contentMode instead
     @Deprecated("Use contentMode instead")
-    val isPlayingMeditation: Boolean
-        get() = contentMode == ContentMode.MEDITATION
+    val isPlayingStory: Boolean
+        get() = contentMode == ContentMode.STORY
 
     var ambientVolume by mutableStateOf(0.8f) // 0.0 (silent) to 1.0 (full ambient), default to 80%
         private set
@@ -56,7 +56,7 @@ class TextToSpeechManager(
     private var currentUtteranceIndex = 0
     private var isCustomMode = false
     private var pendingPhrase: String? = null // Phrase waiting to be displayed when TTS starts
-    private var lastPlayedMeditation: String? = null // Track last meditation to avoid repeats
+    private var lastPlayedStory: String? = null // Track last story to avoid repeats
     private var lastPlayedPoem: String? = null // Track last poem to avoid repeats
     private val prefs = androidx.preference.PreferenceManager.getDefaultSharedPreferences(context)
 
@@ -65,19 +65,19 @@ class TextToSpeechManager(
         get() = prefs.getInt("currentChapterIndex", 0)
         set(value) = prefs.edit().putInt("currentChapterIndex", value).apply()
 
-    private var totalPresetMeditations: Int = 0
+    private var totalPresetStories: Int = 0
     private val voiceManager = VoiceManager.getInstance(context)
 
     // Callback to notify when ambient volume changes
     var onAmbientVolumeChanged: ((Float) -> Unit)? = null
 
     companion object {
-        private const val MEDITATION_PITCH = 1.0f // Natural pitch for all voices
+        private const val STORY_PITCH = 1.0f // Natural pitch for all voices
         const val MAX_AMBIENT_VOLUME = 1.0f // Maximum ambient volume
         const val PREF_CONTENT_MODE = "contentMode"
         const val PREF_CONTENT_COMPLETED = "contentCompletedSuccessfully"
         @Deprecated("Use PREF_CONTENT_COMPLETED instead")
-        const val PREF_MEDITATION_COMPLETED = "meditationCompletedSuccessfully"
+        const val PREF_STORY_COMPLETED = "storyCompletedSuccessfully"
     }
 
     init {
@@ -115,19 +115,19 @@ class TextToSpeechManager(
                 })
 
                 // Initialize chapter count after TTS is ready
-                totalPresetMeditations = countPresetMeditations()
+                totalPresetStories = countPresetStories()
             }
         }
     }
 
     /**
-     * Counts total available preset meditation files
+     * Counts total available preset story files
      */
-    private fun countPresetMeditations(): Int {
+    private fun countPresetStories(): Int {
         var count = 0
         var i = 1
         while (true) {
-            val resId = context.resources.getIdentifier("preset_meditation$i", "raw", context.packageName)
+            val resId = context.resources.getIdentifier("preset_story$i", "raw", context.packageName)
             if (resId == 0) break
             count++
             i++
@@ -154,7 +154,7 @@ class TextToSpeechManager(
         tts?.setSpeechRate(speechRate)
 
         // Use natural pitch for all voices
-        tts?.setPitch(MEDITATION_PITCH)
+        tts?.setPitch(STORY_PITCH)
     }
 
     /**
@@ -205,17 +205,17 @@ class TextToSpeechManager(
     }
 
     /**
-     * Starts speaking a random meditation from text files in res/raw
-     * Always picks a new random meditation, stopping any existing playback
+     * Starts speaking a random story from text files in res/raw
+     * Always picks a new random story, stopping any existing playback
      */
-    fun startSpeakingRandomMeditation(): String? {
+    fun startSpeakingRandomStory(): String? {
         if (!isInitialized) return null
 
-        // Try to load a random meditation file
-        val meditationText = loadRandomMeditationFile() ?: return null
+        // Try to load a random story file
+        val storyText = loadRandomStoryFile() ?: return null
 
-        startSpeakingWithPauses(meditationText)
-        return meditationText
+        startSpeakingWithPauses(storyText)
+        return storyText
     }
 
     /**
@@ -238,46 +238,100 @@ class TextToSpeechManager(
     }
 
     /**
-     * Automatically adds pauses to text for closed caption sentence breaks and paragraph pauses.
-     * Uses (0s) markers between sentences to create caption breaks without actual pauses.
-     * Uses (2s) markers between paragraphs for natural reading flow.
+     * Splits text into sentences while handling common abbreviations.
+     * Returns list of sentences with punctuation preserved.
      */
-    private fun addAutomaticPauses(text: String): String {
-        val result = StringBuilder()
-        val paragraphs = text.split("\n")
+    private fun splitIntoSentences(text: String): List<String> {
+        val sentences = mutableListOf<String>()
+        val commonAbbreviations = listOf("Dr.", "Mr.", "Mrs.", "Ms.", "vs.", "etc.", "e.g.", "i.e.")
 
-        for ((index, paragraph) in paragraphs.withIndex()) {
-            val trimmed = paragraph.trim()
+        var currentSentence = StringBuilder()
+        var i = 0
 
-            // Skip empty lines
-            if (trimmed.isEmpty()) {
-                result.append("\n")
-                continue
-            }
+        while (i < text.length) {
+            val char = text[i]
+            currentSentence.append(char)
 
-            // Split into sentences while preserving the punctuation
-            val sentencePattern = Regex("""[^.!?]+[.!?]+""")
-            val sentences = sentencePattern.findAll(trimmed).map { it.value.trim() }.toList()
+            // Check for sentence-ending punctuation
+            if (char == '.' || char == '!' || char == '?') {
+                // Look ahead to check if this is followed by a space/newline (true sentence end)
+                val nextChar = if (i + 1 < text.length) text[i + 1] else '\n'
+                val isFollowedByWhitespace = nextChar.isWhitespace()
 
-            // If no sentences found with punctuation, treat the whole paragraph as one sentence
-            val sentencesToProcess = if (sentences.isEmpty()) listOf(trimmed) else sentences
+                if (isFollowedByWhitespace) {
+                    // Check if this is an abbreviation
+                    val currentText = currentSentence.toString().trim()
+                    val isAbbreviation = commonAbbreviations.any { abbr ->
+                        currentText.endsWith(abbr)
+                    }
 
-            for (sentence in sentencesToProcess) {
-                if (sentence.isEmpty()) continue
-
-                // Check if this sentence already has a pause marker at the end
-                if (!Regex("""\(\d+(?:\.\d+)?s\)\s*${'$'}""").containsMatchIn(sentence)) {
-                    // Add (0s) marker after each sentence for caption break (no actual pause)
-                    result.append(sentence).append(" (0s)\n")
-                } else {
-                    // Already has a pause, keep it
-                    result.append(sentence).append("\n")
+                    if (!isAbbreviation) {
+                        // This is a real sentence boundary
+                        val sentence = currentSentence.toString().trim()
+                        if (sentence.isNotEmpty()) {
+                            sentences.add(sentence)
+                        }
+                        currentSentence = StringBuilder()
+                    }
                 }
             }
 
-            // Add 2s pause between paragraphs (except after the last one)
-            if (index < paragraphs.size - 1) {
-                result.append("(2s)\n")
+            i++
+        }
+
+        // Add any remaining text as the last sentence
+        val remaining = currentSentence.toString().trim()
+        if (remaining.isNotEmpty()) {
+            sentences.add(remaining)
+        }
+
+        return sentences
+    }
+
+    /**
+     * Automatically adds pauses to text for closed caption sentence breaks and paragraph pauses.
+     * Uses (0.5s) markers between sentences within paragraphs.
+     * Uses (2s) markers between paragraphs for natural reading flow.
+     * Adds <<PARAGRAPH_BREAK>> marker after last sentence of each paragraph.
+     */
+    private fun addAutomaticPauses(text: String): String {
+        val result = StringBuilder()
+        val paragraphs = text.split(Regex("\n\\s*\n")) // Split on blank lines
+
+        for ((paragraphIndex, paragraph) in paragraphs.withIndex()) {
+            val trimmed = paragraph.trim()
+
+            // Skip empty paragraphs
+            if (trimmed.isEmpty()) {
+                continue
+            }
+
+            // Split paragraph into sentences
+            val sentences = splitIntoSentences(trimmed)
+
+            for ((sentenceIndex, sentence) in sentences.withIndex()) {
+                if (sentence.isEmpty()) continue
+
+                val isLastSentenceInParagraph = sentenceIndex == sentences.size - 1
+                val isLastParagraph = paragraphIndex == paragraphs.size - 1
+
+                // Add the sentence
+                result.append(sentence)
+
+                if (isLastSentenceInParagraph) {
+                    // Last sentence in paragraph: add paragraph break marker
+                    result.append("<<PARAGRAPH_BREAK>>")
+
+                    // Add 2s pause between paragraphs (except after the last one)
+                    if (!isLastParagraph) {
+                        result.append(" (2s)\n")
+                    } else {
+                        result.append(" (0.5s)\n")
+                    }
+                } else {
+                    // Not last sentence: add 0.5s pause between sentences
+                    result.append(" (0.5s)\n")
+                }
             }
         }
 
@@ -287,6 +341,7 @@ class TextToSpeechManager(
     /**
      * Extracts phrases and their associated pauses from text
      * Returns list of (phrase, delay in milliseconds)
+     * Preserves <<PARAGRAPH_BREAK>> markers as <<PB>> for display purposes
      */
     private fun extractPhrasesWithPauses(text: String): List<Pair<String, Long>> {
         val result = mutableListOf<Pair<String, Long>>()
@@ -299,7 +354,10 @@ class TextToSpeechManager(
 
         for (match in matches) {
             // Get the phrase before this pause marker
-            val phraseBeforePause = text.substring(lastIndex, match.range.first).trim()
+            var phraseBeforePause = text.substring(lastIndex, match.range.first).trim()
+
+            // Preserve paragraph break marker as <<PB>> (shortened for storage)
+            phraseBeforePause = phraseBeforePause.replace("<<PARAGRAPH_BREAK>>", "<<PB>>")
 
             // Get the pause duration and unit
             val value = match.groupValues[1].toDoubleOrNull() ?: 0.0
@@ -320,8 +378,10 @@ class TextToSpeechManager(
         }
 
         // Add any remaining text after the last pause marker
-        val remainingText = text.substring(lastIndex).trim()
+        var remainingText = text.substring(lastIndex).trim()
         if (remainingText.isNotEmpty()) {
+            // Preserve paragraph break marker as <<PB>>
+            remainingText = remainingText.replace("<<PARAGRAPH_BREAK>>", "<<PB>>")
             result.add(remainingText to 0L)
         }
 
@@ -329,23 +389,23 @@ class TextToSpeechManager(
     }
 
     /**
-     * Loads a random meditation from both preset files and custom meditations
+     * Loads a random story from both preset files and custom storys
      */
-    private fun loadRandomMeditationFile(): String? {
-        // Collect all available meditations
-        val allMeditations = mutableListOf<String>()
+    private fun loadRandomStoryFile(): String? {
+        // Collect all available storys
+        val allStories = mutableListOf<String>()
 
-        // 1. Load all preset meditation files from res/raw
-        // Dynamically discover all preset_meditation files without hardcoded limit
+        // 1. Load all preset story files from res/raw
+        // Dynamically discover all preset_story files without hardcoded limit
         var i = 1
         while (true) {
             val resId = context.resources.getIdentifier(
-                "preset_meditation$i",
+                "preset_story$i",
                 "raw",
                 context.packageName
             )
             if (resId == 0) {
-                // No more preset meditation files found
+                // No more preset story files found
                 break
             }
             try {
@@ -354,54 +414,54 @@ class TextToSpeechManager(
                     .use { it.readText() }
                     .trim()
                 if (text.isNotEmpty()) {
-                    allMeditations.add(text)
+                    allStories.add(text)
                 }
             } catch (e: Exception) {
-                // Silently skip meditation files that can't be read
+                // Silently skip story files that can't be read
             }
             i++
         }
 
-        // Custom meditations excluded from random selection - only presets play via Leaf button
+        // Custom storys excluded from random selection - only presets play via Leaf button
         // Custom content remains accessible through dedicated list views
 
-        // 2. Check if we have any meditations at all
-        if (allMeditations.isEmpty()) {
+        // 2. Check if we have any storys at all
+        if (allStories.isEmpty()) {
             return null
         }
 
-        // 4. Pick a random meditation from all available ones, avoiding the last played one
-        val selectedMeditation = if (allMeditations.size > 1 && lastPlayedMeditation != null) {
-            // Filter out the last played meditation and pick from remaining
-            val availableMeditations = allMeditations.filter { it != lastPlayedMeditation }
-            if (availableMeditations.isNotEmpty()) {
-                availableMeditations.random()
+        // 4. Pick a random story from all available ones, avoiding the last played one
+        val selectedStory = if (allStories.size > 1 && lastPlayedStory != null) {
+            // Filter out the last played story and pick from remaining
+            val availableStories = allStories.filter { it != lastPlayedStory }
+            if (availableStories.isNotEmpty()) {
+                availableStories.random()
             } else {
                 // Fallback: if filtering resulted in empty list (shouldn't happen), pick any
-                allMeditations.random()
+                allStories.random()
             }
         } else {
-            // First time playing or only one meditation available
-            allMeditations.random()
+            // First time playing or only one story available
+            allStories.random()
         }
 
-        // 5. Remember this meditation to avoid repeating it next time
-        lastPlayedMeditation = selectedMeditation
+        // 5. Remember this story to avoid repeating it next time
+        lastPlayedStory = selectedStory
 
-        return selectedMeditation
+        return selectedStory
     }
 
     /**
-     * Loads the current chapter meditation sequentially (1-indexed files)
-     * File naming: preset_meditation1.txt, preset_meditation2.txt, etc.
+     * Loads the current chapter story sequentially (1-indexed files)
+     * File naming: preset_story1.txt, preset_story2.txt, etc.
      */
-    private fun getSequentialMeditation(): String? {
-        if (totalPresetMeditations == 0) totalPresetMeditations = countPresetMeditations()
-        if (totalPresetMeditations == 0) return null
+    private fun getSequentialStory(): String? {
+        if (totalPresetStories == 0) totalPresetStories = countPresetStories()
+        if (totalPresetStories == 0) return null
 
         // currentChapterIndex is 0-based, file names are 1-based
         val fileIndex = currentChapterIndex + 1
-        val resId = context.resources.getIdentifier("preset_meditation$fileIndex", "raw", context.packageName)
+        val resId = context.resources.getIdentifier("preset_story$fileIndex", "raw", context.packageName)
         if (resId == 0) return null
 
         return try {
@@ -474,13 +534,13 @@ class TextToSpeechManager(
     }
 
     /**
-     * Starts speaking the current sequential meditation chapter
+     * Starts speaking the current sequential story chapter
      */
-    fun startSpeakingSequentialMeditation(): String? {
+    fun startSpeakingSequentialStory(): String? {
         if (!isInitialized) return null
-        val meditationText = getSequentialMeditation() ?: return null
-        startSpeakingWithPauses(meditationText)
-        return meditationText
+        val storyText = getSequentialStory() ?: return null
+        startSpeakingWithPauses(storyText)
+        return storyText
     }
 
     /**
@@ -488,19 +548,19 @@ class TextToSpeechManager(
      * Wraps to first chapter when at last chapter
      */
     fun skipToNextChapter(): Boolean {
-        if (totalPresetMeditations == 0) totalPresetMeditations = countPresetMeditations()
-        if (totalPresetMeditations == 0) return false
+        if (totalPresetStories == 0) totalPresetStories = countPresetStories()
+        if (totalPresetStories == 0) return false
 
         // Circular navigation: wrap to first chapter if at last chapter
-        currentChapterIndex = if (currentChapterIndex < totalPresetMeditations - 1) {
+        currentChapterIndex = if (currentChapterIndex < totalPresetStories - 1) {
             currentChapterIndex + 1
         } else {
             0 // Wrap to first chapter
         }
 
-        if (contentMode == ContentMode.MEDITATION) {
+        if (contentMode == ContentMode.STORY) {
             val preservedMode = contentMode
-            startSpeakingSequentialMeditation()
+            startSpeakingSequentialStory()
             contentMode = preservedMode // Restore contentMode after startSpeaking clears it
         }
         return true
@@ -511,38 +571,38 @@ class TextToSpeechManager(
      * Wraps to last chapter when at first chapter
      */
     fun skipToPreviousChapter(): Boolean {
-        if (totalPresetMeditations == 0) totalPresetMeditations = countPresetMeditations()
-        if (totalPresetMeditations == 0) return false
+        if (totalPresetStories == 0) totalPresetStories = countPresetStories()
+        if (totalPresetStories == 0) return false
 
         // Circular navigation: wrap to last chapter if at first chapter
         currentChapterIndex = if (currentChapterIndex > 0) {
             currentChapterIndex - 1
         } else {
-            totalPresetMeditations - 1 // Wrap to last chapter
+            totalPresetStories - 1 // Wrap to last chapter
         }
 
-        if (contentMode == ContentMode.MEDITATION) {
+        if (contentMode == ContentMode.STORY) {
             val preservedMode = contentMode
-            startSpeakingSequentialMeditation()
+            startSpeakingSequentialStory()
             contentMode = preservedMode // Restore contentMode after startSpeaking clears it
         }
         return true
     }
 
     /**
-     * Cycles through content modes: OFF → MEDITATION → POETRY → OFF
-     * Includes crossfade loading state when transitioning from MEDITATION → POETRY
+     * Cycles through content modes: OFF → STORY → POETRY → OFF
+     * Includes crossfade loading state when transitioning from STORY → POETRY
      */
     suspend fun cycleContentMode() {
         when (contentMode) {
             ContentMode.OFF -> {
-                // OFF → MEDITATION (immediate, green) - use sequential playback
-                startSpeakingSequentialMeditation()
-                contentMode = ContentMode.MEDITATION
+                // OFF → STORY (immediate, green) - use sequential playback
+                startSpeakingSequentialStory()
+                contentMode = ContentMode.STORY
                 saveContentMode()
             }
-            ContentMode.MEDITATION -> {
-                // MEDITATION → POETRY (with loading transition)
+            ContentMode.STORY -> {
+                // STORY → POETRY (with loading transition)
                 isLoading = true
                 stopSpeaking()
 
@@ -583,7 +643,7 @@ class TextToSpeechManager(
 
         // If mode was active, restart playback
         when (contentMode) {
-            ContentMode.MEDITATION -> startSpeakingSequentialMeditation()
+            ContentMode.STORY -> startSpeakingSequentialStory()
             ContentMode.POETRY -> startSpeakingRandomPoem()
             ContentMode.OFF -> { /* Do nothing */ }
         }
@@ -608,7 +668,9 @@ class TextToSpeechManager(
         pendingPhrase = phrase
 
         // Clean the phrase for TTS - remove characters that get spoken literally
+        // IMPORTANT: Strip <<PB>> marker before speech (never spoken aloud)
         val cleanedPhrase = phrase
+            .replace("<<PB>>", "")
             .replace("-", " ")
             .replace("#", "")
             .replace("*", "")
@@ -653,7 +715,7 @@ class TextToSpeechManager(
         } else {
             // All done - content completed successfully
             isSpeaking = false
-            // KEEP contentMode as is (MEDITATION or POETRY) so button stays colored
+            // KEEP contentMode as is (STORY or POETRY) so button stays colored
             // (User can manually toggle it off if desired)
             isCustomMode = false
             utteranceQueue.clear()
@@ -669,14 +731,14 @@ class TextToSpeechManager(
             // Set the content completion flag for wake-up greeting
             prefs.edit().putBoolean(PREF_CONTENT_COMPLETED, true).apply()
 
-            // Auto-advance to next chapter for meditation mode
-            if (contentMode == ContentMode.MEDITATION) {
-                if (totalPresetMeditations == 0) totalPresetMeditations = countPresetMeditations()
-                if (currentChapterIndex < totalPresetMeditations - 1) {
+            // Auto-advance to next chapter for story mode
+            if (contentMode == ContentMode.STORY) {
+                if (totalPresetStories == 0) totalPresetStories = countPresetStories()
+                if (currentChapterIndex < totalPresetStories - 1) {
                     currentChapterIndex++
                     scope.launch {
                         delay(1000) // 1 second pause before next chapter
-                        startSpeakingSequentialMeditation()
+                        startSpeakingSequentialStory()
                     }
                 }
             }

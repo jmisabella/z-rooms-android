@@ -12,19 +12,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 
 enum class ContentTab {
-    MEDITATIONS,
+    STORIES,
     POEMS
 }
 
 @Composable
 fun ContentBrowserView(
-    meditationManager: CustomMeditationManager,
+    storyManager: CustomStoryManager,
     poetryManager: CustomPoetryManager,
     onDismiss: () -> Unit,
-    onPlayMeditation: (String) -> Unit,
+    onPlayStory: (String) -> Unit,
     onPlayPoem: (String) -> Unit
 ) {
-    var selectedTab by remember { mutableStateOf(ContentTab.MEDITATIONS) }
+    var selectedTab by remember { mutableStateOf(ContentTab.STORIES) }
 
     Dialog(onDismissRequest = onDismiss) {
         Surface(
@@ -46,9 +46,9 @@ fun ContentBrowserView(
                     // Tab buttons
                     Row {
                         TabButton(
-                            text = "Meditations",
-                            isSelected = selectedTab == ContentTab.MEDITATIONS,
-                            onClick = { selectedTab = ContentTab.MEDITATIONS }
+                            text = "Stories",
+                            isSelected = selectedTab == ContentTab.STORIES,
+                            onClick = { selectedTab = ContentTab.STORIES }
                         )
                         Spacer(Modifier.width(8.dp))
                         TabButton(
@@ -71,11 +71,11 @@ fun ContentBrowserView(
 
                 // Content area - show appropriate list
                 when (selectedTab) {
-                    ContentTab.MEDITATIONS -> {
-                        CustomMeditationListContent(
-                            manager = meditationManager,
+                    ContentTab.STORIES -> {
+                        CustomStoryListContent(
+                            manager = storyManager,
                             onPlay = { text ->
-                                onPlayMeditation(text)
+                                onPlayStory(text)
                                 onDismiss()
                             }
                         )

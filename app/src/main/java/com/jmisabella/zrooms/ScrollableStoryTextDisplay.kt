@@ -29,13 +29,62 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 
 /**
- * Scrollable meditation text display with phrase history.
+ * Data class representing a paragraph for display
+ */
+private data class ParagraphItem(
+    val sentences: List<String>,
+    val isCurrentParagraph: Boolean
+)
+
+/**
+ * Groups phrase history into paragraphs based on <<PB>> markers
+ */
+private fun groupIntoParagraphs(phraseHistory: List<String>, currentPhrase: String): List<ParagraphItem> {
+    if (phraseHistory.isEmpty()) return emptyList()
+
+    val paragraphs = mutableListOf<ParagraphItem>()
+    var currentParagraphSentences = mutableListOf<String>()
+
+    for ((index, phrase) in phraseHistory.withIndex()) {
+        val isCurrentPhrase = phrase == currentPhrase && index == phraseHistory.size - 1
+        val cleanPhrase = phrase.replace("<<PB>>", "")
+
+        currentParagraphSentences.add(cleanPhrase)
+
+        // Check if this phrase ends a paragraph
+        if (phrase.contains("<<PB>>")) {
+            // This is the last sentence in a paragraph
+            val isCurrentParagraph = isCurrentPhrase ||
+                (currentParagraphSentences.any { it.replace("<<PB>>", "") == currentPhrase })
+
+            paragraphs.add(ParagraphItem(
+                sentences = currentParagraphSentences.toList(),
+                isCurrentParagraph = isCurrentParagraph
+            ))
+            currentParagraphSentences = mutableListOf()
+        }
+    }
+
+    // Add any remaining sentences as the current paragraph
+    if (currentParagraphSentences.isNotEmpty()) {
+        paragraphs.add(ParagraphItem(
+            sentences = currentParagraphSentences.toList(),
+            isCurrentParagraph = true
+        ))
+    }
+
+    return paragraphs
+}
+
+/**
+ * Scrollable story text display with phrase history.
  * Shows all spoken phrases with the ability to scroll back through history.
  * Auto-scrolls to new phrases when user is at the bottom.
  * Shows "New text" indicator when scrolled up and new content arrives.
+ * Historical paragraphs are grouped and displayed as blocks.
  */
 @Composable
-fun ScrollableMeditationTextDisplay(
+fun ScrollableStoryTextDisplay(
     phraseHistory: List<String>,
     currentPhrase: String,
     hasNewContent: Boolean,
@@ -46,6 +95,11 @@ fun ScrollableMeditationTextDisplay(
     var userHasScrolledUp by remember { mutableStateOf(false) }
     val scrollState = rememberLazyListState()
     val scope = rememberCoroutineScope()
+
+    // Group phrases into paragraphs
+    val paragraphs = remember(phraseHistory, currentPhrase) {
+        groupIntoParagraphs(phraseHistory, currentPhrase)
+    }
 
     // Derive whether we're at the bottom from scroll state
     val isAtBottom by remember {
@@ -70,8 +124,8 @@ fun ScrollableMeditationTextDisplay(
     // Auto-scroll to bottom when new phrase arrives (unless user has scrolled up)
     LaunchedEffect(phraseHistory.size) {
         if (phraseHistory.isNotEmpty() && !userHasScrolledUp) {
-            // Scroll to the last item (phraseHistory.size - 1, but we have a spacer item after, so use phraseHistory.size)
-            scrollState.scrollToItem(phraseHistory.size)
+            // Scroll to the last item (paragraphs.size for the spacer item)
+            scrollState.scrollToItem(paragraphs.size)
         } else if (!isAtBottom && phraseHistory.isNotEmpty()) {
             // User is scrolled up and new content arrived
             onHasNewContentChange(true)
@@ -117,18 +171,38 @@ fun ScrollableMeditationTextDisplay(
                         )
                     }
             ) {
-                itemsIndexed(phraseHistory) { index, phrase ->
-                    val isCurrentPhrase = index == phraseHistory.size - 1 && phrase == currentPhrase
-
-                    Text(
-                        text = phrase,
-                        fontSize = if (isCurrentPhrase) 18.sp else 16.sp,
-                        fontWeight = if (isCurrentPhrase) FontWeight.Medium else FontWeight.Normal,
-                        color = if (isCurrentPhrase) Color.White else Color.White.copy(alpha = 0.7f),
-                        textAlign = TextAlign.Left,
-                        lineHeight = if (isCurrentPhrase) 26.sp else 22.sp,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                itemsIndexed(paragraphs) { _, paragraph ->
+                    if (paragraph.isCurrentParagraph) {
+                        // Current paragraph: show each sentence individually
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(4.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            paragraph.sentences.forEachIndexed { _, sentence ->
+                                val isCurrentSentence = sentence == currentPhrase
+                                Text(
+                                    text = sentence,
+                                    fontSize = if (isCurrentSentence) 18.sp else 16.sp,
+                                    fontWeight = if (isCurrentSentence) FontWeight.Medium else FontWeight.Normal,
+                                    color = if (isCurrentSentence) Color.White else Color.White.copy(alpha = 0.7f),
+                                    textAlign = TextAlign.Left,
+                                    lineHeight = if (isCurrentSentence) 26.sp else 22.sp,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+                        }
+                    } else {
+                        // Historical paragraph: combine sentences into a block
+                        Text(
+                            text = paragraph.sentences.joinToString(" "),
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Normal,
+                            color = Color.White.copy(alpha = 0.7f),
+                            textAlign = TextAlign.Left,
+                            lineHeight = 22.sp,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
                 }
 
                 // Bottom anchor for scrolling
@@ -148,7 +222,7 @@ fun ScrollableMeditationTextDisplay(
                         onClick = {
                             scope.launch {
                                 // Scroll to bottom and reset state
-                                scrollState.animateScrollToItem(phraseHistory.size)
+                                scrollState.animateScrollToItem(paragraphs.size)
                                 userHasScrolledUp = false
                                 onHasNewContentChange(false)
                             }

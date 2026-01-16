@@ -35,14 +35,14 @@ This document summarizes the changes made to the iOS version of the zz-time app 
 **Result:** Questions are pronounced with proper rising intonation, making stories sound more natural.
 
 ### 3. Preset-Only Random Selection for Leaf and Poetry Buttons
-**Problem:** The Leaf (meditation) and Poetry buttons randomly selected from both preset and custom content, diluting the curated experience.
+**Problem:** The Leaf (story) and Poetry buttons randomly selected from both preset and custom content, diluting the curated experience.
 
 **Changes:**
 - Modified random selection functions to only include preset content.
-- Custom meditations and poems are excluded from random play via buttons.
+- Custom storys and poems are excluded from random play via buttons.
 
 **Implementation Details:**
-- Updated `getRandomMeditation()` and `getRandomPoem()` in `TextToSpeechManager.swift`
+- Updated `getRandomStory()` and `getRandomPoem()` in `TextToSpeechManager.swift`
 - Removed code that added custom content to the selection pool
 - Custom content remains accessible through dedicated list views
 - Updated comments in `ExpandingView.swift` to reflect preset-only behavior
@@ -50,17 +50,17 @@ This document summarizes the changes made to the iOS version of the zz-time app 
 **Result:** Leaf and Poetry buttons now provide a consistent, curated experience with only preset content.
 
 ### 4. Sequential Story Chapter Playback for Leaf Button
-**Problem:** The Leaf button randomly selected preset meditations, but for story mode, it should play chapters sequentially with progress tracking and navigation controls.
+**Problem:** The Leaf button randomly selected preset storys, but for story mode, it should play chapters sequentially with progress tracking and navigation controls.
 
 **Changes:**
-- Replaced random selection with sequential playback starting from chapter 1 (preset_meditation1.txt).
+- Replaced random selection with sequential playback starting from chapter 1 (preset_story1.txt).
 - Added persistent progress tracking using UserDefaults to remember current chapter across sessions.
 - Implemented skip back/forward controls (< > triangles) that appear on screen sides only when Leaf mode is active.
 - Auto-advances to next chapter after completing a session.
 
 **Implementation Details:**
 - Added `currentChapterIndex` property with `@AppStorage` persistence in `TextToSpeechManager.swift`
-- Replaced `getRandomMeditation()` with `getSequentialMeditation()` to load current chapter
+- Replaced `getRandomStory()` with `getSequentialStory()` to load current chapter
 - Added `skipToNextChapter()` and `skipToPreviousChapter()` methods with bounds checking
 - Updated `didFinishSpeaking()` to auto-advance chapters on completion
 - Added conditional UI elements in `ExpandingView.swift` for skip controls

@@ -17,14 +17,14 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 
 @Composable
-fun CustomMeditationEditorView(
-    manager: CustomMeditationManager,
-    meditation: CustomMeditation,
+fun CustomStoryEditorView(
+    manager: CustomStoryManager,
+    story: CustomStory,
     onDismiss: () -> Unit
 ) {
-    var title by remember { mutableStateOf(meditation.title) }
-    var text by remember { mutableStateOf(meditation.text) }
-    val isNewMeditation = meditation.title.isEmpty() && meditation.text.isEmpty()
+    var title by remember { mutableStateOf(story.title) }
+    var text by remember { mutableStateOf(story.text) }
+    val isNewStory = story.title.isEmpty() && story.text.isEmpty()
 
     Dialog(onDismissRequest = onDismiss) {
         Surface(
@@ -46,7 +46,7 @@ fun CustomMeditationEditorView(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = if (isNewMeditation) "New Meditation" else "Edit Meditation",
+                        text = if (isNewStory) "New Story" else "Edit Story",
                         style = MaterialTheme.typography.h6,
                         color = Color.White
                     )
@@ -55,15 +55,15 @@ fun CustomMeditationEditorView(
                         IconButton(
                             onClick = {
                                 if (title.isNotEmpty() || text.isNotEmpty()) {
-                                    val updated = meditation.copy(
+                                    val updated = story.copy(
                                         title = title,
                                         text = text
                                     )
 
-                                    if (isNewMeditation) {
-                                        manager.addMeditation(updated)
+                                    if (isNewStory) {
+                                        manager.addStory(updated)
                                     } else {
-                                        manager.updateMeditation(updated)
+                                        manager.updateStory(updated)
                                     }
                                 }
                                 onDismiss()
@@ -109,7 +109,7 @@ fun CustomMeditationEditorView(
                         modifier = Modifier
                             .fillMaxWidth()
                             .background(Color(0xFF303030)),
-                        placeholder = { Text("My Meditation", color = Color.Gray) },
+                        placeholder = { Text("My Story", color = Color.Gray) },
                         colors = TextFieldDefaults.outlinedTextFieldColors(
                             textColor = Color.White,
                             cursorColor = Color.White,
@@ -123,7 +123,7 @@ fun CustomMeditationEditorView(
 
                     // Text field
                     Text(
-                        text = "Meditation Text",
+                        text = "Story Text",
                         style = MaterialTheme.typography.caption,
                         color = Color.Gray,
                         modifier = Modifier.padding(bottom = 4.dp)
@@ -138,7 +138,7 @@ fun CustomMeditationEditorView(
                             .background(Color(0xFF303030)),
                         placeholder = {
                             Text(
-                                "Enter your meditation text here...\n\nUse pause markers like (3s) for 3 seconds or (1.5m) for 1.5 minutes.",
+                                "Enter your story text here...\n\nUse pause markers like (3s) for 3 seconds or (1.5m) for 1.5 minutes.",
                                 color = Color.Gray,
                                 fontSize = 14.sp
                             )

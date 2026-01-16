@@ -87,8 +87,8 @@ fun CustomPoemListContent(
     val prefs = PreferenceManager.getDefaultSharedPreferences(context)
 
     var editingPoem by remember { mutableStateOf<CustomPoem?>(null) }
-    var showMeditationText by remember {
-        mutableStateOf(prefs.getBoolean("showMeditationText", true))
+    var showStoryText by remember {
+        mutableStateOf(prefs.getBoolean("showStoryText", true))
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -118,16 +118,16 @@ fun CustomPoemListContent(
 
             IconButton(
                 onClick = {
-                    showMeditationText = !showMeditationText
+                    showStoryText = !showStoryText
                     prefs.edit()
-                        .putBoolean("showMeditationText", showMeditationText)
+                        .putBoolean("showStoryText", showStoryText)
                         .apply()
                 }
             ) {
                 Icon(
                     Icons.Filled.ClosedCaption,
-                    contentDescription = if (showMeditationText) "Hide Poem Text" else "Show Poem Text",
-                    tint = if (showMeditationText) Color(0xFF64B5F6) else Color(0xFF757575)
+                    contentDescription = if (showStoryText) "Hide Poem Text" else "Show Poem Text",
+                    tint = if (showStoryText) Color(0xFF64B5F6) else Color(0xFF757575)
                 )
             }
         }

@@ -12,7 +12,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 /**
- * Three pulsing dots loading indicator for meditation→poetry transition
+ * Three pulsing dots loading indicator for story→poetry transition
  */
 @Composable
 fun LoadingDotsIndicator(
