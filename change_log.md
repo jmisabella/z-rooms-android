@@ -6,9 +6,42 @@
 
 Enhanced the Text-to-Speech system to intelligently detect and use the Daniel (English, United States) voice as the default when it's already available on the user's device. This provides a better out-of-box experience for users who have this high-quality voice pre-installed without requiring any downloads or configuration.
 
+**IMPORTANT:** This update includes a one-time migration that resets all existing voice preferences to apply the smart default voice selection. After this migration, user voice preferences will be fully respected going forward.
+
 ### **CHANGES IMPLEMENTED**
 
-#### 1. Smart Voice Detection in VoiceManager
+#### 1. One-Time Voice Preference Migration
+
+**File Modified:**
+- [VoiceManager.kt:55-79](app/src/main/java/com/jmisabella/zrooms/VoiceManager.kt#L55-L79)
+
+**Changes:**
+- Added migration flag `PREF_VOICE_MIGRATION_V1` to track migration status
+- Implemented `performOneTimeMigration()` method that runs once on first app launch after update
+- Migration clears existing voice preferences to enable smart default behavior
+
+**Migration Logic:**
+```kotlin
+private fun performOneTimeMigration() {
+    val migrationCompleted = prefs.getBoolean(PREF_VOICE_MIGRATION_V1, false)
+    if (!migrationCompleted) {
+        // Clear existing voice preferences to apply smart defaults
+        prefs.edit()
+            .remove(PREF_USE_ENHANCED_VOICE)
+            .remove(PREF_PREFERRED_VOICE_NAME)
+            .putBoolean(PREF_VOICE_MIGRATION_V1, true)
+            .apply()
+    }
+}
+```
+
+**Why This Migration?**
+- Ensures all users (both new and existing) benefit from the Daniel voice auto-detection
+- Existing users with custom voice settings will be reset to smart defaults
+- After migration, any new voice selections users make will be respected permanently
+- Migration only runs once per device installation
+
+#### 2. Smart Voice Detection in VoiceManager
 
 **File Modified:**
 - [VoiceManager.kt:105-149](app/src/main/java/com/jmisabella/zrooms/VoiceManager.kt#L105-L149)
@@ -56,10 +89,10 @@ if (!useEnhancedVoice.value) {
 
 - ✅ **Zero Friction:** Users with Daniel pre-installed get better voice quality automatically
 - ✅ **No Forced Downloads:** Users without Daniel aren't prompted to download anything
-- ✅ **User Choice Respected:** Explicit voice selections in settings take precedence
+- ✅ **User Choice Respected:** After one-time migration, explicit voice selections in settings take precedence
 - ✅ **Maintains App Philosophy:** App remains 100% offline with no required downloads
 - ✅ **Better Default Experience:** Many newer devices (especially Google Pixel, Samsung flagship) come with Daniel pre-installed
-- ✅ **Backward Compatible:** Doesn't affect existing users' customized voice preferences
+- ✅ **One-Time Reset:** Existing users will have voice preferences reset once to benefit from smart defaults, then preferences are honored
 
 ### **TECHNICAL DETAILS**
 
@@ -77,6 +110,12 @@ if (!useEnhancedVoice.value) {
 ### **IMPACT**
 
 This change provides an improved default experience for users while maintaining the app's core principle of being fully functional offline without requiring any downloads. Users benefit from higher quality narration if their device already has the capability, with zero configuration required.
+
+**Migration Impact:**
+- All existing users will have their voice preferences reset on the next app launch after this update
+- This one-time reset ensures everyone benefits from the new Daniel voice auto-detection
+- After the migration, users who customize their voice settings will have those preferences fully respected
+- New users will automatically get the smart default behavior without any migration needed
 
 ---
 

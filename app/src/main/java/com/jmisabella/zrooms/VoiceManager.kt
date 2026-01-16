@@ -36,6 +36,7 @@ class VoiceManager private constructor(private val context: Context) {
         // SharedPreferences keys
         private const val PREF_USE_ENHANCED_VOICE = "use_enhanced_voice"
         private const val PREF_PREFERRED_VOICE_NAME = "preferred_voice_name"
+        private const val PREF_VOICE_MIGRATION_V1 = "voice_migration_v1_completed"
 
         // Speech rate multipliers based on voice quality
         private const val DEFAULT_VOICE_RATE = 0.8f  // Slower for robotic voices
@@ -52,8 +53,25 @@ class VoiceManager private constructor(private val context: Context) {
     }
 
     init {
+        performOneTimeMigration()
         loadPreferences()
         initializeTTS()
+    }
+
+    /**
+     * One-time migration to reset voice preferences to smart defaults
+     * This allows all users to benefit from Daniel voice auto-detection
+     */
+    private fun performOneTimeMigration() {
+        val migrationCompleted = prefs.getBoolean(PREF_VOICE_MIGRATION_V1, false)
+        if (!migrationCompleted) {
+            // Clear existing voice preferences to apply smart defaults
+            prefs.edit()
+                .remove(PREF_USE_ENHANCED_VOICE)
+                .remove(PREF_PREFERRED_VOICE_NAME)
+                .putBoolean(PREF_VOICE_MIGRATION_V1, true)
+                .apply()
+        }
     }
 
     private fun loadPreferences() {
