@@ -100,13 +100,31 @@ class VoiceManager private constructor(private val context: Context) {
 
     /**
      * Gets the preferred voice for story narration
-     * Priority: User's selected enhanced voice -> Any high-quality voice -> Default system voice
+     * Priority: User's selected enhanced voice -> Daniel (if available and enhanced disabled) -> Any high-quality voice -> Default system voice
      */
     fun getPreferredVoice(): Voice? {
         if (!isInitialized) return null
 
-        // If enhanced voice is disabled, use default system voice (null = system default)
+        // If enhanced voice is disabled, try to use Daniel voice if already available on device
         if (!useEnhancedVoice.value) {
+            // Check if Daniel voice (voice code "iom") is available
+            val danielVoice = availableVoices.value.firstOrNull { voice ->
+                val name = voice.name.lowercase()
+                val voiceCode = when {
+                    name.contains("-x-") -> {
+                        name.substringAfter("-x-").substringBefore("-").substringBefore("#")
+                    }
+                    else -> ""
+                }
+                voiceCode == "iom" && isVoiceAvailable(voice)
+            }
+
+            // If Daniel is available, use it as the default (unless user explicitly disabled enhanced voices)
+            if (danielVoice != null) {
+                return danielVoice
+            }
+
+            // Otherwise, fall back to system default
             return null
         }
 

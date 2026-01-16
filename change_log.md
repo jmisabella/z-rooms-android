@@ -1,5 +1,85 @@
 # Z Rooms Android - Change Log
 
+## 2026-01-15: Smart Default Voice Selection - Daniel Voice Auto-Detection
+
+### **OVERVIEW**
+
+Enhanced the Text-to-Speech system to intelligently detect and use the Daniel (English, United States) voice as the default when it's already available on the user's device. This provides a better out-of-box experience for users who have this high-quality voice pre-installed without requiring any downloads or configuration.
+
+### **CHANGES IMPLEMENTED**
+
+#### 1. Smart Voice Detection in VoiceManager
+
+**File Modified:**
+- [VoiceManager.kt:105-149](app/src/main/java/com/jmisabella/zrooms/VoiceManager.kt#L105-L149)
+
+**Changes:**
+- Modified `getPreferredVoice()` method to check for Daniel voice availability when enhanced voice is disabled
+- Added logic to detect Daniel voice by its voice code "iom"
+- Implements automatic fallback chain: Daniel (if available) → System default voice
+
+**Implementation Details:**
+```kotlin
+if (!useEnhancedVoice.value) {
+    // Check if Daniel voice (voice code "iom") is available
+    val danielVoice = availableVoices.value.firstOrNull { voice ->
+        val name = voice.name.lowercase()
+        val voiceCode = when {
+            name.contains("-x-") -> {
+                name.substringAfter("-x-").substringBefore("-").substringBefore("#")
+            }
+            else -> ""
+        }
+        voiceCode == "iom" && isVoiceAvailable(voice)
+    }
+
+    if (danielVoice != null) {
+        return danielVoice
+    }
+
+    return null // Fall back to system default
+}
+```
+
+### **BEHAVIOR**
+
+**When Enhanced Voice is Disabled (Default Setting):**
+1. App checks if Daniel voice is already downloaded on the device
+2. If found and available, Daniel is automatically used for TTS
+3. If not found, falls back to system default voice (intentionally robotic voice)
+
+**When Enhanced Voice is Enabled:**
+- User's explicitly selected voice takes precedence (unchanged behavior)
+- Existing voice selection logic remains intact
+
+### **USER EXPERIENCE IMPROVEMENTS**
+
+- ✅ **Zero Friction:** Users with Daniel pre-installed get better voice quality automatically
+- ✅ **No Forced Downloads:** Users without Daniel aren't prompted to download anything
+- ✅ **User Choice Respected:** Explicit voice selections in settings take precedence
+- ✅ **Maintains App Philosophy:** App remains 100% offline with no required downloads
+- ✅ **Better Default Experience:** Many newer devices (especially Google Pixel, Samsung flagship) come with Daniel pre-installed
+- ✅ **Backward Compatible:** Doesn't affect existing users' customized voice preferences
+
+### **TECHNICAL DETAILS**
+
+**Voice Detection Logic:**
+- Identifies Daniel by Google TTS voice code "iom" (IOM Male)
+- Only uses Daniel if `isVoiceAvailable()` returns true (voice is downloaded and functional)
+- Preserves existing friendly name mapping: "iom" → "Daniel"
+
+**Priority Hierarchy (Updated):**
+1. User's selected enhanced voice (when enhanced mode enabled)
+2. Daniel voice (when enhanced mode disabled AND Daniel is available)
+3. High-quality fallback voices (when enhanced mode enabled but selected voice unavailable)
+4. System default voice (final fallback)
+
+### **IMPACT**
+
+This change provides an improved default experience for users while maintaining the app's core principle of being fully functional offline without requiring any downloads. Users benefit from higher quality narration if their device already has the capability, with zero configuration required.
+
+---
+
 ## 2026-01-15 23:45 EST: Responsive Closed Caption Box Height and Layout Optimization
 
 ### **OVERVIEW**
