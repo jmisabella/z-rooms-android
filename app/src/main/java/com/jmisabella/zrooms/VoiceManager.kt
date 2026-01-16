@@ -42,7 +42,7 @@ class VoiceManager private constructor(private val context: Context) {
         private const val ENHANCED_VOICE_RATE = 1.0f // Natural speed for high-quality voices
 
         // Voice volume (shared across story playback and preview)
-        const val VOICE_VOLUME = 0.23f
+        const val VOICE_VOLUME = 0.20f
 
         fun getInstance(context: Context): VoiceManager {
             return INSTANCE ?: synchronized(this) {

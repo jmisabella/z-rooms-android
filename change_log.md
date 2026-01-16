@@ -1,5 +1,45 @@
 # Z Rooms Android - Change Log
 
+## 2026-01-15: Default Ambient Volume and TTS Voice Volume Adjustments
+
+### **OVERVIEW**
+
+Adjusted default audio levels for better user experience:
+- Increased default ambient volume from 85% to 100%
+- Lowered TTS voice volume from 0.23 to 0.20 for better balance with ambient audio
+
+### **CHANGES IMPLEMENTED**
+
+#### 1. Default Ambient Volume Increased to 100%
+
+**Files Modified:**
+- [AudioService.kt:42](app/src/main/java/com/jmisabella/zrooms/AudioService.kt#L42)
+- [TextToSpeechManager.kt:38](app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt#L38)
+
+**Changes:**
+- `AudioService.kt`: Changed `targetAmbientVolume` from `0.8f` (80%) to `1.0f` (100%)
+- `TextToSpeechManager.kt`: Changed `ambientVolume` default from `0.8f` (80%) to `1.0f` (100%)
+
+**Impact:**
+- New users will now start with full ambient volume by default
+- Users can still adjust volume down using the slider if desired
+- Provides more immersive audio experience out of the box
+
+#### 2. TTS Voice Volume Reduced
+
+**File Modified:**
+- [VoiceManager.kt:45](app/src/main/java/com/jmisabella/zrooms/VoiceManager.kt#L45)
+
+**Changes:**
+- Changed `VOICE_VOLUME` constant from `0.23f` to `0.20f`
+
+**Impact:**
+- TTS narration voice is now slightly quieter relative to ambient audio
+- Improves balance between voice and background sounds
+- Makes for a more pleasant listening experience during guided stories and poetry readings
+
+---
+
 ## 2026-01-15 20:30 EST: Closed Caption Paragraph Structure Preservation
 
 ### **OVERVIEW**

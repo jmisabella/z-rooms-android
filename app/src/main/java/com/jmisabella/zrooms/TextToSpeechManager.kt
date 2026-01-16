@@ -35,7 +35,7 @@ class TextToSpeechManager(
     val isPlayingStory: Boolean
         get() = contentMode == ContentMode.STORY
 
-    var ambientVolume by mutableStateOf(0.8f) // 0.0 (silent) to 1.0 (full ambient), default to 80%
+    var ambientVolume by mutableStateOf(1.0f) // 0.0 (silent) to 1.0 (full ambient), default to 100%
         private set
 
     var currentPhrase by mutableStateOf("")

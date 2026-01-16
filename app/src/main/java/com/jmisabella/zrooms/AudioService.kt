@@ -39,7 +39,7 @@ class AudioService : Service() {
     private var alarmPlayer: ExoPlayer? = null
     private var previewPlayer: ExoPlayer? = null
     private var ambientVolume: Float = 0f
-    private var targetAmbientVolume: Float = 0.8f // User's preferred ambient volume (default to 80%)
+    private var targetAmbientVolume: Float = 1.0f // User's preferred ambient volume (default to 100%)
     private var alarmVolume: Float = 0f
     private var previewVolume: Float = 0f
     private var currentAmbientFile: String? = null
