@@ -22,10 +22,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import android.content.res.Configuration
 import kotlinx.coroutines.launch
 
 /**
@@ -96,6 +98,11 @@ fun ScrollableStoryTextDisplay(
     val scrollState = rememberLazyListState()
     val scope = rememberCoroutineScope()
 
+    // Determine caption box height based on orientation
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+    val captionHeight = if (isLandscape) 100.dp else 300.dp
+
     // Group phrases into paragraphs
     val paragraphs = remember(phraseHistory, currentPhrase) {
         groupIntoParagraphs(phraseHistory, currentPhrase)
@@ -140,7 +147,7 @@ fun ScrollableStoryTextDisplay(
     ) {
         Box(
             modifier = Modifier
-                .height(100.dp)
+                .height(captionHeight)
                 .padding(horizontal = 24.dp)
         ) {
             // Semi-transparent dark background

@@ -1,5 +1,105 @@
 # Z Rooms Android - Change Log
 
+## 2026-01-15 23:45 EST: Responsive Closed Caption Box Height and Layout Optimization
+
+### **OVERVIEW**
+
+Enhanced the closed caption display with responsive sizing and improved layout positioning to match the iOS implementation:
+- Increased caption box height in portrait mode from 100.dp to 300.dp (approximately 35-40% of screen height)
+- Maintained compact 100.dp height in landscape mode to avoid covering sliders
+- Repositioned skip chapter buttons to sit just above the caption box without overlapping
+- Adjusted slider positioning higher in landscape mode for optimal screen space usage
+- Lowered caption box in landscape mode for better spacing between sliders and captions
+
+### **CHANGES IMPLEMENTED**
+
+#### 1. Responsive Caption Box Height
+
+**File Modified:**
+- [ScrollableStoryTextDisplay.kt:99-102, 143](app/src/main/java/com/jmisabella/zrooms/ScrollableStoryTextDisplay.kt#L99-L102)
+
+**Changes:**
+- Added orientation detection using `LocalConfiguration`
+- Implemented dynamic height based on screen orientation:
+  - **Portrait mode:** 300.dp (matching iOS 300 points)
+  - **Landscape mode:** 100.dp (compact to avoid covering UI elements)
+
+**Impact:**
+- Users can now read significantly more text at once in portrait mode without scrolling
+- Landscape mode keeps caption box compact to preserve visibility of duration and ambient volume sliders
+- Matches the iOS implementation for consistent cross-platform experience
+
+#### 2. Repositioned Skip Chapter Buttons
+
+**File Modified:**
+- [ExpandingView.kt:632-634, 652](app/src/main/java/com/jmisabella/zrooms/ExpandingView.kt#L632-L634)
+
+**Changes:**
+- Updated button positioning to be orientation-aware
+- Skip buttons now positioned just above caption box with 10.dp gap:
+  - **Portrait mode:** 490.dp from bottom (180 + 300 + 10)
+  - **Landscape mode:** 190.dp from bottom (80 + 100 + 10)
+
+**Impact:**
+- Skip buttons no longer overlap the caption box
+- Proper spacing maintained in both orientations
+- Buttons remain easily accessible while captions are displayed
+
+#### 3. Optimized Slider Positioning for Landscape Mode
+
+**File Modified:**
+- [ExpandingView.kt:124-126, 400](app/src/main/java/com/jmisabella/zrooms/ExpandingView.kt#L124-L126)
+
+**Changes:**
+- Added global orientation detection at function level
+- Reduced top padding for sliders in landscape mode:
+  - **Portrait mode:** 40.dp top padding (unchanged)
+  - **Landscape mode:** 8.dp top padding (moved much higher)
+
+**Impact:**
+- Duration and ambient volume sliders now sit near the top of the screen in landscape
+- Maximizes available space for caption box without overlap
+- Top slider almost touches the top of the screen in landscape as desired
+
+#### 4. Adjusted Caption Box Bottom Spacing
+
+**File Modified:**
+- [ExpandingView.kt:633, 645](app/src/main/java/com/jmisabella/zrooms/ExpandingView.kt#L633)
+
+**Changes:**
+- Made bottom padding responsive to orientation:
+  - **Portrait mode:** 180.dp from bottom (unchanged)
+  - **Landscape mode:** 80.dp from bottom (lowered for better spacing)
+
+**Impact:**
+- In landscape mode, creates proper vertical spacing between sliders and caption box
+- Caption box positioned optimally to not interfere with other UI elements
+- Maintains consistent spacing from bottom control buttons in both orientations
+
+### **TECHNICAL DETAILS**
+
+**Imports Added:**
+- `android.content.res.Configuration`
+- `androidx.compose.ui.platform.LocalConfiguration`
+
+**Responsive Design Pattern:**
+All layout adjustments use a consistent pattern:
+```kotlin
+val configuration = LocalConfiguration.current
+val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+val parameter = if (isLandscape) landscapeValue else portraitValue
+```
+
+### **USER EXPERIENCE IMPROVEMENTS**
+
+- ✅ **Portrait Mode:** Much taller caption box (300.dp) allows reading multiple paragraphs at once
+- ✅ **Landscape Mode:** Compact layout keeps sliders, captions, and buttons all visible without overlap
+- ✅ **Skip Buttons:** Properly positioned above captions in both orientations
+- ✅ **Consistent with iOS:** Matches the iOS app's layout and caption box sizing
+- ✅ **Better Accessibility:** More text visible at once improves readability for users relying on closed captions
+
+---
+
 ## 2026-01-15: Default Ambient Volume and TTS Voice Volume Adjustments
 
 ### **OVERVIEW**

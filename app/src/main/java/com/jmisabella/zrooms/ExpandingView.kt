@@ -1,6 +1,7 @@
 package com.jmisabella.zrooms
 
 import android.content.Context
+import android.content.res.Configuration
 import android.widget.NumberPicker
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FiniteAnimationSpec
@@ -62,6 +63,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
@@ -118,6 +120,10 @@ fun ExpandingView(
     audioService: AudioService? = null
 ) {
     val context = LocalContext.current
+
+    // Determine orientation for responsive layout
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
     // Adaptive slider colors based on background brightness
     val sliderColor = if (isLight(color)) {
@@ -391,7 +397,7 @@ fun ExpandingView(
         ) {
 
             Box(
-                modifier = Modifier.padding(top = 40.dp)
+                modifier = Modifier.padding(top = if (isLandscape) 8.dp else 40.dp)
             ) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally
@@ -623,6 +629,10 @@ fun ExpandingView(
             }
         }
 
+        // Determine caption and button positioning based on orientation
+        val captionBottomPadding = if (isLandscape) 80.dp else 180.dp // Lower in landscape for better spacing
+        val skipButtonBottomPadding = if (isLandscape) 190.dp else 490.dp // 80/180 + 100/300 + 10 gap
+
         // Scrollable story text display with phrase history
         ScrollableStoryTextDisplay(
             phraseHistory = ttsManager.phraseHistory,
@@ -632,7 +642,7 @@ fun ExpandingView(
             isVisible = showStoryText.value && contentMode != ContentMode.OFF,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 180.dp) // Increased spacing from bottom buttons
+                .padding(bottom = captionBottomPadding) // Responsive spacing from bottom buttons
         )
 
         // Skip buttons - only visible in STORY mode (story chapters)
@@ -642,7 +652,7 @@ fun ExpandingView(
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp)
-                    .padding(bottom = 290.dp) // Increased spacing from closed captions
+                    .padding(bottom = skipButtonBottomPadding) // Positioned just above caption box
                     .zIndex(100f), // Ensure buttons are on top and intercept touches first
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
