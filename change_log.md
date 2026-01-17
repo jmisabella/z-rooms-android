@@ -1,5 +1,73 @@
 # Z Rooms Android - Change Log
 
+## 2026-01-17: Poetry Mode and Story Mode - Preset Content Only Verification
+
+### **OVERVIEW**
+
+Verified that the Poetry Mode (Theater Button) and Story Mode (Leaf Button) functionality correctly plays **only preset poems and stories**, excluding custom content from random selection. Custom poems and stories remain accessible exclusively through the dedicated Custom Content browser menu.
+
+### **VERIFICATION COMPLETED**
+
+**No changes were needed** - the implementation is already correct and working as intended.
+
+#### Poetry Mode (Theater Button) - Preset Poems Only
+
+**Files Reviewed:**
+- [TextToSpeechManager.kt:475-534](app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt#L475-L534)
+- [ExpandingView.kt:563-600](app/src/main/java/com/jmisabella/zrooms/ExpandingView.kt#L563-L600)
+
+**Implementation:**
+- Theater button triggers `cycleContentMode()` which calls `startSpeakingRandomPoem()`
+- `startSpeakingRandomPoem()` calls `loadRandomPoemFile()`
+- `loadRandomPoemFile()` explicitly:
+  1. Loads **only** preset poem files (`preset_poem1`, `preset_poem2`, etc.) from res/raw
+  2. **Excludes custom poems** from random selection (lines 503-504)
+  3. Comment at line 503: "Custom poems excluded from random selection - only presets play via Poetry button"
+
+#### Story Mode (Leaf Button) - Preset Stories Only
+
+**Files Reviewed:**
+- [TextToSpeechManager.kt:394-452, 458-472, 536-590](app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt#L394-L452)
+
+**Implementation:**
+- Leaf button triggers sequential story playback via `startSpeakingSequentialStory()`
+- Random story mode uses `loadRandomStoryFile()` which:
+  1. Loads **only** preset story files (`preset_story1`, `preset_story2`, etc.) from res/raw
+  2. **Excludes custom stories** from random selection (lines 425-426)
+  3. Comment at line 425: "Custom storys excluded from random selection - only presets play via Leaf button"
+
+#### Custom Content Access
+
+**Custom Poems and Stories Are:**
+- Accessible **only** through the dedicated Custom Content browser (Format Quote button)
+- Playable directly from the custom content list views
+- Never included in random preset poem/story rotation
+
+### **USER EXPERIENCE**
+
+✅ **Poetry Mode (Theater Button):** Always plays a random **preset poem**
+✅ **Story Mode (Leaf Button):** Always plays **preset stories** sequentially
+✅ **Custom Content:** Only accessible through Custom Content browser menu
+✅ **Separation Maintained:** Clear distinction between preset and custom content playback
+
+### **TECHNICAL DETAILS**
+
+**Random Selection Logic:**
+- Both `loadRandomPoemFile()` and `loadRandomStoryFile()` dynamically discover preset files using resource identifier lookup
+- Files are named: `preset_poem1.txt`, `preset_poem2.txt`, ... and `preset_story1.txt`, `preset_story2.txt`, ...
+- Custom content stored separately in SharedPreferences via `CustomPoetryManager` and `CustomStoryManager`
+- No code path allows custom content to be selected by the Leaf or Theater buttons
+
+**Anti-Repeat Logic:**
+- Tracks `lastPlayedPoem` and `lastPlayedStory` to avoid immediate repetition
+- Filters out the last played item when selecting the next random preset
+
+### **IMPACT**
+
+This verification confirms that users can only trigger custom poems/stories through explicit selection in the Custom Content browser. The Leaf and Theater buttons will never accidentally play user's custom content, maintaining clear separation between preset and custom content experiences.
+
+---
+
 ## 2026-01-15: Smart Default Voice Selection - Daniel Voice Auto-Detection
 
 ### **OVERVIEW**
