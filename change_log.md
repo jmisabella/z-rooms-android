@@ -1,5 +1,28 @@
 # Z Rooms Android - Change Log
 
+## 2026-01-17: Bug Fix - Story Title Overlay Re-trigger
+
+### **BUG FIX**
+
+Fixed bug where story title overlay would only show once and not reappear when toggling story/poetry mode back on, preventing users from accessing the story selector to switch collections.
+
+**Root Cause:** The `StoryTitleOverlay` component used `remember(showTitle)` with a boolean flag. Once the flag was set to true and the overlay faded out, setting it to true again wouldn't retrigger the animation because the remembered state key didn't change.
+
+**Symptoms:**
+- Title overlay appears first time entering Story/Poetry mode
+- After 4.5 second fade-out, overlay never reappears
+- No way to access story selector to switch collections
+- Users stuck on currently selected story
+
+**Solution:** Changed from boolean flag to integer counter (`titleTriggerCount`). Each time content mode switches to STORY or POETRY, the counter increments, forcing the overlay animation to retrigger via `LaunchedEffect(triggerCount)`.
+
+**Files Modified:**
+- [ExpandingView.kt](app/src/main/java/com/jmisabella/zrooms/ExpandingView.kt):217-223 - Changed from boolean `showStoryTitle` to integer `titleTriggerCount` that increments on each mode change
+- [ExpandingView.kt](app/src/main/java/com/jmisabella/zrooms/ExpandingView.kt):725-730 - Updated StoryTitleOverlay call to pass `triggerCount` instead of `showTitle`
+- [StoryTitleOverlay.kt](app/src/main/java/com/jmisabella/zrooms/StoryTitleOverlay.kt):34-48 - Changed parameter from `showTitle: Boolean` to `triggerCount: Int` and updated LaunchedEffect to trigger on count changes
+
+---
+
 ## 2026-01-17: Critical Bug Fix - Collection ID Persistence
 
 ### **BUG FIX**

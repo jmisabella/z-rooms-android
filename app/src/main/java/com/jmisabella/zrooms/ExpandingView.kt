@@ -155,7 +155,6 @@ fun ExpandingView(
     var isLoading by remember { mutableStateOf(ttsManager.isLoading) }
     var showContentBrowser by remember { mutableStateOf(false) }
     var showVoiceSettings by remember { mutableStateOf(false) }
-    var showStoryTitle by remember { mutableStateOf(false) }
     var showStorySelector by remember { mutableStateOf(false) }
 
     // Story text display settings
@@ -213,10 +212,12 @@ fun ExpandingView(
         isLoading = ttsManager.isLoading
     }
 
-    // Show story title when content mode becomes STORY or POETRY
+    // Show story title when content mode changes to STORY or POETRY
+    // Use a counter to force re-trigger the overlay animation each time
+    var titleTriggerCount by remember { mutableStateOf(0) }
     LaunchedEffect(contentMode) {
         if (contentMode != ContentMode.OFF) {
-            showStoryTitle = true
+            titleTriggerCount++
         }
     }
 
@@ -722,7 +723,7 @@ fun ExpandingView(
         // Story title overlay
         StoryTitleOverlay(
             collection = storyCollectionManager.selectedCollection,
-            showTitle = showStoryTitle,
+            triggerCount = titleTriggerCount,
             onTitleClick = { showStorySelector = true },
             modifier = Modifier.align(Alignment.TopCenter)
         )

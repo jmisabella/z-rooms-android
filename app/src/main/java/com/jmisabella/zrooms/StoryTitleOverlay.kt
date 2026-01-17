@@ -33,14 +33,14 @@ import kotlinx.coroutines.delay
 @Composable
 fun StoryTitleOverlay(
     collection: StoryCollection?,
-    showTitle: Boolean,
+    triggerCount: Int,
     onTitleClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var visible by remember(showTitle) { mutableStateOf(showTitle) }
+    var visible by remember { mutableStateOf(false) }
 
-    LaunchedEffect(showTitle) {
-        if (showTitle) {
+    LaunchedEffect(triggerCount) {
+        if (triggerCount > 0) {
             visible = true
             delay(4500) // Show for 4.5 seconds
             visible = false
