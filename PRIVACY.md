@@ -1,10 +1,10 @@
 # Privacy Notice
 
-**Last updated: December 13, 2025**
+**Last updated: January 17, 2026**
 
 This Privacy Notice for Jeffrey Isabella ("we," "us," or "our") describes how and why we might access, collect, store, use, and/or share ("process") your personal information when you use our services ("Services"), including when you:
 
-- Download and use our mobile application (Z Rooms) on Android, an ambient audio, white noise, and guided story app that allows users to select from various "rooms" with distinct color palettes and ambient audio tracks, 35 preset guided storys, custom story creation tools, featuring subtle animations, a duration timer (up to 8 hours), and optional alarms, or any other application of ours that links to this Privacy Notice. Z Rooms is designed to provide ambient audio, visual experiences, and guided story content to promote relaxation and sleep, and it does not collect, process, or store any health-related data or personal information from users. The app includes guided story features with preset storys and the ability to create custom storys. All custom storys are stored locally on your device only and are never transmitted, collected, or processed by us. Meditation content does not contain medical advice or treatment information.
+- Download and use our mobile application (Z Rooms), an ambient audio, white noise, and narrative content app that allows users to select from various "rooms" with distinct color palettes and ambient audio tracks, featuring optional Story Mode with original narrative stories and accompanying poetry, custom story/poem creation tools, text-to-speech voice options (including Android system voices), closed captions, subtle animations, a duration timer (up to 8 hours), and optional alarms, or any other application of ours that links to this Privacy Notice. Z Rooms is designed to provide ambient audio, visual experiences, and narrative content to promote relaxation and sleep, and it does not collect, process, or store any health-related data or personal information from users. The app includes Story Mode with preset narrative content and poetry, as well as the ability to create custom stories and poems. All custom content is stored locally on your device only and is never transmitted, collected, or processed by us. Narrative content does not contain medical advice or treatment information.
 - Engage with us in other related ways, including any sales, marketing, or events
 
 **Questions or concerns?** Reading this Privacy Notice will help you understand your privacy rights and choices. We are responsible for making decisions about how your personal information is processed. If you do not agree with our policies and practices, please do not use our Services. If you still have any questions or concerns, please contact us at jeff.isabella@gmail.com.
@@ -52,11 +52,17 @@ Want to learn more about what we do with any information we collect? [Review the
 
 We collect personal information that you voluntarily provide to us when you express an interest in obtaining information about us or our products and Services, when you participate in activities on the Services, or otherwise when you contact us.
 
-**Sensitive Information.** We do not process sensitive information. Z Rooms does not collect or process any health-related data, such as sleep patterns, biometric information, or wellness metrics. While the app provides guided story and wellness content, all user-created custom storys are stored locally on your device only and are never transmitted to us or any third party. The app operates entirely offline and does not track, monitor, or collect any data about your story practice or usage patterns.
+**Sensitive Information.** We do not process sensitive information. Z Rooms does not collect or process any health-related data, such as sleep patterns, biometric information, or wellness metrics. While the app provides narrative story content and ambient audio for relaxation, all user-created custom stories and poems are stored locally on your device only and are never transmitted to us or any third party. The app operates entirely offline and does not track, monitor, or collect any data about your usage patterns or content preferences. Story and poetry content does not constitute health information or medical advice.
 
 **App-Generated Audio and Visuals.** Z Rooms generates ambient audio tracks and visual animations for user enjoyment. These are pre-programmed app features and do not involve the collection or processing of any user-generated audio, visual, or sensory data.
 
 **Background Audio Playback.** Z Rooms uses foreground services on Android to allow ambient audio to continue playing when your device's screen is locked. This feature is implemented solely to enable continuous audio playback and does not involve accessing, collecting, or processing any device or user data beyond what is necessary for audio playback.
+
+**Story Mode and Custom Content Creation.** Z Rooms includes optional Story Mode featuring original narrative stories with accompanying thematically-related poetry. Users can also create custom stories and poems with timed pause placements (e.g., 2-second or 1.5-minute pauses). All preset stories, preset poems, custom stories, custom poems, and pause configurations are stored locally on your device only and are never transmitted, collected, or processed by us or any third party.
+
+**Text-to-Speech Voice Options.** Z Rooms uses device-native text-to-speech voices provided by Android to narrate story and poetry content. Some voices are pre-installed on your device, while others can be optionally downloaded via Android Settings. These are Android system features managed by Google, not by our app. We do not collect, record, transmit, or process any voice input, audio recordings, or TTS-related data.
+
+**Closed Captions.** Z Rooms includes an optional closed captions feature that displays the text of story or poetry content on-screen as it is being narrated. This feature is enabled by default but can be disabled in settings. All caption rendering occurs locally on your device. We do not collect, transmit, or process any caption data or usage information.
 
 **No Device Permissions for Data Collection.** Z Rooms does not request or use permissions that access user data, such as location, storage (except for local app data), network, or personal information on Android.
 
@@ -68,7 +74,7 @@ All personal information that you provide to us must be true, complete, and accu
 
 We process your personal information for a variety of reasons, depending on how you interact with our Services, including:
 
-- **To provide our Services.** We do not collect or process personal information, as Z Rooms operates offline and uses pre-programmed audio and visuals to deliver relaxation and sleep experiences.
+- **To provide our Services.** We do not collect or process personal information, as Z Rooms operates offline and uses pre-programmed audio, narrative content, and visuals to deliver relaxation and sleep experiences.
 
 ## 3. WHAT LEGAL BASES DO WE RELY ON TO PROCESS YOUR PERSONAL INFORMATION?
 
@@ -118,9 +124,15 @@ We do not collect or retain any personal information from users of Z Rooms, as t
 
 ## 6. DO WE COLLECT INFORMATION FROM MINORS?
 
-**In Short:** *We do not knowingly collect data from or market to children under 18 years of age or the equivalent age as specified by law in your jurisdiction.*
+**In Short:** *We do not knowingly collect data from or market to children under 13 years of age.*
 
-We do not knowingly collect, solicit data from, or market to children under 18 years of age or the equivalent age as specified by law in your jurisdiction, nor do we knowingly sell such personal information. By using the Services, you represent that you are at least 18 or the equivalent age as specified by law in your jurisdiction or that you are the parent or guardian of such a minor and consent to such minor dependent's use of the Services. If we learn that personal information from users less than 18 years of age or the equivalent age as specified by law in your jurisdiction has been collected, we will deactivate the account and take reasonable measures to promptly delete such data from our records. If you become aware of any data we may have collected from children under age 18 or the equivalent age as specified by law in your jurisdiction, please contact us at jeff.isabella@gmail.com.
+Z Rooms contains mature thematic content in Story Mode, including psychological horror, dark science fiction, and existential themes. Age ratings vary by jurisdiction based on Google Play Store ratings: Teen (13+) in North America via ESRB, 12+ in Brazil via ClassInd, 16+ in Europe via PEGI, 16+ in Germany via USK, 16+ in Rest of World, Russia, and South Korea via IARC Generic and Google Play ratings. The app is not directed to children under 13 years of age, and we do not knowingly collect, solicit data from, or market to children under 13.
+
+By using the Services, you represent that you meet the minimum age requirement for your jurisdiction as specified by the applicable rating authority. If you are under the age of majority in your jurisdiction, you represent that your parent or legal guardian has reviewed this Privacy Notice and consents to your use of the Services.
+
+If we learn that personal information from users less than 13 years of age has been collected, we will deactivate the account and take reasonable measures to promptly delete such data from our records. However, as Z Rooms operates entirely offline and does not collect any user data, this scenario is highly unlikely to occur.
+
+If you become aware of any data we may have collected from children under age 13, please contact us at jeff.isabella@gmail.com.
 
 ## 7. WHAT ARE YOUR PRIVACY RIGHTS?
 
