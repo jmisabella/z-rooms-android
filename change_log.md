@@ -1,5 +1,156 @@
 # Z Rooms Android - Change Log
 
+## 2026-01-17: Critical Bug Fix - Collection ID Persistence
+
+### **BUG FIX**
+
+Fixed critical bug where story playback would fail after app restart or toggling story mode off and back on.
+
+**Root Cause:** The `StoryCollection` data class was generating a new random UUID for each collection's `id` field every time collections were loaded. When the app saved the selected collection ID to SharedPreferences and then reloaded collections (e.g., after app restart or navigating back to a room), the saved UUID would not match any of the newly generated UUIDs, causing `selectedCollection` to return null.
+
+**Symptoms:**
+- Leaf button unresponsive (no story playback)
+- Logs showed: `selectedCollection is null (collections count: 1)`
+- Title overlay and navigation buttons appeared but no audio/captions
+
+**Solution:**
+1. Changed `id` from a constructor parameter with random UUID default to a computed property that returns `directoryName`. Since directory names are stable across app sessions, collection IDs are now consistent and persist correctly.
+2. Added migration logic to detect old UUID-based IDs (contain dashes) and reset to default, ensuring smooth upgrade for existing users.
+
+**Files Modified:**
+- [StoryCollection.kt](app/src/main/java/com/jmisabella/zrooms/StoryCollection.kt):3-10 - Changed `id` from `val id: String = UUID.randomUUID().toString()` to computed property `val id: String get() = directoryName`
+- [StoryCollectionManager.kt](app/src/main/java/com/jmisabella/zrooms/StoryCollectionManager.kt):78-83 - Added migration logic to detect and reset old UUID-based collection IDs
+
+---
+
+## 2026-01-17: Multi-Story Architecture Implementation
+
+### **OVERVIEW**
+
+Implemented multi-story architecture allowing the app to organize stories and poems into collections. Each story collection has its own chapters and thematically related poems, matching the iOS implementation. This is a significant architectural enhancement that enables scalable story content organization.
+
+### **KEY FEATURES ADDED**
+
+#### 1. Story Collections
+- Stories organized in `assets/tts_content/` directory structure
+- Each collection has `stories/` and `poems/` subdirectories
+- Initial collection: "Signal Decay" with 8 chapters and 8 poems
+- Automatic discovery of new story collections when added to assets
+
+#### 2. Story Title Display
+- Title appears for 4.5 seconds when toggling Leaf/Theater buttons
+- Smooth fade-in (500ms) and fade-out (1000ms) animations
+- Tappable title with chevron down indicator to open story selector
+- Shows current story collection name formatted with title case
+
+#### 3. Story Selection Dialog
+- Shows all available story collections
+- Displays metadata: chapter count and poem count for each collection
+- Visual indication of currently selected collection (checkmark + highlighted background)
+- Dark theme matching app aesthetic
+- Remembers selected story across app sessions via SharedPreferences
+
+#### 4. Per-Story Chapter Memory
+- Each story remembers its own chapter position separately
+- Stored as JSON map in SharedPreferences (key: "chapter_positions")
+- Example: Signal Decay at chapter 4, another story at chapter 2
+- Position preserved across app restarts
+
+#### 5. Scoped Poetry Mode
+- Theater button now plays poems ONLY from current story's collection
+- Poems scoped to `tts_content/{story_name}/poems/` directory
+- Random selection from current story's poem pool
+- Maintains last-played tracking to avoid immediate repeats
+
+#### 6. Auto-Selection for New Users
+- New users automatically get "signal_decay" as default collection (if exists)
+- Falls back to first available collection alphabetically if signal_decay doesn't exist
+- Existing users with saved preferences unaffected
+
+### **FILES ADDED**
+
+- **[StoryCollection.kt](app/src/main/java/com/jmisabella/zrooms/StoryCollection.kt)** - Data model for story collections with nested StoryFile class for chapter tracking
+- **[StoryCollectionManager.kt](app/src/main/java/com/jmisabella/zrooms/StoryCollectionManager.kt)** - Manager for collection scanning, persistence, and per-story chapter memory using GSON + SharedPreferences
+- **[StoryTitleOverlay.kt](app/src/main/java/com/jmisabella/zrooms/StoryTitleOverlay.kt)** - Composable for title display with animated fade (4.5s duration)
+- **[StorySelectionDialog.kt](app/src/main/java/com/jmisabella/zrooms/StorySelectionDialog.kt)** - Composable for story selection UI with metadata display
+
+### **FILES MODIFIED**
+
+#### [TextToSpeechManager.kt](app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt)
+- **Line 24**: Added `storyCollectionManager` parameter to constructor
+- **Lines 64-68**: Removed deprecated `currentChapterIndex` and `totalPresetStories` properties
+- **Lines 120-132**: Deleted `countPresetStories()` function (no longer needed)
+- **Lines 439-445**: Replaced `getSequentialStory()` to use AssetManager-based collection system
+- **Lines 450-459**: Replaced `loadRandomPoemFile()` to use collection-scoped poem loading
+- **Lines 486-509**: Replaced `skipToNextChapter()` with per-collection chapter tracking
+- **Lines 515-538**: Replaced `skipToPreviousChapter()` with per-collection chapter tracking
+- **Lines 683-696**: Updated auto-advance logic to use collection-based chapter management
+
+#### [ExpandingView.kt](app/src/main/java/com/jmisabella/zrooms/ExpandingView.kt)
+- **Lines 139-145**: Added StoryCollectionManager instantiation and collection loading
+- **Lines 148-150**: Updated TextToSpeechManager constructor to include storyCollectionManager
+- **Lines 158-159**: Added UI state variables for story title and selector dialogs
+- **Lines 217-221**: Added LaunchedEffect to trigger title display on content mode changes
+- **Lines 723-728**: Added StoryTitleOverlay composable to UI hierarchy
+- **Lines 903-912**: Added StorySelectionDialog composable for story selection
+
+### **FILE MIGRATION**
+
+Migrated content from `res/raw/` to structured `assets/tts_content/` directory:
+
+#### Stories (renamed with numeric prefixes for ordering):
+- `preset_story1.txt` → `assets/tts_content/signal_decay/stories/01_prelude.txt`
+- `preset_story2.txt` → `assets/tts_content/signal_decay/stories/02_awakening.txt`
+- `preset_story3.txt` → `assets/tts_content/signal_decay/stories/03_diagnostics.txt`
+- `preset_story4.txt` → `assets/tts_content/signal_decay/stories/04_exploration.txt`
+- `preset_story5.txt` → `assets/tts_content/signal_decay/stories/05_revelation.txt`
+- `preset_story6.txt` → `assets/tts_content/signal_decay/stories/06_descent.txt`
+- `preset_story7.txt` → `assets/tts_content/signal_decay/stories/07_convergence.txt`
+- `preset_story8.txt` → `assets/tts_content/signal_decay/stories/08_epilogue.txt`
+
+#### Poems (kept similar naming):
+- `preset_poem1.txt` → `assets/tts_content/signal_decay/poems/forty_years_waiting.txt`
+- `preset_poem2-8.txt` → `assets/tts_content/signal_decay/poems/poem_02-08.txt`
+
+#### Default Custom Content:
+- Moved to `assets/tts_content/default_custom_story.txt`
+- Moved to `assets/tts_content/default_custom_poem.txt`
+
+### **TECHNICAL DETAILS**
+
+#### Architecture Patterns Used:
+- **Jetpack Compose** for UI (AnimatedVisibility, LaunchedEffect, Dialog)
+- **Compose MutableState** for reactive state management (`mutableStateListOf`, `mutableStateOf`)
+- **Manager Pattern** matching existing CustomStoryManager architecture
+- **GSON** for JSON serialization of chapter positions in SharedPreferences
+- **AssetManager** for runtime directory scanning and file access
+
+#### Key Implementation Decisions:
+- **0-based chapter indexing** (consistent with current implementation)
+- **Directory names lowercase** (Android convention): `signal_decay` not `Signal_Decay`
+- **Numeric prefixes mandatory** for story files: `01_`, `02_`, etc.
+- **Poem files flexible naming** (selected randomly, no ordering required)
+- **Custom stories/poems unchanged** (separate SharedPreferences system remains independent)
+
+### **FUTURE STORY ADDITION PROCESS**
+
+To add new story collections:
+1. Create directory: `assets/tts_content/my_story_name/`
+2. Create subdirectories: `stories/` and `poems/`
+3. Add numbered story files: `01_chapter1.txt`, `02_chapter2.txt`, etc.
+4. Add poem files with any names: `poem1.txt`, `my_poem.txt`, etc.
+5. Rebuild app
+6. New story automatically appears in selection dialog as "My Story Name"
+
+### **COMPATIBILITY**
+
+- Backward compatible with existing custom stories/poems system
+- All TTS functionality preserved (pauses, captions, voice selection, ambient volume)
+- Button behavior unchanged (Leaf = Story, Theater = Poetry, circular navigation)
+- Old `res/raw/` files can remain as backup but are no longer used
+
+---
+
 ## 2026-01-17: Poetry Mode and Story Mode - Preset Content Only Verification
 
 ### **OVERVIEW**

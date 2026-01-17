@@ -136,9 +136,17 @@ fun ExpandingView(
     val storyManager = remember { CustomStoryManager(context) }
     val poetryManager = remember { CustomPoetryManager(context) }
 
+    // Story collection manager
+    val storyCollectionManager = remember { StoryCollectionManager(context) }
+
+    // Load collections on first composition
+    LaunchedEffect(Unit) {
+        storyCollectionManager.loadCollections()
+    }
+
     // Text-to-speech manager (needs both managers for random content selection)
     val ttsManager = remember {
-        TextToSpeechManager(context, storyManager, poetryManager)
+        TextToSpeechManager(context, storyManager, poetryManager, storyCollectionManager)
     }
     val voiceManager = remember { VoiceManager.getInstance(context) }
     val scope = rememberCoroutineScope()
@@ -147,6 +155,8 @@ fun ExpandingView(
     var isLoading by remember { mutableStateOf(ttsManager.isLoading) }
     var showContentBrowser by remember { mutableStateOf(false) }
     var showVoiceSettings by remember { mutableStateOf(false) }
+    var showStoryTitle by remember { mutableStateOf(false) }
+    var showStorySelector by remember { mutableStateOf(false) }
 
     // Story text display settings
     val showStoryText = remember {
@@ -201,6 +211,13 @@ fun ExpandingView(
 
     LaunchedEffect(ttsManager.isLoading) {
         isLoading = ttsManager.isLoading
+    }
+
+    // Show story title when content mode becomes STORY or POETRY
+    LaunchedEffect(contentMode) {
+        if (contentMode != ContentMode.OFF) {
+            showStoryTitle = true
+        }
     }
 
     // Ambient volume state (0.0 to 0.6)
@@ -701,6 +718,14 @@ fun ExpandingView(
                 }
             }
         }
+
+        // Story title overlay
+        StoryTitleOverlay(
+            collection = storyCollectionManager.selectedCollection,
+            showTitle = showStoryTitle,
+            onTitleClick = { showStorySelector = true },
+            modifier = Modifier.align(Alignment.TopCenter)
+        )
     }
 
     // Hide alarm state label after 2 seconds
@@ -870,6 +895,18 @@ fun ExpandingView(
                 showVoiceSettings = false
                 // Refresh voice settings when user closes the dialog
                 ttsManager.refreshVoiceSettings()
+            }
+        )
+    }
+
+    // Story selection dialog
+    if (showStorySelector) {
+        StorySelectionDialog(
+            collections = storyCollectionManager.collections,
+            selectedCollectionId = storyCollectionManager.selectedCollectionId,
+            onDismiss = { showStorySelector = false },
+            onSelectCollection = { collection ->
+                storyCollectionManager.setSelectedCollection(collection.id)
             }
         )
     }

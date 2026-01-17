@@ -20,7 +20,8 @@ import java.util.Locale
 class TextToSpeechManager(
     private val context: Context,
     private val customStoryManager: CustomStoryManager? = null,
-    private val customPoetryManager: CustomPoetryManager? = null
+    private val customPoetryManager: CustomPoetryManager? = null,
+    private val storyCollectionManager: StoryCollectionManager? = null
 ) {
     var isSpeaking by mutableStateOf(false)
         private set
@@ -60,12 +61,7 @@ class TextToSpeechManager(
     private var lastPlayedPoem: String? = null // Track last poem to avoid repeats
     private val prefs = androidx.preference.PreferenceManager.getDefaultSharedPreferences(context)
 
-    // Sequential chapter playback
-    private var currentChapterIndex: Int
-        get() = prefs.getInt("currentChapterIndex", 0)
-        set(value) = prefs.edit().putInt("currentChapterIndex", value).apply()
-
-    private var totalPresetStories: Int = 0
+    // Sequential chapter playback - now managed by StoryCollectionManager
     private val voiceManager = VoiceManager.getInstance(context)
 
     // Callback to notify when ambient volume changes
@@ -113,26 +109,8 @@ class TextToSpeechManager(
                         pendingPhrase = null
                     }
                 })
-
-                // Initialize chapter count after TTS is ready
-                totalPresetStories = countPresetStories()
             }
         }
-    }
-
-    /**
-     * Counts total available preset story files
-     */
-    private fun countPresetStories(): Int {
-        var count = 0
-        var i = 1
-        while (true) {
-            val resId = context.resources.getIdentifier("preset_story$i", "raw", context.packageName)
-            if (resId == 0) break
-            count++
-            i++
-        }
-        return count
     }
 
     /**
@@ -456,70 +434,43 @@ class TextToSpeechManager(
      * File naming: preset_story1.txt, preset_story2.txt, etc.
      */
     private fun getSequentialStory(): String? {
-        if (totalPresetStories == 0) totalPresetStories = countPresetStories()
-        if (totalPresetStories == 0) return null
-
-        // currentChapterIndex is 0-based, file names are 1-based
-        val fileIndex = currentChapterIndex + 1
-        val resId = context.resources.getIdentifier("preset_story$fileIndex", "raw", context.packageName)
-        if (resId == 0) return null
-
-        return try {
-            context.resources.openRawResource(resId).bufferedReader().use { it.readText() }.trim()
-        } catch (e: Exception) {
-            null
+        val manager = storyCollectionManager
+        if (manager == null) {
+            println("❌ getSequentialStory: storyCollectionManager is null")
+            return null
         }
+
+        val collection = manager.selectedCollection
+        if (collection == null) {
+            println("❌ getSequentialStory: selectedCollection is null (collections count: ${manager.collections.size})")
+            return null
+        }
+
+        val chapterIndex = manager.getChapterIndex(collection.directoryName)
+        println("📖 Loading story: ${collection.displayName}, chapter index: $chapterIndex")
+
+        val storyText = manager.getStoryText(collection, chapterIndex)
+        if (storyText == null) {
+            println("❌ getSequentialStory: getStoryText returned null for ${collection.displayName} chapter $chapterIndex")
+        } else {
+            println("✅ Successfully loaded story (${storyText.length} chars)")
+        }
+
+        return storyText
     }
 
     /**
      * Loads a random poem from preset files only
      */
     private fun loadRandomPoemFile(): String? {
-        val allPoems = mutableListOf<String>()
+        val manager = storyCollectionManager ?: return null
+        val collection = manager.selectedCollection ?: return null
 
-        // 1. Load all preset poem files (preset_poem1 through preset_poem35)
-        var i = 1
-        while (true) {
-            val resId = context.resources.getIdentifier(
-                "preset_poem$i",
-                "raw",
-                context.packageName
-            )
-            if (resId == 0) break
-            try {
-                val text = context.resources.openRawResource(resId)
-                    .bufferedReader()
-                    .use { it.readText() }
-                    .trim()
-                if (text.isNotEmpty()) {
-                    allPoems.add(text)
-                }
-            } catch (e: Exception) {
-                // Silently skip poems that can't be read
-            }
-            i++
+        val poemText = manager.getRandomPoem(collection)
+        if (poemText != null) {
+            lastPlayedPoem = poemText
         }
-
-        // Custom poems excluded from random selection - only presets play via Poetry button
-        // Custom content remains accessible through dedicated list views
-
-        // 2. Check if we have any poems at all
-        if (allPoems.isEmpty()) return null
-
-        // 3. Pick random poem, avoiding last played
-        val selectedPoem = if (allPoems.size > 1 && lastPlayedPoem != null) {
-            val availablePoems = allPoems.filter { it != lastPlayedPoem }
-            if (availablePoems.isNotEmpty()) {
-                availablePoems.random()
-            } else {
-                allPoems.random()
-            }
-        } else {
-            allPoems.random()
-        }
-
-        lastPlayedPoem = selectedPoem
-        return selectedPoem
+        return poemText
     }
 
     /**
@@ -548,20 +499,26 @@ class TextToSpeechManager(
      * Wraps to first chapter when at last chapter
      */
     fun skipToNextChapter(): Boolean {
-        if (totalPresetStories == 0) totalPresetStories = countPresetStories()
-        if (totalPresetStories == 0) return false
+        val manager = storyCollectionManager ?: return false
+        val collection = manager.selectedCollection ?: return false
 
-        // Circular navigation: wrap to first chapter if at last chapter
-        currentChapterIndex = if (currentChapterIndex < totalPresetStories - 1) {
-            currentChapterIndex + 1
+        val currentIndex = manager.getChapterIndex(collection.directoryName)
+        val sortedChapters = collection.sortedChapters
+
+        if (sortedChapters.isEmpty()) return false
+
+        val nextIndex = if (currentIndex < sortedChapters.size - 1) {
+            currentIndex + 1
         } else {
-            0 // Wrap to first chapter
+            0  // Wrap to first
         }
+
+        manager.setChapterIndex(nextIndex, collection.directoryName)
 
         if (contentMode == ContentMode.STORY) {
             val preservedMode = contentMode
             startSpeakingSequentialStory()
-            contentMode = preservedMode // Restore contentMode after startSpeaking clears it
+            contentMode = preservedMode
         }
         return true
     }
@@ -571,20 +528,26 @@ class TextToSpeechManager(
      * Wraps to last chapter when at first chapter
      */
     fun skipToPreviousChapter(): Boolean {
-        if (totalPresetStories == 0) totalPresetStories = countPresetStories()
-        if (totalPresetStories == 0) return false
+        val manager = storyCollectionManager ?: return false
+        val collection = manager.selectedCollection ?: return false
 
-        // Circular navigation: wrap to last chapter if at first chapter
-        currentChapterIndex = if (currentChapterIndex > 0) {
-            currentChapterIndex - 1
+        val currentIndex = manager.getChapterIndex(collection.directoryName)
+        val sortedChapters = collection.sortedChapters
+
+        if (sortedChapters.isEmpty()) return false
+
+        val previousIndex = if (currentIndex > 0) {
+            currentIndex - 1
         } else {
-            totalPresetStories - 1 // Wrap to last chapter
+            sortedChapters.size - 1  // Wrap to last
         }
+
+        manager.setChapterIndex(previousIndex, collection.directoryName)
 
         if (contentMode == ContentMode.STORY) {
             val preservedMode = contentMode
             startSpeakingSequentialStory()
-            contentMode = preservedMode // Restore contentMode after startSpeaking clears it
+            contentMode = preservedMode
         }
         return true
     }
@@ -597,9 +560,14 @@ class TextToSpeechManager(
         when (contentMode) {
             ContentMode.OFF -> {
                 // OFF → STORY (immediate, green) - use sequential playback
-                startSpeakingSequentialStory()
-                contentMode = ContentMode.STORY
-                saveContentMode()
+                val storyText = startSpeakingSequentialStory()
+                if (storyText != null) {
+                    contentMode = ContentMode.STORY
+                    saveContentMode()
+                } else {
+                    // Failed to load story - don't change mode
+                    println("⚠️ Failed to start story - collection not loaded or no content available")
+                }
             }
             ContentMode.STORY -> {
                 // STORY → POETRY (with loading transition)
@@ -733,12 +701,16 @@ class TextToSpeechManager(
 
             // Auto-advance to next chapter for story mode
             if (contentMode == ContentMode.STORY) {
-                if (totalPresetStories == 0) totalPresetStories = countPresetStories()
-                if (currentChapterIndex < totalPresetStories - 1) {
-                    currentChapterIndex++
-                    scope.launch {
-                        delay(1000) // 1 second pause before next chapter
-                        startSpeakingSequentialStory()
+                val manager = storyCollectionManager
+                val collection = manager?.selectedCollection
+                if (manager != null && collection != null) {
+                    val currentIndex = manager.getChapterIndex(collection.directoryName)
+                    if (currentIndex < collection.sortedChapters.size - 1) {
+                        manager.setChapterIndex(currentIndex + 1, collection.directoryName)
+                        scope.launch {
+                            delay(1000)
+                            startSpeakingSequentialStory()
+                        }
                     }
                 }
             }
