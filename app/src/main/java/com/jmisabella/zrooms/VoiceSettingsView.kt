@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.sp
 
 /**
  * Settings screen for selecting enhanced TTS voices
- * Allows users to preview and select high-quality meditation voices
+ * Allows users to preview and select high-quality story voices
  */
 @Composable
 fun VoiceSettingsView(
@@ -136,7 +136,7 @@ fun VoiceSettingsView(
                                 previewingVoice = voice
                                 voiceManager.previewVoice(
                                     voice = voice,
-                                    text = "Welcome to your meditation practice. Take a deep breath and relax.",
+                                    text = "Welcome to your story session. Take a deep breath and relax.",
                                     onComplete = {
                                         if (previewingVoice == voice) {
                                             previewingVoice = null

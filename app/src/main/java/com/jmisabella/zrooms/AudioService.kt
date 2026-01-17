@@ -39,7 +39,7 @@ class AudioService : Service() {
     private var alarmPlayer: ExoPlayer? = null
     private var previewPlayer: ExoPlayer? = null
     private var ambientVolume: Float = 0f
-    private var targetAmbientVolume: Float = 0.8f // User's preferred ambient volume (default to 80%)
+    private var targetAmbientVolume: Float = 1.0f // User's preferred ambient volume (default to 100%)
     private var alarmVolume: Float = 0f
     private var previewVolume: Float = 0f
     private var currentAmbientFile: String? = null
@@ -436,7 +436,7 @@ class AudioService : Service() {
 
     /**
      * Schedules the wake-up greeting to play 5 seconds after alarm starts
-     * Only plays once, then clears the meditation completion flag
+     * Only plays once, then clears the story completion flag
      */
     private fun scheduleWakeUpGreeting() {
         if (!isGreetingTtsInitialized) return

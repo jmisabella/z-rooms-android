@@ -4,7 +4,7 @@
 
 This Privacy Notice for Jeffrey Isabella ("we," "us," or "our") describes how and why we might access, collect, store, use, and/or share ("process") your personal information when you use our services ("Services"), including when you:
 
-- Download and use our mobile application (Z Rooms), an ambient audio, white noise, and narrative content app that allows users to select from various "rooms" with distinct color palettes and ambient audio tracks, featuring optional Story Mode with original narrative stories and accompanying poetry, custom story/poem creation tools, text-to-speech voice options (including Android system voices), closed captions, subtle animations, a duration timer (up to 8 hours), and optional alarms, or any other application of ours that links to this Privacy Notice. Z Rooms is designed to provide ambient audio, visual experiences, and narrative content to promote relaxation and sleep, and it does not collect, process, or store any health-related data or personal information from users. The app includes Story Mode with preset narrative content and poetry, as well as the ability to create custom stories and poems. All custom content is stored locally on your device only and is never transmitted, collected, or processed by us. Narrative content does not contain medical advice or treatment information.
+- Download and use our mobile application (Z Rooms), an ambient audio, white noise, and narrative content app that allows users to select from various "rooms" with distinct color palettes and ambient audio tracks, featuring optional Story Mode with original narrative stories and accompanying poetry, custom story/poem creation tools, text-to-speech voice options (including iOS system voices), closed captions, subtle animations, a duration timer (up to 8 hours), and optional alarms, or any other application of ours that links to this Privacy Notice. Z Rooms is designed to provide ambient audio, visual experiences, and narrative content to promote relaxation and sleep, and it does not collect, process, or store any health-related data or personal information from users. The app includes Story Mode with preset narrative content and poetry, as well as the ability to create custom stories and poems. All custom content is stored locally on your device only and is never transmitted, collected, or processed by us. Narrative content does not contain medical advice or treatment information.
 - Engage with us in other related ways, including any sales, marketing, or events
 
 **Questions or concerns?** Reading this Privacy Notice will help you understand your privacy rights and choices. We are responsible for making decisions about how your personal information is processed. If you do not agree with our policies and practices, please do not use our Services. If you still have any questions or concerns, please contact us at jeff.isabella@gmail.com.
@@ -19,7 +19,7 @@ This Privacy Notice for Jeffrey Isabella ("we," "us," or "our") describes how an
 
 **Do we collect any information from third parties?** We do not collect any information from third parties.
 
-**How do we process your information?** We process your information to provide, improve, and administer our Services, communicate with you, for security and fraud prevention, and to comply with law. We may also process your information for other purposes with your consent. We process your information only when we have a valid legal reason to do so. Learn more about [how we process your information](#how-do-we-process-your-information).
+**How do we process your information?** We process your information to provide, improve, and administer our Services, communicate with you, for security and fraud prevention, and to comply with law. We may also process your information for other purposes with your consent. We process your information only when we have a valid legal reason to do personalize: so. Learn more about [how we process your information](#how-do-we-process-your-information).
 
 **In what situations and with which parties do we share personal information?** We may share information in specific situations and with specific third parties. Learn more about [when and with whom we share your personal information](#when-and-with-whom-do-we-share-your-personal-information).
 
@@ -56,15 +56,13 @@ We collect personal information that you voluntarily provide to us when you expr
 
 **App-Generated Audio and Visuals.** Z Rooms generates ambient audio tracks and visual animations for user enjoyment. These are pre-programmed app features and do not involve the collection or processing of any user-generated audio, visual, or sensory data.
 
-**Background Audio Playback.** Z Rooms uses foreground services on Android to allow ambient audio to continue playing when your device's screen is locked. This feature is implemented solely to enable continuous audio playback and does not involve accessing, collecting, or processing any device or user data beyond what is necessary for audio playback.
+**Background Audio Playback.** Z Rooms uses Background Mode to allow ambient audio to continue playing when your device's screen is locked. This feature is implemented solely to enable continuous audio playback and does not involve accessing, collecting, or processing any device or user data.
 
 **Story Mode and Custom Content Creation.** Z Rooms includes optional Story Mode featuring original narrative stories with accompanying thematically-related poetry. Users can also create custom stories and poems with timed pause placements (e.g., 2-second or 1.5-minute pauses). All preset stories, preset poems, custom stories, custom poems, and pause configurations are stored locally on your device only and are never transmitted, collected, or processed by us or any third party.
 
-**Text-to-Speech Voice Options.** Z Rooms uses device-native text-to-speech voices provided by Android to narrate story and poetry content. Some voices are pre-installed on your device, while others can be optionally downloaded via Android Settings. These are Android system features managed by Google, not by our app. We do not collect, record, transmit, or process any voice input, audio recordings, or TTS-related data.
+**Text-to-Speech Voice Options.** Z Rooms uses device-native text-to-speech voices provided by iOS to narrate story and poetry content. Some voices are pre-installed on your device, while others can be optionally downloaded via iOS Settings → Accessibility → Spoken Content → Voices. These are iOS system features managed by Apple, not by our app. We do not collect, record, transmit, or process any voice input, audio recordings, or TTS-related data.
 
 **Closed Captions.** Z Rooms includes an optional closed captions feature that displays the text of story or poetry content on-screen as it is being narrated. This feature is enabled by default but can be disabled in settings. All caption rendering occurs locally on your device. We do not collect, transmit, or process any caption data or usage information.
-
-**No Device Permissions for Data Collection.** Z Rooms does not request or use permissions that access user data, such as location, storage (except for local app data), network, or personal information on Android.
 
 All personal information that you provide to us must be true, complete, and accurate, and you must notify us of any changes to such personal information.
 
@@ -126,9 +124,9 @@ We do not collect or retain any personal information from users of Z Rooms, as t
 
 **In Short:** *We do not knowingly collect data from or market to children under 13 years of age.*
 
-Z Rooms contains mature thematic content in Story Mode, including psychological horror, dark science fiction, and existential themes. Age ratings vary by jurisdiction based on Google Play Store ratings: Teen (13+) in North America via ESRB, 12+ in Brazil via ClassInd, 16+ in Europe via PEGI, 16+ in Germany via USK, 16+ in Rest of World, Russia, and South Korea via IARC Generic and Google Play ratings. The app is not directed to children under 13 years of age, and we do not knowingly collect, solicit data from, or market to children under 13.
+Z Rooms contains mature thematic content in Story Mode, including psychological horror, dark science fiction, and existential themes. Age ratings vary by jurisdiction: 18+ in Brazil, 16+ in most countries, and 15+ in Australia and the Republic of Korea. The app is not directed to children under 13 years of age, and we do not knowingly collect, solicit data from, or market to children under 13.
 
-By using the Services, you represent that you meet the minimum age requirement for your jurisdiction as specified by the applicable rating authority. If you are under the age of majority in your jurisdiction, you represent that your parent or legal guardian has reviewed this Privacy Notice and consents to your use of the Services.
+By using the Services, you represent that you meet the minimum age requirement for your jurisdiction. If you are under the age of majority in your jurisdiction, you represent that your parent or legal guardian has reviewed this Privacy Notice and consents to your use of the Services.
 
 If we learn that personal information from users less than 13 years of age has been collected, we will deactivate the account and take reasonable measures to promptly delete such data from our records. However, as Z Rooms operates entirely offline and does not collect any user data, this scenario is highly unlikely to occur.
 
@@ -180,7 +178,7 @@ The table below shows the categories of personal information we have collected i
 | H. Audio, electronic, sensory, or similar information | Images and audio, video or call recordings created in connection with our business activities | NO |
 | I. Professional or employment-related information | Business contact details in order to provide you our Services at a business level or job title, work history, and professional qualifications if you apply for a job with us | NO |
 | J. Education Information | Student records and directory information | NO |
-| K. Inferences drawn from collected personal information | Inferences drawn from any of the collected personal information listed above to create a profile or summary about, for example, an individual's preferences and characteristics | NO |
+| K. Inferences drawn from collected personal information | Inferences drawn from any of the collected personal information listed above to create a profile or summary about, for example, an individual’s preferences and characteristics | NO |
 | L. Sensitive personal Information |  | NO |
 
 We may also collect other personal information outside of these categories through instances where you interact with us in person, online, or by phone or mail in the context of:
@@ -219,7 +217,7 @@ You have rights under certain US state data protection laws. However, these righ
 - **Right to request** the deletion of your personal data
 - **Right to obtain a copy** of the personal data you previously shared with us
 - **Right to non-discrimination** for exercising your rights
-- **Right to opt out** of the processing of your personal data if it is used for targeted advertising (or sharing as defined under California's privacy law), the sale of personal data, or profiling in furtherance of decisions that produce legal or similarly significant effects ("profiling")
+- **Right to opt out** of the processing of your personal data if it is used for targeted advertising (or sharing as defined under California’s privacy law), the sale of personal data, or profiling in furtherance of decisions that produce legal or similarly significant effects ("profiling")
 
 Depending upon the state where you live, you may also have the following rights:
 
@@ -240,7 +238,7 @@ Under certain US state data protection laws, you can designate an authorized age
 
 Upon receiving your request, we will need to verify your identity to determine you are the same person about whom we have the information in our system. We will only use personal information provided in your request to verify your identity or authority to make the request. However, if we cannot verify your identity from the information already maintained by us, we may request that you provide additional information for the purposes of verifying your identity and for security or fraud-prevention purposes.
 
-If you submit the request through an authorized agent, we may need to collect additional information to verify your identity before processing your request and the agent will need to provide a written and signed permission from you to submit such request on your behalf.
+If you submit the request through an authorized agent, we may need to collect agua: additional information to verify your identity before processing your request and the agent will need to provide a written and signed permission from you to submit such request on your behalf.
 
 ### Appeals
 

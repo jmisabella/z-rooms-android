@@ -1,6 +1,7 @@
 package com.jmisabella.zrooms
 
 import android.content.Context
+import android.content.res.Configuration
 import android.widget.NumberPicker
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FiniteAnimationSpec
@@ -43,6 +44,9 @@ import androidx.compose.material.icons.outlined.Eco
 import androidx.compose.material.icons.outlined.FormatQuote
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.filled.TheaterComedy
+import androidx.compose.material.icons.filled.ChevronLeft
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Composable
@@ -59,6 +63,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
@@ -116,6 +121,10 @@ fun ExpandingView(
 ) {
     val context = LocalContext.current
 
+    // Determine orientation for responsive layout
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+
     // Adaptive slider colors based on background brightness
     val sliderColor = if (isLight(color)) {
         Color(0xFF3A3A3A) // Dark grey for bright backgrounds
@@ -123,13 +132,21 @@ fun ExpandingView(
         Color(0xFFE0E0E0) // Light grey for dark backgrounds
     }
 
-    // Custom meditation and poetry managers (must be created first)
-    val meditationManager = remember { CustomMeditationManager(context) }
+    // Custom story and poetry managers (must be created first)
+    val storyManager = remember { CustomStoryManager(context) }
     val poetryManager = remember { CustomPoetryManager(context) }
+
+    // Story collection manager
+    val storyCollectionManager = remember { StoryCollectionManager(context) }
+
+    // Load collections on first composition
+    LaunchedEffect(Unit) {
+        storyCollectionManager.loadCollections()
+    }
 
     // Text-to-speech manager (needs both managers for random content selection)
     val ttsManager = remember {
-        TextToSpeechManager(context, meditationManager, poetryManager)
+        TextToSpeechManager(context, storyManager, poetryManager, storyCollectionManager)
     }
     val voiceManager = remember { VoiceManager.getInstance(context) }
     val scope = rememberCoroutineScope()
@@ -138,11 +155,12 @@ fun ExpandingView(
     var isLoading by remember { mutableStateOf(ttsManager.isLoading) }
     var showContentBrowser by remember { mutableStateOf(false) }
     var showVoiceSettings by remember { mutableStateOf(false) }
+    var showStorySelector by remember { mutableStateOf(false) }
 
-    // Meditation text display settings
-    val showMeditationText = remember {
+    // Story text display settings
+    val showStoryText = remember {
         mutableStateOf(
-            PreferenceManager.getDefaultSharedPreferences(context).getBoolean("showMeditationText", true)
+            PreferenceManager.getDefaultSharedPreferences(context).getBoolean("showStoryText", true)
         )
     }
 
@@ -150,8 +168,8 @@ fun ExpandingView(
     LaunchedEffect(Unit) {
         while (true) {
             delay(500) // Check every 500ms for preference changes
-            showMeditationText.value = PreferenceManager.getDefaultSharedPreferences(context)
-                .getBoolean("showMeditationText", true)
+            showStoryText.value = PreferenceManager.getDefaultSharedPreferences(context)
+                .getBoolean("showStoryText", true)
         }
     }
 
@@ -192,6 +210,15 @@ fun ExpandingView(
 
     LaunchedEffect(ttsManager.isLoading) {
         isLoading = ttsManager.isLoading
+    }
+
+    // Show story title when content mode changes to STORY or POETRY
+    // Use a counter to force re-trigger the overlay animation each time
+    var titleTriggerCount by remember { mutableStateOf(0) }
+    LaunchedEffect(contentMode) {
+        if (contentMode != ContentMode.OFF) {
+            titleTriggerCount++
+        }
     }
 
     // Ambient volume state (0.0 to 0.6)
@@ -374,7 +401,7 @@ fun ExpandingView(
                     )
                 }
                 .pointerInput(Unit) {
-                    detectTapGestures { _ ->
+                    detectTapGestures { offset ->
                         if (isAlarmActive.value) {
                             audioService?.stopAll()
                             isAlarmActive.value = false
@@ -388,7 +415,7 @@ fun ExpandingView(
         ) {
 
             Box(
-                modifier = Modifier.padding(top = 40.dp)
+                modifier = Modifier.padding(top = if (isLandscape) 8.dp else 40.dp)
             ) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally
@@ -512,7 +539,7 @@ fun ExpandingView(
 
                     Spacer(Modifier.width(40.dp))
 
-                    // Custom Meditations Button
+                    // Custom Storys Button
                     Box(
                         modifier = Modifier
                             .clickable {
@@ -524,7 +551,7 @@ fun ExpandingView(
                     ) {
                         Icon(
                             Icons.Outlined.FormatQuote,
-                            contentDescription = "Meditations & Poems",
+                            contentDescription = "Storys & Poems",
                             tint = Color(0xFF9E9E9E),
                             modifier = Modifier.size(28.dp)
                         )
@@ -551,7 +578,7 @@ fun ExpandingView(
 
                     Spacer(Modifier.width(40.dp))
 
-                    // 3-State Content Button: OFF → MEDITATION → POETRY → OFF
+                    // 3-State Content Button: OFF → STORY → POETRY → OFF
                     Box(
                         modifier = Modifier
                             .clickable {
@@ -563,7 +590,7 @@ fun ExpandingView(
                             .padding(12.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        // Show loading indicator during meditation→poetry transition
+                        // Show loading indicator during story→poetry transition
                         if (isLoading) {
                             LoadingDotsIndicator(
                                 color = Color(0xFFFFB74D)  // Orange/amber color
@@ -571,17 +598,17 @@ fun ExpandingView(
                         } else {
                             Icon(
                                 imageVector = when (contentMode) {
-                                    ContentMode.MEDITATION -> Icons.Outlined.Eco
+                                    ContentMode.STORY -> Icons.Outlined.Eco
                                     ContentMode.POETRY -> Icons.Filled.TheaterComedy
                                     ContentMode.OFF -> Icons.Outlined.Eco
                                 },
                                 contentDescription = when (contentMode) {
-                                    ContentMode.MEDITATION -> "Stop Meditation"
+                                    ContentMode.STORY -> "Stop Story"
                                     ContentMode.POETRY -> "Stop Poetry"
                                     ContentMode.OFF -> "Start Content"
                                 },
                                 tint = when (contentMode) {
-                                    ContentMode.MEDITATION -> Color(0xFF4CAF50)  // Green
+                                    ContentMode.STORY -> Color(0xFF4CAF50)  // Green
                                     ContentMode.POETRY -> Color(0xFFAB47BC)      // Purple
                                     ContentMode.OFF -> Color(0xFF9E9E9E)         // Gray
                                 },
@@ -620,16 +647,85 @@ fun ExpandingView(
             }
         }
 
-        // Scrollable meditation text display with phrase history
-        ScrollableMeditationTextDisplay(
+        // Determine caption and button positioning based on orientation
+        val captionBottomPadding = if (isLandscape) 80.dp else 180.dp // Lower in landscape for better spacing
+        val skipButtonBottomPadding = if (isLandscape) 190.dp else 490.dp // 80/180 + 100/300 + 10 gap
+
+        // Scrollable story text display with phrase history
+        ScrollableStoryTextDisplay(
             phraseHistory = ttsManager.phraseHistory,
             currentPhrase = ttsManager.currentPhrase,
             hasNewContent = ttsManager.hasNewCaptionContent,
             onHasNewContentChange = { newValue -> ttsManager.hasNewCaptionContent = newValue },
-            isVisible = showMeditationText.value && contentMode != ContentMode.OFF,
+            isVisible = showStoryText.value && contentMode != ContentMode.OFF,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 140.dp) // Position clearly above buttons and room label
+                .padding(bottom = captionBottomPadding) // Responsive spacing from bottom buttons
+        )
+
+        // Skip buttons - only visible in STORY mode (story chapters)
+        if (contentMode == ContentMode.STORY) {
+            Row(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp)
+                    .padding(bottom = skipButtonBottomPadding) // Positioned just above caption box
+                    .zIndex(100f), // Ensure buttons are on top and intercept touches first
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                // Previous chapter button (left edge)
+                Box(
+                    modifier = Modifier
+                        .pointerInput(Unit) {
+                            detectTapGestures(
+                                onTap = { offset ->
+                                    ttsManager.skipToPreviousChapter()
+                                }
+                            )
+                        }
+                        .background(Color.Black.copy(alpha = 0.3f), CircleShape)
+                        .padding(8.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        Icons.Filled.ChevronLeft,
+                        contentDescription = "Previous Chapter",
+                        tint = Color.White.copy(alpha = 0.7f),
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+
+                // Next chapter button (right edge)
+                Box(
+                    modifier = Modifier
+                        .pointerInput(Unit) {
+                            detectTapGestures(
+                                onTap = { offset ->
+                                    ttsManager.skipToNextChapter()
+                                }
+                            )
+                        }
+                        .background(Color.Black.copy(alpha = 0.3f), CircleShape)
+                        .padding(8.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        Icons.Filled.ChevronRight,
+                        contentDescription = "Next Chapter",
+                        tint = Color.White.copy(alpha = 0.7f),
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
+        }
+
+        // Story title overlay
+        StoryTitleOverlay(
+            collection = storyCollectionManager.selectedCollection,
+            triggerCount = titleTriggerCount,
+            onTitleClick = { showStorySelector = true },
+            modifier = Modifier.align(Alignment.TopCenter)
         )
     }
 
@@ -775,15 +871,15 @@ fun ExpandingView(
         }
     }
 
-    // Content browser dialog (meditations and poems)
+    // Content browser dialog (storys and poems)
     if (showContentBrowser) {
         ContentBrowserView(
-            meditationManager = meditationManager,
+            storyManager = storyManager,
             poetryManager = poetryManager,
             onDismiss = { showContentBrowser = false },
-            onPlayMeditation = { text ->
+            onPlayStory = { text ->
                 ttsManager.startSpeakingWithPauses(text)
-                ttsManager.contentMode = ContentMode.MEDITATION
+                ttsManager.contentMode = ContentMode.STORY
             },
             onPlayPoem = { text ->
                 ttsManager.startSpeakingWithPauses(text)
@@ -800,6 +896,18 @@ fun ExpandingView(
                 showVoiceSettings = false
                 // Refresh voice settings when user closes the dialog
                 ttsManager.refreshVoiceSettings()
+            }
+        )
+    }
+
+    // Story selection dialog
+    if (showStorySelector) {
+        StorySelectionDialog(
+            collections = storyCollectionManager.collections,
+            selectedCollectionId = storyCollectionManager.selectedCollectionId,
+            onDismiss = { showStorySelector = false },
+            onSelectCollection = { collection ->
+                storyCollectionManager.setSelectedCollection(collection.id)
             }
         )
     }

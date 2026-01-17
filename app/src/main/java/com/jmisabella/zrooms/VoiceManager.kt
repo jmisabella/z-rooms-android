@@ -36,13 +36,14 @@ class VoiceManager private constructor(private val context: Context) {
         // SharedPreferences keys
         private const val PREF_USE_ENHANCED_VOICE = "use_enhanced_voice"
         private const val PREF_PREFERRED_VOICE_NAME = "preferred_voice_name"
+        private const val PREF_VOICE_MIGRATION_V1 = "voice_migration_v1_completed"
 
         // Speech rate multipliers based on voice quality
         private const val DEFAULT_VOICE_RATE = 0.8f  // Slower for robotic voices
         private const val ENHANCED_VOICE_RATE = 1.0f // Natural speed for high-quality voices
 
-        // Voice volume (shared across meditation playback and preview)
-        const val VOICE_VOLUME = 0.23f
+        // Voice volume (shared across story playback and preview)
+        const val VOICE_VOLUME = 0.20f
 
         fun getInstance(context: Context): VoiceManager {
             return INSTANCE ?: synchronized(this) {
@@ -52,8 +53,25 @@ class VoiceManager private constructor(private val context: Context) {
     }
 
     init {
+        performOneTimeMigration()
         loadPreferences()
         initializeTTS()
+    }
+
+    /**
+     * One-time migration to reset voice preferences to smart defaults
+     * This allows all users to benefit from Daniel voice auto-detection
+     */
+    private fun performOneTimeMigration() {
+        val migrationCompleted = prefs.getBoolean(PREF_VOICE_MIGRATION_V1, false)
+        if (!migrationCompleted) {
+            // Clear existing voice preferences to apply smart defaults
+            prefs.edit()
+                .remove(PREF_USE_ENHANCED_VOICE)
+                .remove(PREF_PREFERRED_VOICE_NAME)
+                .putBoolean(PREF_VOICE_MIGRATION_V1, true)
+                .apply()
+        }
     }
 
     private fun loadPreferences() {
@@ -99,14 +117,32 @@ class VoiceManager private constructor(private val context: Context) {
     }
 
     /**
-     * Gets the preferred voice for meditation narration
-     * Priority: User's selected enhanced voice -> Any high-quality voice -> Default system voice
+     * Gets the preferred voice for story narration
+     * Priority: User's selected enhanced voice -> Daniel (if available and enhanced disabled) -> Any high-quality voice -> Default system voice
      */
     fun getPreferredVoice(): Voice? {
         if (!isInitialized) return null
 
-        // If enhanced voice is disabled, use default system voice (null = system default)
+        // If enhanced voice is disabled, try to use Daniel voice if already available on device
         if (!useEnhancedVoice.value) {
+            // Check if Daniel voice (voice code "iom") is available
+            val danielVoice = availableVoices.value.firstOrNull { voice ->
+                val name = voice.name.lowercase()
+                val voiceCode = when {
+                    name.contains("-x-") -> {
+                        name.substringAfter("-x-").substringBefore("-").substringBefore("#")
+                    }
+                    else -> ""
+                }
+                voiceCode == "iom" && isVoiceAvailable(voice)
+            }
+
+            // If Daniel is available, use it as the default (unless user explicitly disabled enhanced voices)
+            if (danielVoice != null) {
+                return danielVoice
+            }
+
+            // Otherwise, fall back to system default
             return null
         }
 

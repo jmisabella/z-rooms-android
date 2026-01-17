@@ -4,12 +4,12 @@ Z Rooms app for Android operating system
 
 ## Overview
 
-Z Rooms is a 100% offline, free, ad-free meditation and sleep app featuring:
+Z Rooms is a 100% offline, free, ad-free story and sleep app featuring:
 - 35 looping audio files (white noise, dark ambient, bright ambient, classical)
-- Guided meditation with Text-to-Speech narration
-- 35 preset meditations + 35 custom meditation slots
+- Guided story with Text-to-Speech narration
+- 35 preset storys + 35 custom story slots
 - Optional enhanced voice quality with downloadable TTS voices
-- Closed captioning for meditation narration
+- Closed captioning for story narration
 - Wake-up alarm with personalized greeting
 - Infinite or timed listening sessions
 - Fully offline (no internet required)
@@ -23,18 +23,18 @@ Z Rooms is a 100% offline, free, ad-free meditation and sleep app featuring:
   - Bright ambient
   - Classical compositions
 
-### Guided Meditation
-- Toggle meditation on/off via leaf button
-- 35 preset meditations with varied content and breathwork guidance
-- 35 custom meditation slots (write your own)
+### Guided Story
+- Toggle story on/off via leaf button
+- 35 preset storys with varied content and breathwork guidance
+- 35 custom story slots (write your own)
 - Pause markers: `(2s)` for 2 seconds, `(1.5m)` for 1.5 minutes
 - Automatic pauses if no markers provided
 - Closed captioning (optional, enabled by default)
-- Random meditation selection from presets + custom meditations
+- Random story selection from presets + custom storys
 
 ### Enhanced Voice Quality (NEW - December 2025)
-- Optional high-quality TTS voices for meditation narration
-- Accessible via gear icon in meditation view (leftmost button)
+- Optional high-quality TTS voices for story narration
+- Accessible via gear icon in story view (leftmost button)
 - Preview voices before selecting
 - Friendly voice names (Samantha, Alex, Emily, Daniel, etc.)
 - Dynamic speech rate based on voice quality
@@ -43,9 +43,9 @@ Z Rooms is a 100% offline, free, ad-free meditation and sleep app featuring:
 
 ### Wake-Up Alarm
 - Set alarm time with wake-up audio
-- Personalized greeting when meditation completed before alarm
+- Personalized greeting when story completed before alarm
 - SILENCE option for ambient fade-out only
-- Integration with meditation completion tracking
+- Integration with story completion tracking
 
 ## Technical Details
 
@@ -58,10 +58,10 @@ Z Rooms is a 100% offline, free, ad-free meditation and sleep app featuring:
 
 ### Key Components
 - `VoiceManager.kt` - TTS voice discovery and management
-- `TextToSpeechManager.kt` - Meditation narration engine
+- `TextToSpeechManager.kt` - Story narration engine
 - `VoiceSettingsView.kt` - Voice selection UI
 - `AudioService.kt` - Background audio playback and alarm
-- `CustomMeditationManager.kt` - Custom meditation persistence
+- `CustomStoryManager.kt` - Custom story persistence
 
 ### Build Configuration
 - Min SDK: 21 (Android 5.0)

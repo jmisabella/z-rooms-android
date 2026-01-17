@@ -1,10 +1,975 @@
 # Z Rooms Android - Change Log
 
+## 2026-01-17: Bug Fix - Story Title Overlay Re-trigger
+
+### **BUG FIX**
+
+Fixed bug where story title overlay would only show once and not reappear when toggling story/poetry mode back on, preventing users from accessing the story selector to switch collections.
+
+**Root Cause:** The `StoryTitleOverlay` component used `remember(showTitle)` with a boolean flag. Once the flag was set to true and the overlay faded out, setting it to true again wouldn't retrigger the animation because the remembered state key didn't change.
+
+**Symptoms:**
+- Title overlay appears first time entering Story/Poetry mode
+- After 4.5 second fade-out, overlay never reappears
+- No way to access story selector to switch collections
+- Users stuck on currently selected story
+
+**Solution:** Changed from boolean flag to integer counter (`titleTriggerCount`). Each time content mode switches to STORY or POETRY, the counter increments, forcing the overlay animation to retrigger via `LaunchedEffect(triggerCount)`.
+
+**Files Modified:**
+- [ExpandingView.kt](app/src/main/java/com/jmisabella/zrooms/ExpandingView.kt):217-223 - Changed from boolean `showStoryTitle` to integer `titleTriggerCount` that increments on each mode change
+- [ExpandingView.kt](app/src/main/java/com/jmisabella/zrooms/ExpandingView.kt):725-730 - Updated StoryTitleOverlay call to pass `triggerCount` instead of `showTitle`
+- [StoryTitleOverlay.kt](app/src/main/java/com/jmisabella/zrooms/StoryTitleOverlay.kt):34-48 - Changed parameter from `showTitle: Boolean` to `triggerCount: Int` and updated LaunchedEffect to trigger on count changes
+
+---
+
+## 2026-01-17: Critical Bug Fix - Collection ID Persistence
+
+### **BUG FIX**
+
+Fixed critical bug where story playback would fail after app restart or toggling story mode off and back on.
+
+**Root Cause:** The `StoryCollection` data class was generating a new random UUID for each collection's `id` field every time collections were loaded. When the app saved the selected collection ID to SharedPreferences and then reloaded collections (e.g., after app restart or navigating back to a room), the saved UUID would not match any of the newly generated UUIDs, causing `selectedCollection` to return null.
+
+**Symptoms:**
+- Leaf button unresponsive (no story playback)
+- Logs showed: `selectedCollection is null (collections count: 1)`
+- Title overlay and navigation buttons appeared but no audio/captions
+
+**Solution:**
+1. Changed `id` from a constructor parameter with random UUID default to a computed property that returns `directoryName`. Since directory names are stable across app sessions, collection IDs are now consistent and persist correctly.
+2. Added migration logic to detect old UUID-based IDs (contain dashes) and reset to default, ensuring smooth upgrade for existing users.
+
+**Files Modified:**
+- [StoryCollection.kt](app/src/main/java/com/jmisabella/zrooms/StoryCollection.kt):3-10 - Changed `id` from `val id: String = UUID.randomUUID().toString()` to computed property `val id: String get() = directoryName`
+- [StoryCollectionManager.kt](app/src/main/java/com/jmisabella/zrooms/StoryCollectionManager.kt):78-83 - Added migration logic to detect and reset old UUID-based collection IDs
+
+---
+
+## 2026-01-17: Multi-Story Architecture Implementation
+
+### **OVERVIEW**
+
+Implemented multi-story architecture allowing the app to organize stories and poems into collections. Each story collection has its own chapters and thematically related poems, matching the iOS implementation. This is a significant architectural enhancement that enables scalable story content organization.
+
+### **KEY FEATURES ADDED**
+
+#### 1. Story Collections
+- Stories organized in `assets/tts_content/` directory structure
+- Each collection has `stories/` and `poems/` subdirectories
+- Initial collection: "Signal Decay" with 8 chapters and 8 poems
+- Automatic discovery of new story collections when added to assets
+
+#### 2. Story Title Display
+- Title appears for 4.5 seconds when toggling Leaf/Theater buttons
+- Smooth fade-in (500ms) and fade-out (1000ms) animations
+- Tappable title with chevron down indicator to open story selector
+- Shows current story collection name formatted with title case
+
+#### 3. Story Selection Dialog
+- Shows all available story collections
+- Displays metadata: chapter count and poem count for each collection
+- Visual indication of currently selected collection (checkmark + highlighted background)
+- Dark theme matching app aesthetic
+- Remembers selected story across app sessions via SharedPreferences
+
+#### 4. Per-Story Chapter Memory
+- Each story remembers its own chapter position separately
+- Stored as JSON map in SharedPreferences (key: "chapter_positions")
+- Example: Signal Decay at chapter 4, another story at chapter 2
+- Position preserved across app restarts
+
+#### 5. Scoped Poetry Mode
+- Theater button now plays poems ONLY from current story's collection
+- Poems scoped to `tts_content/{story_name}/poems/` directory
+- Random selection from current story's poem pool
+- Maintains last-played tracking to avoid immediate repeats
+
+#### 6. Auto-Selection for New Users
+- New users automatically get "signal_decay" as default collection (if exists)
+- Falls back to first available collection alphabetically if signal_decay doesn't exist
+- Existing users with saved preferences unaffected
+
+### **FILES ADDED**
+
+- **[StoryCollection.kt](app/src/main/java/com/jmisabella/zrooms/StoryCollection.kt)** - Data model for story collections with nested StoryFile class for chapter tracking
+- **[StoryCollectionManager.kt](app/src/main/java/com/jmisabella/zrooms/StoryCollectionManager.kt)** - Manager for collection scanning, persistence, and per-story chapter memory using GSON + SharedPreferences
+- **[StoryTitleOverlay.kt](app/src/main/java/com/jmisabella/zrooms/StoryTitleOverlay.kt)** - Composable for title display with animated fade (4.5s duration)
+- **[StorySelectionDialog.kt](app/src/main/java/com/jmisabella/zrooms/StorySelectionDialog.kt)** - Composable for story selection UI with metadata display
+
+### **FILES MODIFIED**
+
+#### [TextToSpeechManager.kt](app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt)
+- **Line 24**: Added `storyCollectionManager` parameter to constructor
+- **Lines 64-68**: Removed deprecated `currentChapterIndex` and `totalPresetStories` properties
+- **Lines 120-132**: Deleted `countPresetStories()` function (no longer needed)
+- **Lines 439-445**: Replaced `getSequentialStory()` to use AssetManager-based collection system
+- **Lines 450-459**: Replaced `loadRandomPoemFile()` to use collection-scoped poem loading
+- **Lines 486-509**: Replaced `skipToNextChapter()` with per-collection chapter tracking
+- **Lines 515-538**: Replaced `skipToPreviousChapter()` with per-collection chapter tracking
+- **Lines 683-696**: Updated auto-advance logic to use collection-based chapter management
+
+#### [ExpandingView.kt](app/src/main/java/com/jmisabella/zrooms/ExpandingView.kt)
+- **Lines 139-145**: Added StoryCollectionManager instantiation and collection loading
+- **Lines 148-150**: Updated TextToSpeechManager constructor to include storyCollectionManager
+- **Lines 158-159**: Added UI state variables for story title and selector dialogs
+- **Lines 217-221**: Added LaunchedEffect to trigger title display on content mode changes
+- **Lines 723-728**: Added StoryTitleOverlay composable to UI hierarchy
+- **Lines 903-912**: Added StorySelectionDialog composable for story selection
+
+### **FILE MIGRATION**
+
+Migrated content from `res/raw/` to structured `assets/tts_content/` directory:
+
+#### Stories (renamed with numeric prefixes for ordering):
+- `preset_story1.txt` → `assets/tts_content/signal_decay/stories/01_prelude.txt`
+- `preset_story2.txt` → `assets/tts_content/signal_decay/stories/02_awakening.txt`
+- `preset_story3.txt` → `assets/tts_content/signal_decay/stories/03_diagnostics.txt`
+- `preset_story4.txt` → `assets/tts_content/signal_decay/stories/04_exploration.txt`
+- `preset_story5.txt` → `assets/tts_content/signal_decay/stories/05_revelation.txt`
+- `preset_story6.txt` → `assets/tts_content/signal_decay/stories/06_descent.txt`
+- `preset_story7.txt` → `assets/tts_content/signal_decay/stories/07_convergence.txt`
+- `preset_story8.txt` → `assets/tts_content/signal_decay/stories/08_epilogue.txt`
+
+#### Poems (kept similar naming):
+- `preset_poem1.txt` → `assets/tts_content/signal_decay/poems/forty_years_waiting.txt`
+- `preset_poem2-8.txt` → `assets/tts_content/signal_decay/poems/poem_02-08.txt`
+
+#### Default Custom Content:
+- Moved to `assets/tts_content/default_custom_story.txt`
+- Moved to `assets/tts_content/default_custom_poem.txt`
+
+### **TECHNICAL DETAILS**
+
+#### Architecture Patterns Used:
+- **Jetpack Compose** for UI (AnimatedVisibility, LaunchedEffect, Dialog)
+- **Compose MutableState** for reactive state management (`mutableStateListOf`, `mutableStateOf`)
+- **Manager Pattern** matching existing CustomStoryManager architecture
+- **GSON** for JSON serialization of chapter positions in SharedPreferences
+- **AssetManager** for runtime directory scanning and file access
+
+#### Key Implementation Decisions:
+- **0-based chapter indexing** (consistent with current implementation)
+- **Directory names lowercase** (Android convention): `signal_decay` not `Signal_Decay`
+- **Numeric prefixes mandatory** for story files: `01_`, `02_`, etc.
+- **Poem files flexible naming** (selected randomly, no ordering required)
+- **Custom stories/poems unchanged** (separate SharedPreferences system remains independent)
+
+### **FUTURE STORY ADDITION PROCESS**
+
+To add new story collections:
+1. Create directory: `assets/tts_content/my_story_name/`
+2. Create subdirectories: `stories/` and `poems/`
+3. Add numbered story files: `01_chapter1.txt`, `02_chapter2.txt`, etc.
+4. Add poem files with any names: `poem1.txt`, `my_poem.txt`, etc.
+5. Rebuild app
+6. New story automatically appears in selection dialog as "My Story Name"
+
+### **COMPATIBILITY**
+
+- Backward compatible with existing custom stories/poems system
+- All TTS functionality preserved (pauses, captions, voice selection, ambient volume)
+- Button behavior unchanged (Leaf = Story, Theater = Poetry, circular navigation)
+- Old `res/raw/` files can remain as backup but are no longer used
+
+---
+
+## 2026-01-17: Poetry Mode and Story Mode - Preset Content Only Verification
+
+### **OVERVIEW**
+
+Verified that the Poetry Mode (Theater Button) and Story Mode (Leaf Button) functionality correctly plays **only preset poems and stories**, excluding custom content from random selection. Custom poems and stories remain accessible exclusively through the dedicated Custom Content browser menu.
+
+### **VERIFICATION COMPLETED**
+
+**No changes were needed** - the implementation is already correct and working as intended.
+
+#### Poetry Mode (Theater Button) - Preset Poems Only
+
+**Files Reviewed:**
+- [TextToSpeechManager.kt:475-534](app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt#L475-L534)
+- [ExpandingView.kt:563-600](app/src/main/java/com/jmisabella/zrooms/ExpandingView.kt#L563-L600)
+
+**Implementation:**
+- Theater button triggers `cycleContentMode()` which calls `startSpeakingRandomPoem()`
+- `startSpeakingRandomPoem()` calls `loadRandomPoemFile()`
+- `loadRandomPoemFile()` explicitly:
+  1. Loads **only** preset poem files (`preset_poem1`, `preset_poem2`, etc.) from res/raw
+  2. **Excludes custom poems** from random selection (lines 503-504)
+  3. Comment at line 503: "Custom poems excluded from random selection - only presets play via Poetry button"
+
+#### Story Mode (Leaf Button) - Preset Stories Only
+
+**Files Reviewed:**
+- [TextToSpeechManager.kt:394-452, 458-472, 536-590](app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt#L394-L452)
+
+**Implementation:**
+- Leaf button triggers sequential story playback via `startSpeakingSequentialStory()`
+- Random story mode uses `loadRandomStoryFile()` which:
+  1. Loads **only** preset story files (`preset_story1`, `preset_story2`, etc.) from res/raw
+  2. **Excludes custom stories** from random selection (lines 425-426)
+  3. Comment at line 425: "Custom storys excluded from random selection - only presets play via Leaf button"
+
+#### Custom Content Access
+
+**Custom Poems and Stories Are:**
+- Accessible **only** through the dedicated Custom Content browser (Format Quote button)
+- Playable directly from the custom content list views
+- Never included in random preset poem/story rotation
+
+### **USER EXPERIENCE**
+
+✅ **Poetry Mode (Theater Button):** Always plays a random **preset poem**
+✅ **Story Mode (Leaf Button):** Always plays **preset stories** sequentially
+✅ **Custom Content:** Only accessible through Custom Content browser menu
+✅ **Separation Maintained:** Clear distinction between preset and custom content playback
+
+### **TECHNICAL DETAILS**
+
+**Random Selection Logic:**
+- Both `loadRandomPoemFile()` and `loadRandomStoryFile()` dynamically discover preset files using resource identifier lookup
+- Files are named: `preset_poem1.txt`, `preset_poem2.txt`, ... and `preset_story1.txt`, `preset_story2.txt`, ...
+- Custom content stored separately in SharedPreferences via `CustomPoetryManager` and `CustomStoryManager`
+- No code path allows custom content to be selected by the Leaf or Theater buttons
+
+**Anti-Repeat Logic:**
+- Tracks `lastPlayedPoem` and `lastPlayedStory` to avoid immediate repetition
+- Filters out the last played item when selecting the next random preset
+
+### **IMPACT**
+
+This verification confirms that users can only trigger custom poems/stories through explicit selection in the Custom Content browser. The Leaf and Theater buttons will never accidentally play user's custom content, maintaining clear separation between preset and custom content experiences.
+
+---
+
+## 2026-01-15: Smart Default Voice Selection - Daniel Voice Auto-Detection
+
+### **OVERVIEW**
+
+Enhanced the Text-to-Speech system to intelligently detect and use the Daniel (English, United States) voice as the default when it's already available on the user's device. This provides a better out-of-box experience for users who have this high-quality voice pre-installed without requiring any downloads or configuration.
+
+**IMPORTANT:** This update includes a one-time migration that resets all existing voice preferences to apply the smart default voice selection. After this migration, user voice preferences will be fully respected going forward.
+
+### **CHANGES IMPLEMENTED**
+
+#### 1. One-Time Voice Preference Migration
+
+**File Modified:**
+- [VoiceManager.kt:55-79](app/src/main/java/com/jmisabella/zrooms/VoiceManager.kt#L55-L79)
+
+**Changes:**
+- Added migration flag `PREF_VOICE_MIGRATION_V1` to track migration status
+- Implemented `performOneTimeMigration()` method that runs once on first app launch after update
+- Migration clears existing voice preferences to enable smart default behavior
+
+**Migration Logic:**
+```kotlin
+private fun performOneTimeMigration() {
+    val migrationCompleted = prefs.getBoolean(PREF_VOICE_MIGRATION_V1, false)
+    if (!migrationCompleted) {
+        // Clear existing voice preferences to apply smart defaults
+        prefs.edit()
+            .remove(PREF_USE_ENHANCED_VOICE)
+            .remove(PREF_PREFERRED_VOICE_NAME)
+            .putBoolean(PREF_VOICE_MIGRATION_V1, true)
+            .apply()
+    }
+}
+```
+
+**Why This Migration?**
+- Ensures all users (both new and existing) benefit from the Daniel voice auto-detection
+- Existing users with custom voice settings will be reset to smart defaults
+- After migration, any new voice selections users make will be respected permanently
+- Migration only runs once per device installation
+
+#### 2. Smart Voice Detection in VoiceManager
+
+**File Modified:**
+- [VoiceManager.kt:105-149](app/src/main/java/com/jmisabella/zrooms/VoiceManager.kt#L105-L149)
+
+**Changes:**
+- Modified `getPreferredVoice()` method to check for Daniel voice availability when enhanced voice is disabled
+- Added logic to detect Daniel voice by its voice code "iom"
+- Implements automatic fallback chain: Daniel (if available) → System default voice
+
+**Implementation Details:**
+```kotlin
+if (!useEnhancedVoice.value) {
+    // Check if Daniel voice (voice code "iom") is available
+    val danielVoice = availableVoices.value.firstOrNull { voice ->
+        val name = voice.name.lowercase()
+        val voiceCode = when {
+            name.contains("-x-") -> {
+                name.substringAfter("-x-").substringBefore("-").substringBefore("#")
+            }
+            else -> ""
+        }
+        voiceCode == "iom" && isVoiceAvailable(voice)
+    }
+
+    if (danielVoice != null) {
+        return danielVoice
+    }
+
+    return null // Fall back to system default
+}
+```
+
+### **BEHAVIOR**
+
+**When Enhanced Voice is Disabled (Default Setting):**
+1. App checks if Daniel voice is already downloaded on the device
+2. If found and available, Daniel is automatically used for TTS
+3. If not found, falls back to system default voice (intentionally robotic voice)
+
+**When Enhanced Voice is Enabled:**
+- User's explicitly selected voice takes precedence (unchanged behavior)
+- Existing voice selection logic remains intact
+
+### **USER EXPERIENCE IMPROVEMENTS**
+
+- ✅ **Zero Friction:** Users with Daniel pre-installed get better voice quality automatically
+- ✅ **No Forced Downloads:** Users without Daniel aren't prompted to download anything
+- ✅ **User Choice Respected:** After one-time migration, explicit voice selections in settings take precedence
+- ✅ **Maintains App Philosophy:** App remains 100% offline with no required downloads
+- ✅ **Better Default Experience:** Many newer devices (especially Google Pixel, Samsung flagship) come with Daniel pre-installed
+- ✅ **One-Time Reset:** Existing users will have voice preferences reset once to benefit from smart defaults, then preferences are honored
+
+### **TECHNICAL DETAILS**
+
+**Voice Detection Logic:**
+- Identifies Daniel by Google TTS voice code "iom" (IOM Male)
+- Only uses Daniel if `isVoiceAvailable()` returns true (voice is downloaded and functional)
+- Preserves existing friendly name mapping: "iom" → "Daniel"
+
+**Priority Hierarchy (Updated):**
+1. User's selected enhanced voice (when enhanced mode enabled)
+2. Daniel voice (when enhanced mode disabled AND Daniel is available)
+3. High-quality fallback voices (when enhanced mode enabled but selected voice unavailable)
+4. System default voice (final fallback)
+
+### **IMPACT**
+
+This change provides an improved default experience for users while maintaining the app's core principle of being fully functional offline without requiring any downloads. Users benefit from higher quality narration if their device already has the capability, with zero configuration required.
+
+**Migration Impact:**
+- All existing users will have their voice preferences reset on the next app launch after this update
+- This one-time reset ensures everyone benefits from the new Daniel voice auto-detection
+- After the migration, users who customize their voice settings will have those preferences fully respected
+- New users will automatically get the smart default behavior without any migration needed
+
+---
+
+## 2026-01-15 23:45 EST: Responsive Closed Caption Box Height and Layout Optimization
+
+### **OVERVIEW**
+
+Enhanced the closed caption display with responsive sizing and improved layout positioning to match the iOS implementation:
+- Increased caption box height in portrait mode from 100.dp to 300.dp (approximately 35-40% of screen height)
+- Maintained compact 100.dp height in landscape mode to avoid covering sliders
+- Repositioned skip chapter buttons to sit just above the caption box without overlapping
+- Adjusted slider positioning higher in landscape mode for optimal screen space usage
+- Lowered caption box in landscape mode for better spacing between sliders and captions
+
+### **CHANGES IMPLEMENTED**
+
+#### 1. Responsive Caption Box Height
+
+**File Modified:**
+- [ScrollableStoryTextDisplay.kt:99-102, 143](app/src/main/java/com/jmisabella/zrooms/ScrollableStoryTextDisplay.kt#L99-L102)
+
+**Changes:**
+- Added orientation detection using `LocalConfiguration`
+- Implemented dynamic height based on screen orientation:
+  - **Portrait mode:** 300.dp (matching iOS 300 points)
+  - **Landscape mode:** 100.dp (compact to avoid covering UI elements)
+
+**Impact:**
+- Users can now read significantly more text at once in portrait mode without scrolling
+- Landscape mode keeps caption box compact to preserve visibility of duration and ambient volume sliders
+- Matches the iOS implementation for consistent cross-platform experience
+
+#### 2. Repositioned Skip Chapter Buttons
+
+**File Modified:**
+- [ExpandingView.kt:632-634, 652](app/src/main/java/com/jmisabella/zrooms/ExpandingView.kt#L632-L634)
+
+**Changes:**
+- Updated button positioning to be orientation-aware
+- Skip buttons now positioned just above caption box with 10.dp gap:
+  - **Portrait mode:** 490.dp from bottom (180 + 300 + 10)
+  - **Landscape mode:** 190.dp from bottom (80 + 100 + 10)
+
+**Impact:**
+- Skip buttons no longer overlap the caption box
+- Proper spacing maintained in both orientations
+- Buttons remain easily accessible while captions are displayed
+
+#### 3. Optimized Slider Positioning for Landscape Mode
+
+**File Modified:**
+- [ExpandingView.kt:124-126, 400](app/src/main/java/com/jmisabella/zrooms/ExpandingView.kt#L124-L126)
+
+**Changes:**
+- Added global orientation detection at function level
+- Reduced top padding for sliders in landscape mode:
+  - **Portrait mode:** 40.dp top padding (unchanged)
+  - **Landscape mode:** 8.dp top padding (moved much higher)
+
+**Impact:**
+- Duration and ambient volume sliders now sit near the top of the screen in landscape
+- Maximizes available space for caption box without overlap
+- Top slider almost touches the top of the screen in landscape as desired
+
+#### 4. Adjusted Caption Box Bottom Spacing
+
+**File Modified:**
+- [ExpandingView.kt:633, 645](app/src/main/java/com/jmisabella/zrooms/ExpandingView.kt#L633)
+
+**Changes:**
+- Made bottom padding responsive to orientation:
+  - **Portrait mode:** 180.dp from bottom (unchanged)
+  - **Landscape mode:** 80.dp from bottom (lowered for better spacing)
+
+**Impact:**
+- In landscape mode, creates proper vertical spacing between sliders and caption box
+- Caption box positioned optimally to not interfere with other UI elements
+- Maintains consistent spacing from bottom control buttons in both orientations
+
+### **TECHNICAL DETAILS**
+
+**Imports Added:**
+- `android.content.res.Configuration`
+- `androidx.compose.ui.platform.LocalConfiguration`
+
+**Responsive Design Pattern:**
+All layout adjustments use a consistent pattern:
+```kotlin
+val configuration = LocalConfiguration.current
+val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+val parameter = if (isLandscape) landscapeValue else portraitValue
+```
+
+### **USER EXPERIENCE IMPROVEMENTS**
+
+- ✅ **Portrait Mode:** Much taller caption box (300.dp) allows reading multiple paragraphs at once
+- ✅ **Landscape Mode:** Compact layout keeps sliders, captions, and buttons all visible without overlap
+- ✅ **Skip Buttons:** Properly positioned above captions in both orientations
+- ✅ **Consistent with iOS:** Matches the iOS app's layout and caption box sizing
+- ✅ **Better Accessibility:** More text visible at once improves readability for users relying on closed captions
+
+---
+
+## 2026-01-15: Default Ambient Volume and TTS Voice Volume Adjustments
+
+### **OVERVIEW**
+
+Adjusted default audio levels for better user experience:
+- Increased default ambient volume from 85% to 100%
+- Lowered TTS voice volume from 0.23 to 0.20 for better balance with ambient audio
+
+### **CHANGES IMPLEMENTED**
+
+#### 1. Default Ambient Volume Increased to 100%
+
+**Files Modified:**
+- [AudioService.kt:42](app/src/main/java/com/jmisabella/zrooms/AudioService.kt#L42)
+- [TextToSpeechManager.kt:38](app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt#L38)
+
+**Changes:**
+- `AudioService.kt`: Changed `targetAmbientVolume` from `0.8f` (80%) to `1.0f` (100%)
+- `TextToSpeechManager.kt`: Changed `ambientVolume` default from `0.8f` (80%) to `1.0f` (100%)
+
+**Impact:**
+- New users will now start with full ambient volume by default
+- Users can still adjust volume down using the slider if desired
+- Provides more immersive audio experience out of the box
+
+#### 2. TTS Voice Volume Reduced
+
+**File Modified:**
+- [VoiceManager.kt:45](app/src/main/java/com/jmisabella/zrooms/VoiceManager.kt#L45)
+
+**Changes:**
+- Changed `VOICE_VOLUME` constant from `0.23f` to `0.20f`
+
+**Impact:**
+- TTS narration voice is now slightly quieter relative to ambient audio
+- Improves balance between voice and background sounds
+- Makes for a more pleasant listening experience during guided stories and poetry readings
+
+---
+
+## 2026-01-15 20:30 EST: Closed Caption Paragraph Structure Preservation
+
+### **OVERVIEW**
+
+Fixed Android closed captions to preserve original paragraph structure in historical text. Previously, each sentence appeared on its own line in the scroll history. Now historical paragraphs are grouped and displayed as text blocks, matching the original story formatting and the iOS implementation.
+
+### **PROBLEM STATEMENT**
+
+**What was broken:**
+- Closed captions correctly showed sentence-by-sentence display for currently spoken text
+- However, **historical text** (previously spoken sentences) did not preserve paragraph structure
+- Each sentence appeared on a separate line instead of being grouped back into paragraphs
+- Made it difficult to read scrolled-back content, breaking the natural flow of the story
+
+**Expected behavior:**
+1. **Current sentence**: Display ONLY the current sentence being read (highlighted, larger font)
+2. **Previous sentences** in same paragraph: Show dimmed above current sentence
+3. **Historical text** (when scrolling up): Group sentences back into their **original paragraphs** for readability
+
+### **TECHNICAL APPROACH**
+
+The fix uses a **paragraph boundary marker** system, identical to the iOS implementation:
+
+1. **Text Processing**: Split paragraphs into sentences and add `<<PARAGRAPH_BREAK>>` marker after last sentence of each paragraph
+2. **Marker Management**: Strip marker before speech (never spoken), preserve as `<<PB>>` in phrase history for display
+3. **Display Logic**: Group historical sentences between markers back into paragraph blocks
+
+### **CHANGES IMPLEMENTED**
+
+#### 1. Sentence Boundary Detection
+
+**File:** [TextToSpeechManager.kt:240-289](app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt#L240-L289)
+
+**New Function:** `splitIntoSentences(text: String): List<String>`
+- Character-by-character parsing with lookahead for accurate sentence detection
+- Detects sentence endings: `.`, `!`, `?` followed by whitespace
+- Handles common abbreviations to avoid false splits:
+  - Personal titles: `Dr.`, `Mr.`, `Mrs.`, `Ms.`
+  - Common terms: `vs.`, `etc.`, `e.g.`, `i.e.`
+- Returns list of sentences with punctuation preserved
+
+**Example:**
+```kotlin
+Input: "Dr. Smith is here. How are you? Great!"
+Output: ["Dr. Smith is here.", "How are you?", "Great!"]
+```
+
+#### 2. Paragraph Break Marker Insertion
+
+**File:** [TextToSpeechManager.kt:291-339](app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt#L291-L339)
+
+**Updated Function:** `addAutomaticPauses(text: String): String`
+
+**Key Changes:**
+- Changed from splitting on single newlines `\n` to blank lines `\n\s*\n` (proper paragraph detection)
+- Added `<<PARAGRAPH_BREAK>>` marker after last sentence of each paragraph
+- Updated pause timing:
+  - 0.5s between sentences within paragraphs (was 0s)
+  - 2s between paragraphs (unchanged)
+
+**Data Flow:**
+```
+Input text:
+"Sentence one. Sentence two.
+
+Next paragraph here."
+
+↓ Processing ↓
+
+Output with markers:
+"Sentence one. (0.5s)
+Sentence two.<<PARAGRAPH_BREAK>> (2s)
+Next paragraph here.<<PARAGRAPH_BREAK>> (0.5s)"
+```
+
+#### 3. Marker Preservation in Storage
+
+**File:** [TextToSpeechManager.kt:341-389](app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt#L341-L389)
+
+**Updated Function:** `extractPhrasesWithPauses(text: String): List<Pair<String, Long>>`
+
+**Key Changes:**
+- Preserves `<<PARAGRAPH_BREAK>>` as shortened `<<PB>>` marker in phrase storage
+- Marker stays with the sentence in the `phraseHistory` array
+- Allows display component to identify paragraph boundaries
+
+**Example Storage:**
+```kotlin
+phraseHistory = [
+    "Sentence one.",
+    "Sentence two.<<PB>>",  // End of paragraph 1
+    "Next paragraph here.<<PB>>"  // End of paragraph 2
+]
+```
+
+#### 4. Marker Stripping Before Speech
+
+**File:** [TextToSpeechManager.kt:610-618](app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt#L610-L618)
+
+**Updated Function:** `speakNextPhrase()`
+
+**Critical Change:**
+- Strip `<<PB>>` marker before passing text to TTS engine
+- **IMPORTANT:** Marker is NEVER spoken aloud
+- Marker only exists for display logic
+
+```kotlin
+val cleanedPhrase = phrase
+    .replace("<<PB>>", "")  // Strip paragraph marker
+    .replace("-", " ")       // Existing cleanup
+    // ... other cleanup
+```
+
+#### 5. Paragraph Grouping Helper
+
+**File:** [ScrollableStoryTextDisplay.kt:31-77](app/src/main/java/com/jmisabella/zrooms/ScrollableStoryTextDisplay.kt#L31-L77)
+
+**New Data Class:** `ParagraphItem`
+```kotlin
+private data class ParagraphItem(
+    val sentences: List<String>,
+    val isCurrentParagraph: Boolean
+)
+```
+
+**New Function:** `groupIntoParagraphs(phraseHistory: List<String>, currentPhrase: String): List<ParagraphItem>`
+
+**Logic:**
+1. Iterate through phrase history
+2. Accumulate sentences into current paragraph
+3. When `<<PB>>` marker found, create new `ParagraphItem` and start next paragraph
+4. Identify which paragraph contains the currently spoken sentence
+5. Return list of paragraph items for display
+
+**Example:**
+```kotlin
+Input phraseHistory:
+["Sentence 1.", "Sentence 2.<<PB>>", "Sentence 3."]
+
+Output:
+[
+    ParagraphItem(sentences=["Sentence 1.", "Sentence 2."], isCurrentParagraph=false),
+    ParagraphItem(sentences=["Sentence 3."], isCurrentParagraph=true)
+]
+```
+
+#### 6. Updated Display Logic
+
+**File:** [ScrollableStoryTextDisplay.kt:120-206](app/src/main/java/com/jmisabella/zrooms/ScrollableStoryTextDisplay.kt#L120-L206)
+
+**Previous Implementation:**
+```kotlin
+itemsIndexed(phraseHistory) { index, phrase ->
+    // Each phrase displayed individually
+    Text(text = phrase, ...)
+}
+```
+
+**New Implementation:**
+```kotlin
+itemsIndexed(paragraphs) { _, paragraph ->
+    if (paragraph.isCurrentParagraph) {
+        // Current paragraph: show sentences individually
+        Column {
+            paragraph.sentences.forEach { sentence ->
+                Text(
+                    text = sentence,
+                    fontSize = if (isCurrentSentence) 18.sp else 16.sp,
+                    color = if (isCurrentSentence) White else White.copy(0.7f)
+                )
+            }
+        }
+    } else {
+        // Historical paragraph: combine into block
+        Text(
+            text = paragraph.sentences.joinToString(" "),
+            fontSize = 16.sp,
+            color = White.copy(0.7f)
+        )
+    }
+}
+```
+
+**Display Behavior:**
+
+**Current Paragraph** (contains actively spoken sentence):
+- Each sentence displayed individually
+- Current sentence: 18sp, bright white, medium weight
+- Previous sentences in same paragraph: 16sp, dimmed (70% opacity)
+
+**Historical Paragraphs** (already completed):
+- All sentences combined with `joinToString(" ")`
+- Restores original paragraph structure
+- Single text block: 16sp, dimmed (70% opacity)
+- `<<PB>>` markers automatically stripped via `replace()` calls
+
+#### 7. Scroll Position Updates
+
+**File:** [ScrollableStoryTextDisplay.kt:124-133, 222-228](app/src/main/java/com/jmisabella/zrooms/ScrollableStoryTextDisplay.kt#L124-L133)
+
+**Updated:** Auto-scroll and "New text" button to use `paragraphs.size` instead of `phraseHistory.size`
+- Ensures correct scroll target since display now uses paragraph items, not raw phrases
+
+### **EXAMPLE BEHAVIOR**
+
+**Story Structure** (preset_story1.txt excerpt):
+```
+You sign the contract because you need to eat. Because the rent on your
+compartment in the Ganymede hab-ring is three weeks overdue. Because your
+daughter needs new pressure seals for her school suit.
+
+The contract is forty-seven pages of legal text optimized for corporate
+liability protection. You scroll through terms like "acceptable casualty rates."
+
+Someone has to pick through the ruins.
+```
+
+**While Speaking Paragraph 1:**
+```
+[Dimmed] You sign the contract because you need to eat.
+[Dimmed] Because the rent on your compartment in the Ganymede hab-ring is three weeks overdue.
+[BRIGHT, LARGE] Because your daughter needs new pressure seals for her school suit.
+```
+
+**After Completing Paragraph 1, While Speaking Paragraph 2:**
+```
+[Historical Block] You sign the contract because you need to eat. Because the rent on your compartment in the Ganymede hab-ring is three weeks overdue. Because your daughter needs new pressure seals for her school suit.
+
+[Dimmed] The contract is forty-seven pages of legal text optimized for corporate liability protection.
+[BRIGHT, LARGE] You scroll through terms like "acceptable casualty rates."
+```
+
+**After Completing Paragraph 2:**
+```
+[Historical Block] You sign the contract because you need to eat. Because the rent on your compartment in the Ganymede hab-ring is three weeks overdue. Because your daughter needs new pressure seals for her school suit.
+
+[Historical Block] The contract is forty-seven pages of legal text optimized for corporate liability protection. You scroll through terms like "acceptable casualty rates."
+
+[Current] Someone has to pick through the ruins.
+```
+
+### **KEY DESIGN PRINCIPLES**
+
+1. **Minimal Overhead**: Simple string markers (`<<PB>>`), no complex data structures
+2. **Never Speak Markers**: Always strip before TTS synthesis
+3. **Current vs Historical**: Different display modes for active vs completed paragraphs
+4. **Natural Pauses**: 0.5s between sentences, 2s between paragraphs
+5. **Readability**: Historical text looks like original paragraphs when scrolling back
+
+### **TESTING**
+
+- ✅ Project builds successfully with no compilation errors
+- ✅ Implementation matches iOS approach documented in TODO.md
+- ✅ Ready for testing with multi-paragraph stories (preset_story1.txt through preset_story8.txt)
+
+### **FILES MODIFIED**
+
+1. [TextToSpeechManager.kt](app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt)
+   - Added `splitIntoSentences()` function (lines 240-289)
+   - Updated `addAutomaticPauses()` to insert paragraph markers (lines 291-339)
+   - Updated `extractPhrasesWithPauses()` to preserve markers (lines 341-389)
+   - Updated `speakNextPhrase()` to strip markers before TTS (lines 610-618)
+
+2. [ScrollableStoryTextDisplay.kt](app/src/main/java/com/jmisabella/zrooms/ScrollableStoryTextDisplay.kt)
+   - Added `ParagraphItem` data class (lines 31-37)
+   - Added `groupIntoParagraphs()` helper function (lines 39-77)
+   - Updated display logic for paragraph-based rendering (lines 120-206)
+   - Updated scroll targets to use paragraph count (lines 124-133, 222-228)
+
+---
+
+## 2026-01-14 22:00 EST: Circular Chapter Navigation & UI Fixes
+
+### **OVERVIEW**
+
+Implemented circular navigation for story chapters (wrapping from last to first and vice versa) and fixed critical UI issues where navigation buttons were unresponsive and poorly positioned.
+
+### **CHANGES IMPLEMENTED**
+
+#### 1. Circular Chapter Navigation
+
+**File:** [TextToSpeechManager.kt:490-530](app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt#L490-L530)
+
+**Previous Behavior:**
+- `skipToNextChapter()` returned `false` when at last chapter (stopping navigation)
+- `skipToPreviousChapter()` returned `false` when at first chapter (stopping navigation)
+
+**New Behavior:**
+- Clicking next on last chapter wraps to first chapter (preset_story1.txt)
+- Clicking previous on first chapter wraps to last chapter
+- Both functions now always return `true` (unless no chapters exist)
+
+**Critical Bug Fix:**
+- Added `contentMode` preservation in both navigation functions (lines 502-504, 525-527)
+- **Issue:** `startSpeakingSequentialStory()` calls `stopSpeaking()` which sets `contentMode = OFF`
+- **Impact:** This was causing the Leaf button to turn off, hiding navigation buttons and closed captions
+- **Solution:** Save contentMode before calling `startSpeaking`, restore it immediately after
+
+#### 2. Navigation Button Touch Input Fix
+
+**File:** [ExpandingView.kt:649-695](app/src/main/java/com/jmisabella/zrooms/ExpandingView.kt#L649-L695)
+
+**Problem:** Navigation buttons were not responding to taps - taps were propagating to parent Column's tap gesture handler which called `dismiss()`
+
+**Root Cause Analysis:**
+- Parent Column has `detectTapGestures` modifier (line 380-389) that catches all taps
+- Navigation buttons are siblings to Column in parent Box
+- `zIndex` alone wasn't sufficient to prevent tap propagation
+- The `clickable` modifier was still allowing events to bubble up
+
+**Solution:**
+- Replaced `clickable` modifier with `pointerInput(Unit)` + `detectTapGestures` on each button
+- This properly consumes tap events at the button level before they reach the parent
+
+#### 3. UI Spacing Improvements
+
+**File:** [ExpandingView.kt:635, 645](app/src/main/java/com/jmisabella/zrooms/ExpandingView.kt#L635)
+
+Increased spacing to prevent overlapping UI elements:
+- **Closed captions box:** `bottom = 140.dp` → `180.dp` (40dp increase)
+- **Navigation buttons:** `bottom = 250.dp` → `290.dp` (40dp increase)
+
+**Before:** Navigation buttons and closed captions were touching the bottom control buttons (Leaf, Settings, etc.)
+
+**After:** Clean visual separation with proper spacing
+
+### **DEBUGGING PROCESS**
+
+Added temporary debug logging to identify the root cause:
+```kotlin
+println("DEBUG: Next chapter button tapped! contentMode=$contentMode")
+println("DEBUG: Column tap gesture detected at offset=$offset, contentMode=$contentMode")
+```
+
+Logs revealed:
+1. Button tap handlers WERE firing correctly
+2. `contentMode` was correctly `MEDITATION` before and after `skipToNextChapter()`
+3. But UI was still disappearing, indicating contentMode was being changed elsewhere
+4. Traced to `startSpeakingWithPauses() → stopSpeaking() → contentMode = OFF`
+
+### **FILES MODIFIED**
+
+| File | Changes |
+|------|---------|
+| [TextToSpeechManager.kt](app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt) | Circular navigation logic, contentMode preservation |
+| [ExpandingView.kt](app/src/main/java/com/jmisabella/zrooms/ExpandingView.kt) | Button touch input handling, spacing adjustments |
+
+### **TESTING CHECKLIST**
+
+- [x] Navigation buttons respond to taps without dismissing view
+- [x] Leaf button stays green/enabled when navigating chapters
+- [x] Closed captions remain visible during chapter navigation
+- [x] Voice continues playing new chapter after navigation
+- [x] Clicking next on last chapter wraps to first chapter
+- [x] Clicking previous on first chapter wraps to last chapter
+- [x] Navigation buttons have proper spacing from bottom controls
+- [x] No UI overlap between navigation buttons and control buttons
+
+---
+
+## 2026-01-14: Story Chapter Mode - Sequential Playback with Navigation
+
+### **OVERVIEW**
+
+Major feature pivot: The guided story feature (Leaf button) has been repurposed to play sequential story chapters instead of random storys. This aligns the Android app with corresponding iOS changes.
+
+### **CHANGES IMPLEMENTED**
+
+#### 1. TTS Pause Timing Adjustments
+
+**File:** [TextToSpeechManager.kt:245-285](app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt#L245-L285)
+
+- **Removed** automatic 2-second pauses after sentences
+- **Reduced** paragraph pauses from 4 seconds to 2 seconds
+- **Added** `(0s)` markers between sentences to create closed caption breaks without actual audio pauses
+- Manual pause markers like `(2s)` or `(1.5m)` in content files still work as expected
+
+**Result:** Narration flows more naturally with shorter pauses, while closed captions update sentence-by-sentence.
+
+#### 2. Preset-Only Random Selection
+
+**Files Modified:** [TextToSpeechManager.kt:335-336, 418-419](app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt#L335-L336)
+
+- **Removed** custom storys from the random story pool
+- **Removed** custom poems from the random poetry pool
+- Custom content remains accessible through the dedicated content browser (quote button)
+
+**Rationale:** The Leaf button and Poetry mode now only play preset content for consistent story/poem experience.
+
+#### 3. Sequential Story Chapter Playback
+
+**File:** [TextToSpeechManager.kt](app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt)
+
+New properties and methods added:
+
+- `currentChapterIndex` - Persisted to SharedPreferences, tracks which chapter the user is on (lines 64-66)
+- `totalPresetStorys` - Cached count of available chapters (line 68)
+- `countPresetStorys()` - Dynamically counts preset files (lines 126-136)
+- `getSequentialStory()` - Loads current chapter by index (lines 393-406)
+- `startSpeakingSequentialStory()` - Starts playing current chapter (lines 474-479)
+- `skipToNextChapter()` - Advances to next chapter if available (lines 485-495)
+- `skipToPreviousChapter()` - Goes back to previous chapter if available (lines 501-510)
+
+**Behavior Changes:**
+
+- Leaf button now plays chapters sequentially starting from chapter 1 (or last saved position)
+- Chapter progress persists across app restarts via SharedPreferences
+- Auto-advances to next chapter when current chapter completes (with 1-second pause)
+- Poetry mode remains random (not sequential)
+
+#### 4. Skip Button UI
+
+**File:** [ExpandingView.kt:638-680](app/src/main/java/com/jmisabella/zrooms/ExpandingView.kt#L638-L680)
+
+Added `<` and `>` navigation buttons:
+
+- **Position:** Above closed caption area (`bottom = 250.dp`)
+- **Visibility:** Only appear when in MEDITATION mode (story chapters)
+- **Styling:** Semi-transparent black circles with chevron icons
+- Left button calls `skipToPreviousChapter()`
+- Right button calls `skipToNextChapter()`
+
+#### 5. TTS Character Filtering
+
+**File:** [TextToSpeechManager.kt:595-607](app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt#L595-L607)
+
+Fixed issue where TTS was literally saying "dash" and "hash" for `-` and `#` characters:
+
+```kotlin
+val cleanedPhrase = phrase
+    .replace("-", " ")   // Dash becomes space (natural for hyphenated words)
+    .replace("#", "")    // Hash removed
+    .replace("*", "")    // Asterisk removed
+    .replace("_", "")    // Underscore removed
+    .replace("~", "")    // Tilde removed
+```
+
+**Note:** Closed captions still display the original text with these characters - only the TTS audio is cleaned.
+
+### **FILES MODIFIED**
+
+| File | Changes |
+|------|---------|
+| [TextToSpeechManager.kt](app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt) | Pause timing, preset-only selection, sequential playback, chapter navigation, TTS character filtering |
+| [ExpandingView.kt](app/src/main/java/com/jmisabella/zrooms/ExpandingView.kt) | Added skip button UI with < > navigation |
+
+### **TESTING CHECKLIST**
+
+- [x] Build compiles successfully
+- [ ] TTS plays without sentence pauses, 2s pauses between paragraphs
+- [ ] Manual pause markers `(2s)` still work
+- [ ] Leaf button only plays preset storys (not custom)
+- [ ] Poetry button only plays preset poems (not custom)
+- [ ] Story plays sequentially from chapter 1
+- [ ] Chapter progress persists after app restart
+- [ ] Skip buttons appear only in MEDITATION mode
+- [ ] < and > buttons navigate chapters correctly
+- [ ] Auto-advance works when chapter completes
+- [ ] Closed captions update sentence-by-sentence
+- [ ] TTS does not say "dash" or "hash" for - and # characters
+- [ ] Skip buttons don't overlap with other UI elements
+
+---
+
 ## 2026-01-03 18:45 EST: Scrollable Closed Caption History with Auto-Scroll
 
 ### **THE FEATURE**
 
-Users can now scroll through the full transcript of meditation and poetry narration as it's being spoken. Previously, only the current phrase and previous phrase were visible - once text scrolled off, it was lost forever. Now users can scroll back to review earlier phrases they may have missed, while the voice continues narrating in the background.
+Users can now scroll through the full transcript of story and poetry narration as it's being spoken. Previously, only the current phrase and previous phrase were visible - once text scrolled off, it was lost forever. Now users can scroll back to review earlier phrases they may have missed, while the voice continues narrating in the background.
 
 **User Impact:**
 - Full scrollable history of all spoken phrases during the session
@@ -30,7 +995,7 @@ Three main components were modified/created to implement scrollable captions:
    - Clear history when stopping playback in `stopSpeaking()` (lines 194-195)
    - Clear history when narration completes in `didFinishSpeaking()` (lines 544-545)
 
-2. **ScrollableMeditationTextDisplay.kt** - NEW Scrollable Component
+2. **ScrollableStoryTextDisplay.kt** - NEW Scrollable Component
    - Uses `LazyColumn` with `rememberLazyListState()` for efficient virtualization
    - Fixed 100dp height with semi-transparent dark background (55% opacity, 16dp rounded corners)
    - `derivedStateOf` for accurate bottom detection (lines 51-60)
@@ -43,7 +1008,7 @@ Three main components were modified/created to implement scrollable captions:
    - Previous phrases dimmed: 70% opacity, 16sp, normal weight
 
 3. **ExpandingView.kt** - Integration
-   - Replaced `MeditationTextDisplay` with `ScrollableMeditationTextDisplay` (lines 624-633)
+   - Replaced `StoryTextDisplay` with `ScrollableStoryTextDisplay` (lines 624-633)
    - Connected phrase history from TTS manager
    - Connected `hasNewCaptionContent` state with callback for updates
    - Maintained same positioning (140dp above buttons)
@@ -121,8 +1086,8 @@ The iOS version initially experienced significant lag and unresponsiveness when 
 ✅ Auto-scroll stops when user scrolls up
 ✅ "New text" indicator appears correctly
 ✅ Tapping "New text" scrolls back to bottom
-✅ History clears when meditation ends
-✅ History resets when starting new meditation
+✅ History clears when story ends
+✅ History resets when starting new story
 
 **Performance Verified:**
 ✅ No lag when opening room view
@@ -131,7 +1096,7 @@ The iOS version initially experienced significant lag and unresponsiveness when 
 
 ### **FILES CREATED**
 
-- [app/src/main/java/com/jmisabella/zrooms/ScrollableMeditationTextDisplay.kt](app/src/main/java/com/jmisabella/zrooms/ScrollableMeditationTextDisplay.kt) - New scrollable caption component (182 lines)
+- [app/src/main/java/com/jmisabella/zrooms/ScrollableStoryTextDisplay.kt](app/src/main/java/com/jmisabella/zrooms/ScrollableStoryTextDisplay.kt) - New scrollable caption component (182 lines)
 
 ### **FILES MODIFIED**
 
@@ -144,7 +1109,7 @@ The iOS version initially experienced significant lag and unresponsiveness when 
   - Clear history in `didFinishSpeaking()` (lines 544-545)
 
 - [app/src/main/java/com/jmisabella/zrooms/ExpandingView.kt](app/src/main/java/com/jmisabella/zrooms/ExpandingView.kt):
-  - Replaced `MeditationTextDisplay` with `ScrollableMeditationTextDisplay` (lines 624-633)
+  - Replaced `StoryTextDisplay` with `ScrollableStoryTextDisplay` (lines 624-633)
   - Connected phrase history and new content state from TTS manager
 
 ### **CODE STATISTICS**
@@ -166,14 +1131,14 @@ The iOS version initially experienced significant lag and unresponsiveness when 
 
 ### **THE BUG**
 
-When meditation or poetry narration completes, the closed caption box (semi-transparent dark modal window) remains visible on screen even though there's no text being spoken. The caption text itself disappears, but the empty dark background box persists.
+When story or poetry narration completes, the closed caption box (semi-transparent dark modal window) remains visible on screen even though there's no text being spoken. The caption text itself disappears, but the empty dark background box persists.
 
 **User Impact:**
-After listening to a meditation or poem in its entirety, users see an empty dark box floating at the bottom of the screen, which looks unprofessional and confusing. The box should disappear completely when narration ends.
+After listening to a story or poem in its entirety, users see an empty dark box floating at the bottom of the screen, which looks unprofessional and confusing. The box should disappear completely when narration ends.
 
 ### **THE CAUSE**
 
-The `MeditationTextDisplay` component was already correctly implemented with conditional rendering logic (line 33):
+The `StoryTextDisplay` component was already correctly implemented with conditional rendering logic (line 33):
 ```kotlin
 visible = isVisible && (currentPhrase.isNotEmpty() || previousPhrase.isNotEmpty())
 ```
@@ -212,7 +1177,7 @@ Modified the `didFinishSpeaking()` method in [TextToSpeechManager.kt:540-543](ap
 
 ### **THE RESULT**
 
-The closed caption box now properly disappears when meditation/poetry narration completes:
+The closed caption box now properly disappears when story/poetry narration completes:
 - Narration ends → Caption text cleared → Entire caption box (including background) disappears ✅
 - Wake-up greeting functionality still works correctly (relies on `PREF_CONTENT_COMPLETED` flag, not caption text)
 - Content mode button stays colored (MEDITATION/POETRY mode remains active until user manually toggles it off)
@@ -229,10 +1194,10 @@ The closed caption box now properly disappears when meditation/poetry narration 
 
 ### **THE BUG**
 
-When users set a waking alarm sound and enable meditation mode or poetry mode, the app plays a brief greeting ("Welcome back", etc.) when the alarm goes off. However, this greeting was always spoken using the default woman's voice, even when the user had selected a different voice (such as one of the male voices) for their meditation/poetry narration.
+When users set a waking alarm sound and enable story mode or poetry mode, the app plays a brief greeting ("Welcome back", etc.) when the alarm goes off. However, this greeting was always spoken using the default woman's voice, even when the user had selected a different voice (such as one of the male voices) for their story/poetry narration.
 
 **User Impact:**
-Users who selected a specific voice (e.g., Alex, Daniel, Michael) for their meditation or poetry narration would hear the default voice for the wake-up greeting instead of their chosen voice, creating an inconsistent experience.
+Users who selected a specific voice (e.g., Alex, Daniel, Michael) for their story or poetry narration would hear the default voice for the wake-up greeting instead of their chosen voice, creating an inconsistent experience.
 
 ### **THE CAUSE**
 
@@ -241,7 +1206,7 @@ In [AudioService.kt](app/src/main/java/com/jmisabella/zrooms/AudioService.kt), t
 - Speech rate was hardcoded to `0.6f`
 - Pitch was hardcoded to `0.58f`
 
-The greeting TTS initialization did not use the `VoiceManager` to apply the user's selected voice preferences, unlike the main meditation/poetry TTS which correctly uses `VoiceManager.getPreferredVoice()`.
+The greeting TTS initialization did not use the `VoiceManager` to apply the user's selected voice preferences, unlike the main story/poetry TTS which correctly uses `VoiceManager.getPreferredVoice()`.
 
 ### **THE FIX**
 
@@ -280,7 +1245,7 @@ The wake-up greeting now respects the user's voice selection:
 - Users who select Alex, Daniel, Michael, or any other voice will hear that same voice for the "Welcome back" greeting
 - Voice settings are refreshed at playback time, ensuring the greeting always uses the current selection
 - Speech rate automatically adjusts based on voice quality (enhanced voices at natural speed, default voice slightly slower)
-- Consistent voice experience throughout the entire meditation/poetry alarm workflow
+- Consistent voice experience throughout the entire story/poetry alarm workflow
 
 **Files Modified:**
 - [app/src/main/java/com/jmisabella/zrooms/AudioService.kt](app/src/main/java/com/jmisabella/zrooms/AudioService.kt) (lines 137-158, 454-480)
@@ -338,7 +1303,7 @@ Replaced the edge-to-edge gradient background with a rounded, semi-transparent d
 
 **Code Changes:**
 
-**MeditationTextDisplay.kt:**
+**StoryTextDisplay.kt:**
 ```kotlin
 // BEFORE (Gradient approach):
 Box(
@@ -375,7 +1340,7 @@ Box(
 **ExpandingView.kt:**
 ```kotlin
 // BEFORE:
-MeditationTextDisplay(
+StoryTextDisplay(
     modifier = Modifier
         .align(Alignment.BottomCenter)
         .fillMaxWidth()
@@ -383,7 +1348,7 @@ MeditationTextDisplay(
 )
 
 // AFTER:
-MeditationTextDisplay(
+StoryTextDisplay(
     modifier = Modifier
         .align(Alignment.BottomCenter)
         .padding(bottom = 90.dp) // Position above room label and buttons
@@ -392,7 +1357,7 @@ MeditationTextDisplay(
 
 ### **FILES MODIFIED**
 
-- [app/src/main/java/com/jmisabella/zrooms/MeditationTextDisplay.kt](app/src/main/java/com/jmisabella/zrooms/MeditationTextDisplay.kt):
+- [app/src/main/java/com/jmisabella/zrooms/StoryTextDisplay.kt](app/src/main/java/com/jmisabella/zrooms/StoryTextDisplay.kt):
   - Removed `Brush` import (no longer needed)
   - Added `RoundedCornerShape` import
   - Replaced gradient background with rounded semi-transparent dark modal (Color.Black.copy(alpha = 0.55f))
@@ -436,7 +1401,7 @@ MeditationTextDisplay(
 - ✅ Same smooth animations (fade + slide)
 - ✅ Same text styling (previous phrase faded/smaller, current phrase bold/larger)
 - ✅ Same two-line display format
-- ✅ Same show/hide behavior based on meditation state
+- ✅ Same show/hide behavior based on story state
 
 ### **DESIGN RATIONALE**
 
@@ -454,12 +1419,12 @@ Sometimes the best solution is to pivot to a different approach rather than cont
 
 ### **THE REQUEST**
 
-Change the default ambient audio volume from 100% to 80% to provide a better balance between the meditation voice narration and ambient background audio.
+Change the default ambient audio volume from 100% to 80% to provide a better balance between the story voice narration and ambient background audio.
 
 ### **THE PROBLEM**
 
 **User Experience Issue:**
-At the default 100% ambient volume level, the meditation voice (fixed at 23% volume) was too quiet relative to the ambient background audio. This created a suboptimal listening experience where users had to manually adjust the ambient slider down to hear the meditation guidance clearly.
+At the default 100% ambient volume level, the story voice (fixed at 23% volume) was too quiet relative to the ambient background audio. This created a suboptimal listening experience where users had to manually adjust the ambient slider down to hear the story guidance clearly.
 
 **Testing Results:**
 After testing across all ambient audio track types (white noise, dark ambient, bright ambient, and classical compositions), the user found that 80% ambient volume provided the ideal ratio between voice clarity and ambient atmosphere.
@@ -468,7 +1433,7 @@ After testing across all ambient audio track types (white noise, dark ambient, b
 
 Updated the default ambient volume from 100% (1.0f) to 80% (0.8f) in both TextToSpeechManager and AudioService. This change:
 1. Provides better out-of-box experience for new users
-2. Ensures meditation voice narration is clearly audible over ambient audio
+2. Ensures story voice narration is clearly audible over ambient audio
 3. Maintains full user control (slider still allows 0-100% adjustment)
 4. Works well across all ambient track styles
 
@@ -501,21 +1466,21 @@ private var targetAmbientVolume: Float = 0.8f // default to 80%
 
 **Positive Changes:**
 - Better default experience - voice narration is clearly audible without manual adjustment
-- Improved meditation quality with optimal voice-to-ambient ratio
+- Improved story quality with optimal voice-to-ambient ratio
 - Tested and verified across all 4 ambient audio styles
 
 **No Breaking Changes:**
 - Users can still adjust ambient volume from 0-100% using the slider
 - Setting is not persisted, so always resets to the new 80% default on app launch
-- Meditation voice volume remains unchanged at 23%
+- Story voice volume remains unchanged at 23%
 
 ---
 
-## 2024-12-26 16:30: Bug Fix - Voice Settings Not Applied to Meditations
+## 2024-12-26 16:30: Bug Fix - Voice Settings Not Applied to Storys
 
 ### **THE REQUEST**
 
-User reported that when selecting a different voice in the Voice Settings dialog, the selected voice was not being applied to guided meditations. The meditation would continue using the default system voice instead of the user's chosen voice.
+User reported that when selecting a different voice in the Voice Settings dialog, the selected voice was not being applied to guided storys. The story would continue using the default system voice instead of the user's chosen voice.
 
 ### **THE PROBLEM**
 
@@ -523,15 +1488,15 @@ User reported that when selecting a different voice in the Voice Settings dialog
 The `VoiceManager.setPreferredVoice()` method was saving the voice selection to preferences but was not enabling the `useEnhancedVoice` flag. The `getPreferredVoice()` method checks if enhanced voice is enabled, and returns `null` (default system voice) when disabled, even if a voice has been selected.
 
 **Impact:**
-- Users could select enhanced voices but they would not be used for meditation playback
+- Users could select enhanced voices but they would not be used for story playback
 - Voice previews worked correctly (they used their own TTS instance)
-- Actual meditation playback ignored the voice selection and used the default system voice
+- Actual story playback ignored the voice selection and used the default system voice
 - User experience was confusing as the settings appeared to save but had no effect
 
 **Code Flow Analysis:**
 1. User selects voice in VoiceSettingsView → calls `voiceManager.setPreferredVoice(voice)`
 2. `setPreferredVoice()` saves voice name to preferences but doesn't enable enhanced voice
-3. When meditation plays → `TextToSpeechManager.applyVoiceSettings()` calls `voiceManager.getPreferredVoice()`
+3. When story plays → `TextToSpeechManager.applyVoiceSettings()` calls `voiceManager.getPreferredVoice()`
 4. `getPreferredVoice()` checks `if (!useEnhancedVoice.value)` and returns `null`
 5. TTS engine uses default system voice instead of selected voice
 
@@ -583,8 +1548,8 @@ To verify the fix:
 2. Tap the Voice Settings button (gear icon)
 3. Select a different voice from the list (e.g., "Alex" or "Samantha")
 4. Close the Voice Settings dialog
-5. Tap the meditation button (leaf icon) to play a guided meditation
-6. Verify the meditation uses the selected voice (not the default system voice)
+5. Tap the story button (leaf icon) to play a guided story
+6. Verify the story uses the selected voice (not the default system voice)
 
 ### **DEPLOYMENT NOTE**
 
@@ -603,7 +1568,7 @@ Remove all debug logging (`println()` statements) from the codebase to prepare f
 The app contained 46 active `println()` debug statements across 7 Kotlin files used during development for debugging:
 - UI state changes
 - Gesture detection
-- Alarm and meditation state transitions
+- Alarm and story state transitions
 - File loading operations
 - TTS initialization
 
@@ -636,14 +1601,14 @@ Systematically removed all 46 `println()` statements across the codebase:
    - Fixed unused parameter warnings
 
 4. **TextToSpeechManager.kt** - 3 statements removed
-   - Meditation file loading
+   - Story file loading
    - Replaced with silent error handling
 
 5. **MainActivity.kt** - 1 statement removed
    - onCreate lifecycle logging
 
-6. **CustomMeditationManager.kt** - 1 statement removed
-   - Default meditation loading errors
+6. **CustomStoryManager.kt** - 1 statement removed
+   - Default story loading errors
 
 7. **AlarmSelectionContent.kt** - 1 statement removed
    - Alarm tile tap detection
@@ -680,7 +1645,7 @@ The original Voice Settings interface had several UX issues:
 2. **Fixed Info Section**: The "About Voices" information card stayed fixed at the top while scrolling, taking up valuable screen real estate and minimizing the number of visible voice options
 3. **Redundant Title**: "About Enhanced Voices" was redundant since the context already made it clear these were enhanced voices
 4. **Unnecessary Information**: The sentence about app size and system storage was more technical detail than users needed
-5. **Get More Voices Button**: The deep-link to TTS settings added complexity without clear benefit, and instructions for downloading voices were unnecessarily detailed for a meditation app
+5. **Get More Voices Button**: The deep-link to TTS settings added complexity without clear benefit, and instructions for downloading voices were unnecessarily detailed for a story app
 
 ### **THE SOLUTION**
 
@@ -706,7 +1671,7 @@ The original Voice Settings interface had several UX issues:
    - Deleted entire OutlinedButton component and deep-link logic (~30 lines)
    - Removed unused `context` variable (LocalContext.current)
    - Removed unused Intent imports
-   - Rationale: Users can still access TTS settings through device settings if needed, but this complexity doesn't belong in a meditation app's voice selector
+   - Rationale: Users can still access TTS settings through device settings if needed, but this complexity doesn't belong in a story app's voice selector
 
 5. **Reorganized Layout Structure**:
    - "About Voices" section (scrollable)
@@ -733,7 +1698,7 @@ The original Voice Settings interface had several UX issues:
 - Cleaner, less cluttered interface
 - Information available when needed but not intrusive
 - Removed unnecessary technical details and complexity
-- Focus on meditation experience rather than TTS management
+- Focus on story experience rather than TTS management
 
 ### **CHANGES MADE**
 
@@ -790,21 +1755,21 @@ New "About Voices" content:
 
 **Total Lines:** 159 lines (down from ~370 lines)
 
-## 2025-12-25 23:27: Enhanced Opening Phrase Variety in Preset Meditations
+## 2025-12-25 23:27: Enhanced Opening Phrase Variety in Preset Storys
 
 ### **THE REQUEST**
 
-The user noticed that an excessive number of preset meditations began with the exact same literal phrase: "Before we begin, consider this." This repetitive opening created a monotonous user experience for regular meditation users. The request was to introduce significant variety in the opening phrases while maintaining the overall contemplative meaning and tone.
+The user noticed that an excessive number of preset storys began with the exact same literal phrase: "Before we begin, consider this." This repetitive opening created a monotonous user experience for regular story users. The request was to introduce significant variety in the opening phrases while maintaining the overall contemplative meaning and tone.
 
 **Initial Analysis:**
-- 27 out of 36 meditation files used "Before we begin,"
+- 27 out of 36 story files used "Before we begin,"
 - 13 of those used the generic "consider this" after it
-- This lack of variety made meditations feel formulaic and less engaging
+- This lack of variety made storys feel formulaic and less engaging
 
 ### **THE SOLUTION**
 
 **Implementation Strategy:**
-Developed a diverse collection of 20+ opening phrase variations across 5 categories, distributed thoughtfully across all meditation files based on their content and sources. The approach prioritized attribution-specific phrases for meditations with named sources (Marcus Aurelius, Tao Te Ching, etc.) while using varied invitations and tone-setters for original content.
+Developed a diverse collection of 20+ opening phrase variations across 5 categories, distributed thoughtfully across all story files based on their content and sources. The approach prioritized attribution-specific phrases for storys with named sources (Marcus Aurelius, Tao Te Ching, etc.) while using varied invitations and tone-setters for original content.
 
 **Opening Phrase Categories Created:**
 
@@ -827,9 +1792,9 @@ Developed a diverse collection of 20+ opening phrase variations across 5 categor
 - "Let us settle in with"
 - "We begin with"
 
-**Category 3: Attribution-Specific (for meditations with sources)**
+**Category 3: Attribution-Specific (for storys with sources)**
 - "In the words of William Wordsworth, from I Wandered Lonely As A Cloud"
-- "Marcus Aurelius reminds us, from his Meditations"
+- "Marcus Aurelius reminds us, from his Storys"
 - "Wisdom from Ralph Waldo Emerson's Self-Reliance"
 - "From Lao Tzu's Tao Te Ching, these words"
 - "The Bhagavad Gita teaches us"
@@ -845,47 +1810,47 @@ Developed a diverse collection of 20+ opening phrase variations across 5 categor
 - "Let's begin with this thought"
 
 **Category 5: Direct Entry**
-- One meditation (preset_meditation4.txt) starts directly with instructions, no preamble
+- One story (preset_story4.txt) starts directly with instructions, no preamble
 
 **Preserved "Before we begin" instances (2-3 total, as requested):**
-- "A reflection before we begin" (meditation 10)
-- "Before we begin, from the Serenity Prayer" (meditation 25)
-- "Before we begin, from an old Zen saying" (meditation 28)
+- "A reflection before we begin" (story 10)
+- "Before we begin, from the Serenity Prayer" (story 25)
+- "Before we begin, from an old Zen saying" (story 28)
 
 ### **CHANGES MADE**
 
-Updated 27 out of 36 meditation files with varied opening phrases:
+Updated 27 out of 36 story files with varied opening phrases:
 
-**Meditations with Attribution-Specific Phrases:**
-- preset_meditation1.txt: "In the words of William Wordsworth..."
-- preset_meditation2.txt: "Marcus Aurelius reminds us..."
-- preset_meditation6.txt: "Wisdom from Ralph Waldo Emerson's Self-Reliance"
-- preset_meditation8.txt: "From Lao Tzu's Tao Te Ching, these words"
-- preset_meditation11.txt: "The Bhagavad Gita teaches us"
-- preset_meditation15.txt: "An ancient teaching from the Tao Te Ching"
-- preset_meditation20.txt: "Wisdom from the Dhammapada"
-- preset_meditation21.txt: "Ancient Buddhist wisdom teaches"
-- preset_meditation30.txt: "From the Upanishads, this teaching"
+**Storys with Attribution-Specific Phrases:**
+- preset_story1.txt: "In the words of William Wordsworth..."
+- preset_story2.txt: "Marcus Aurelius reminds us..."
+- preset_story6.txt: "Wisdom from Ralph Waldo Emerson's Self-Reliance"
+- preset_story8.txt: "From Lao Tzu's Tao Te Ching, these words"
+- preset_story11.txt: "The Bhagavad Gita teaches us"
+- preset_story15.txt: "An ancient teaching from the Tao Te Ching"
+- preset_story20.txt: "Wisdom from the Dhammapada"
+- preset_story21.txt: "Ancient Buddhist wisdom teaches"
+- preset_story30.txt: "From the Upanishads, this teaching"
 
-**Meditations with Reflection & Invitation Phrases:**
-- preset_meditation3.txt: "Here's a reflection"
-- preset_meditation7.txt: "Let us settle in with"
-- preset_meditation12.txt: "To guide our journey today"
-- preset_meditation13.txt: "A thought to hold"
-- preset_meditation14.txt: "Let's begin with this insight"
-- preset_meditation16.txt: "Something to ponder"
-- preset_meditation17.txt: "To set our intention"
-- preset_meditation18.txt: "Reflect on this"
-- preset_meditation19.txt: "Here's a thought to carry with us"
-- preset_meditation22.txt: "Something to reflect upon"
-- preset_meditation24.txt: "A moment to contemplate"
-- preset_meditation26.txt: "As we prepare"
-- preset_meditation29.txt: "Consider these words"
-- preset_meditation31.txt: "To ground this practice"
-- preset_meditation32.txt: "Let these words guide us"
-- preset_meditation33.txt: "A reminder for our practice"
-- preset_meditation34.txt: "May we hold this truth"
-- preset_meditation35.txt: "We begin with"
+**Storys with Reflection & Invitation Phrases:**
+- preset_story3.txt: "Here's a reflection"
+- preset_story7.txt: "Let us settle in with"
+- preset_story12.txt: "To guide our journey today"
+- preset_story13.txt: "A thought to hold"
+- preset_story14.txt: "Let's begin with this insight"
+- preset_story16.txt: "Something to ponder"
+- preset_story17.txt: "To set our intention"
+- preset_story18.txt: "Reflect on this"
+- preset_story19.txt: "Here's a thought to carry with us"
+- preset_story22.txt: "Something to reflect upon"
+- preset_story24.txt: "A moment to contemplate"
+- preset_story26.txt: "As we prepare"
+- preset_story29.txt: "Consider these words"
+- preset_story31.txt: "To ground this practice"
+- preset_story32.txt: "Let these words guide us"
+- preset_story33.txt: "A reminder for our practice"
+- preset_story34.txt: "May we hold this truth"
+- preset_story35.txt: "We begin with"
 
 ### **DISTRIBUTION & VARIETY ACHIEVED**
 
@@ -897,13 +1862,13 @@ Updated 27 out of 36 meditation files with varied opening phrases:
 **After:**
 - Only 2-3 files retain "Before we begin" (10, 25, 28)
 - 20+ unique opening phrases across all categories
-- Variety distributed evenly based on meditation content and sources
-- Each meditation feels more unique and thoughtfully crafted
+- Variety distributed evenly based on story content and sources
+- Each story feels more unique and thoughtfully crafted
 
 ### **FILES MODIFIED**
 
-All meditation files in `zz-time/Meditations/`:
-- preset_meditation1.txt through preset_meditation35.txt
+All story files in `zz-time/Storys/`:
+- preset_story1.txt through preset_story35.txt
 - Total: 27 files updated with new opening phrases
 - 3 files retained "Before we begin" for variety
 - Multiple files already had "Let's begin with this thought" variations (kept for continuity)
@@ -911,76 +1876,76 @@ All meditation files in `zz-time/Meditations/`:
 
 ## 2025-12-25 15:00 EST
 
-**Feature Enhancement:** Prevent Consecutive Meditation Repeats - Ensures variety in meditation selection
+**Feature Enhancement:** Prevent Consecutive Story Repeats - Ensures variety in story selection
 
-**User Experience:** When users toggle the leaf button on to play a meditation, then toggle it off to stop, and toggle it back on again, the app now guarantees that the second meditation will be different from the first. This prevents the jarring experience of hearing the exact same meditation twice in a row when toggling the leaf button multiple times.
+**User Experience:** When users toggle the leaf button on to play a story, then toggle it off to stop, and toggle it back on again, the app now guarantees that the second story will be different from the first. This prevents the jarring experience of hearing the exact same story twice in a row when toggling the leaf button multiple times.
 
 **Implementation Details:**
 
-Added meditation history tracking to prevent immediate repeats:
+Added story history tracking to prevent immediate repeats:
 
 1. **Last Played Tracking:**
-   - New variable `lastPlayedMeditation: String?` stores the full text of the most recently played meditation
-   - Updated when meditation is selected in `loadRandomMeditationFile()`
+   - New variable `lastPlayedStory: String?` stores the full text of the most recently played story
+   - Updated when story is selected in `loadRandomStoryFile()`
    - Persists for the app session (not saved to disk)
 
 2. **Smart Random Selection:**
-   - When 2+ meditations available AND a previous meditation exists:
-     - Filters out `lastPlayedMeditation` from available pool
-     - Selects randomly from remaining meditations
-   - When only 1 meditation available:
-     - Plays that single meditation (no choice)
-   - First time playing (no previous meditation):
-     - Selects randomly from all available meditations
+   - When 2+ storys available AND a previous story exists:
+     - Filters out `lastPlayedStory` from available pool
+     - Selects randomly from remaining storys
+   - When only 1 story available:
+     - Plays that single story (no choice)
+   - First time playing (no previous story):
+     - Selects randomly from all available storys
 
 3. **Selection Logic:**
 ```kotlin
-val selectedMeditation = if (allMeditations.size > 1 && lastPlayedMeditation != null) {
-    // Filter out the last played meditation and pick from remaining
-    val availableMeditations = allMeditations.filter { it != lastPlayedMeditation }
-    availableMeditations.random()
+val selectedStory = if (allStorys.size > 1 && lastPlayedStory != null) {
+    // Filter out the last played story and pick from remaining
+    val availableStorys = allStorys.filter { it != lastPlayedStory }
+    availableStorys.random()
 } else {
-    // First time playing or only one meditation available
-    allMeditations.random()
+    // First time playing or only one story available
+    allStorys.random()
 }
-lastPlayedMeditation = selectedMeditation
+lastPlayedStory = selectedStory
 ```
 
 **User Scenarios:**
 
-*Scenario 1: Typical Toggle On/Off/On (Multiple Meditations Available)*
-- User toggles leaf ON → Meditation #12 plays
-- User toggles leaf OFF → Meditation stops
-- User toggles leaf ON → Meditation #27 plays (guaranteed NOT #12)
-- User toggles leaf OFF → Meditation stops
-- User toggles leaf ON → Any meditation EXCEPT #27 plays
+*Scenario 1: Typical Toggle On/Off/On (Multiple Storys Available)*
+- User toggles leaf ON → Story #12 plays
+- User toggles leaf OFF → Story stops
+- User toggles leaf ON → Story #27 plays (guaranteed NOT #12)
+- User toggles leaf OFF → Story stops
+- User toggles leaf ON → Any story EXCEPT #27 plays
 
-*Scenario 2: Only One Meditation Available*
-- User has deleted all presets except one, no custom meditations
-- User toggles leaf ON → Meditation #1 plays
-- User toggles leaf OFF → Meditation stops
-- User toggles leaf ON → Meditation #1 plays (only choice available)
+*Scenario 2: Only One Story Available*
+- User has deleted all presets except one, no custom storys
+- User toggles leaf ON → Story #1 plays
+- User toggles leaf OFF → Story stops
+- User toggles leaf ON → Story #1 plays (only choice available)
 
-*Scenario 3: With 70 Total Meditations (35 presets + 35 custom)*
+*Scenario 3: With 70 Total Storys (35 presets + 35 custom)*
 - Each toggle ensures variety: 69 different options each time
 - Prevents repetitive experience even with frequent toggling
-- Last played meditation only persists during app session
+- Last played story only persists during app session
 
 **Benefits:**
 - Better user experience with guaranteed variety
-- Prevents frustration from hearing same meditation immediately after stopping it
-- Works seamlessly with both preset and custom meditations
-- No impact on first-time meditation selection
-- Minimal memory overhead (stores single meditation text)
+- Prevents frustration from hearing same story immediately after stopping it
+- Works seamlessly with both preset and custom storys
+- No impact on first-time story selection
+- Minimal memory overhead (stores single story text)
 
 **Files Modified:**
-- [app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt](app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt) - Added `lastPlayedMeditation` tracking (line 46), updated `loadRandomMeditationFile()` with smart selection logic (lines 324-342)
+- [app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt](app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt) - Added `lastPlayedStory` tracking (line 46), updated `loadRandomStoryFile()` with smart selection logic (lines 324-342)
 
 ## 2025-12-25 14:30 EST
 
 **Bug Fix:** Voice Volume Consistency - Unified TTS voice volume across all playback instances
 
-**Problem:** The voice preview feature in VoiceSettingsView was playing at full volume (1.0), which was significantly louder than the meditation narration volume (0.23f). This created a jarring experience where users would hear previews at one volume level but meditations at a much quieter level. Additionally, the VOICE_VOLUME constant was duplicated in multiple files (TextToSpeechManager and referenced in AudioService), violating DRY principles and creating maintenance risk.
+**Problem:** The voice preview feature in VoiceSettingsView was playing at full volume (1.0), which was significantly louder than the story narration volume (0.23f). This created a jarring experience where users would hear previews at one volume level but storys at a much quieter level. Additionally, the VOICE_VOLUME constant was duplicated in multiple files (TextToSpeechManager and referenced in AudioService), violating DRY principles and creating maintenance risk.
 
 **Solution:** Consolidated voice volume management by:
 1. Moving the VOICE_VOLUME constant to VoiceManager as the single source of truth
@@ -990,7 +1955,7 @@ lastPlayedMeditation = selectedMeditation
 **Implementation Details:**
 
 All three TTS voice instances now use the same volume (0.23f):
-- **Meditation narration** (TextToSpeechManager.speakNextPhrase())
+- **Story narration** (TextToSpeechManager.speakNextPhrase())
 - **Voice preview** (VoiceManager.previewVoice())
 - **Wake-up greeting** (AudioService.playWakeUpGreeting())
 
@@ -999,11 +1964,11 @@ All three TTS voice instances now use the same volume (0.23f):
 ```kotlin
 // VoiceManager.kt - Single source of truth for voice volume
 companion object {
-    // Voice volume (shared across meditation playback and preview)
+    // Voice volume (shared across story playback and preview)
     const val VOICE_VOLUME = 0.23f
 }
 
-// Preview now uses same volume as meditations
+// Preview now uses same volume as storys
 fun previewVoice(voice: Voice, text: String, onComplete: (() -> Unit)? = null) {
     val params = HashMap<String, String>()
     params[TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID] = "preview"
@@ -1018,15 +1983,15 @@ fun previewVoice(voice: Voice, text: String, onComplete: (() -> Unit)? = null) {
 - [app/src/main/java/com/jmisabella/zrooms/AudioService.kt](app/src/main/java/com/jmisabella/zrooms/AudioService.kt) - Updated wake-up greeting to use VoiceManager.VOICE_VOLUME (line 449)
 
 **User Impact:**
-- Voice previews now play at the same comfortable volume as meditations (0.23f instead of 1.0)
+- Voice previews now play at the same comfortable volume as storys (0.23f instead of 1.0)
 - Consistent audio experience across all TTS features
 - No more jarring volume differences when testing voices
 
 ## 2025-12-25
 
-**Feature:** Enhanced Voice Quality - Optional high-quality TTS voices for meditation narration
+**Feature:** Enhanced Voice Quality - Optional high-quality TTS voices for story narration
 
-**User Experience:** Users can now optionally select higher-quality TTS voices for meditation narration while maintaining the default "artificial" voice aesthetic as the default. A new gear icon (settings button) appears in the meditation view (ExpandingView), positioned as the leftmost button in the bottom row. Tapping this icon opens voice settings where users can toggle "Enhanced Voice" on/off and select from available high-quality voices. Each voice can be previewed with a sample meditation phrase before selection. The app maintains 100% offline functionality - only voices that don't require network connectivity are shown.
+**User Experience:** Users can now optionally select higher-quality TTS voices for story narration while maintaining the default "artificial" voice aesthetic as the default. A new gear icon (settings button) appears in the story view (ExpandingView), positioned as the leftmost button in the bottom row. Tapping this icon opens voice settings where users can toggle "Enhanced Voice" on/off and select from available high-quality voices. Each voice can be previewed with a sample story phrase before selection. The app maintains 100% offline functionality - only voices that don't require network connectivity are shown.
 
 **Implementation Details:**
 
@@ -1046,7 +2011,7 @@ The enhanced voice quality feature consists of three main components:
      - Female voices: sfg→Samantha, iob→Emily, iog→Victoria
      - Male voices: tpf→Alex, iom→Daniel, tpd→Michael, tpc→James
      - Fallback to generic names (Voice A, Voice B, etc.) for unknown codes
-   - Separate preview TTS instance to avoid interfering with meditation playback
+   - Separate preview TTS instance to avoid interfering with story playback
    - Preview management: `stopPreview()` prevents audio looping and allows rapid voice comparison
    - `getPreferredVoice()` fallback logic: User selection → Any high-quality voice → Default system voice
 
@@ -1060,7 +2025,7 @@ The enhanced voice quality feature consists of three main components:
      - Download status indicator for voices requiring download
      - Preview button (play/stop icon) with immediate switching
      - Selected indicator (checkmark icon)
-   - Preview functionality: Sample text "Welcome to your meditation practice. Take a deep breath and relax."
+   - Preview functionality: Sample text "Welcome to your story practice. Take a deep breath and relax."
    - Preview state management: Clicking new preview immediately stops previous one
    - "Get More Voices" button: Deep-links to Android TTS settings for voice management
    - Info section (scrollable, at bottom of list when Enhanced Voice ON):
@@ -1068,7 +2033,7 @@ The enhanced voice quality feature consists of three main components:
      - Notes many voices come pre-installed, others require download (100-500MB each)
      - Provides path: Settings → Accessibility → Text-to-Speech → Speech Services by Google → Settings icon → Voice selection
      - Clarifies enhanced voices stored in device system storage, not app
-   - Close button returns to meditation view and refreshes voice settings
+   - Close button returns to story view and refreshes voice settings
 
 3. **Integration Changes**:
 
@@ -1083,7 +2048,7 @@ The enhanced voice quality feature consists of three main components:
 
    **ExpandingView.kt** (MODIFIED):
    - Added gear icon (Settings) as leftmost button in bottom row
-   - Button order: gear → quote (custom meditation) → clock (alarm timer) → leaf (meditation toggle)
+   - Button order: gear → quote (custom story) → clock (alarm timer) → leaf (story toggle)
    - Added `showVoiceSettings` state variable for sheet presentation
    - VoiceSettingsView presented as full-screen overlay when gear icon tapped
    - Calls `ttsManager.refreshVoiceSettings()` on dismiss to apply voice changes
@@ -1153,12 +2118,12 @@ return when (voiceCode) {
 
 *Scenario 1: Default User (No Changes)*
 - Enhanced Voice toggle remains OFF (default)
-- Meditations use default system voice at 0.8x speed, 1.0 pitch
+- Storys use default system voice at 0.8x speed, 1.0 pitch
 - Exactly same experience as before this feature was added
 - No behavior change
 
 *Scenario 2: Enhanced Voice Discovery*
-- User taps gear icon in meditation view
+- User taps gear icon in story view
 - Opens voice settings
 - Toggles "Enhanced Voice" ON
 - Scrollable list of voices appears with friendly names
@@ -1166,7 +2131,7 @@ return when (voiceCode) {
 - Taps preview button on "Alex" → Previous preview stops, new one starts
 - Selects "Samantha" (checkmark appears)
 - Closes settings
-- Next meditation uses Samantha voice at natural speed (1.0x)
+- Next story uses Samantha voice at natural speed (1.0x)
 - Preference persists across app restarts
 
 *Scenario 3: Voice Requires Download*
@@ -1176,7 +2141,7 @@ return when (voiceCode) {
 - Deep-linked to Android TTS settings
 - Downloads voice via Google Text-to-Speech app
 - Returns to z rooms app
-- Selected voice now available for meditations
+- Selected voice now available for storys
 
 *Scenario 4: Enhanced Voice Unavailable (Fallback)*
 - User previously selected enhanced voice "Victoria"
@@ -1185,7 +2150,7 @@ return when (voiceCode) {
   1. Try to use Victoria → Not available
   2. Try any QUALITY_HIGH voice for en-US → If available, use it
   3. Fall back to default system voice → Always available
-- Meditation plays successfully with fallback voice
+- Story plays successfully with fallback voice
 
 **Android-Specific Implementation Notes:**
 
@@ -1199,7 +2164,7 @@ Unlike iOS where voices download automatically on first use, Android requires ma
 
 1. **Offline-Only Voices**: Only shows voices with `isNetworkConnectionRequired == false`
 2. **Singleton Pattern**: VoiceManager ensures single TTS instance for voice discovery
-3. **Separate Preview TTS**: Prevents interference with meditation playback
+3. **Separate Preview TTS**: Prevents interference with story playback
 4. **Observable State**: Uses Compose `mutableStateOf` for reactive UI updates
 5. **SharedPreferences Persistence**: Survives app restarts, device reboots
 6. **Natural Pitch (1.0)**: Removed artificial pitch lowering (0.58 in old code) for all voices
@@ -1218,132 +2183,132 @@ Unlike iOS where voices download automatically on first use, Android requires ma
 
 ## 2025-12-21
 
-**Feature:** Wake-Up Greeting - Personalized audio greetings for users who complete meditations before their alarm
+**Feature:** Wake-Up Greeting - Personalized audio greetings for users who complete storys before their alarm
 
-**User Experience:** When a user completes a guided meditation the night before and wakes to a non-SILENCE alarm, the app now speaks a brief, randomized greeting phrase approximately 5 seconds after the alarm begins playing. This creates a gentle, personalized wake-up experience that acknowledges the user's meditation practice.
+**User Experience:** When a user completes a guided story the night before and wakes to a non-SILENCE alarm, the app now speaks a brief, randomized greeting phrase approximately 5 seconds after the alarm begins playing. This creates a gentle, personalized wake-up experience that acknowledges the user's story practice.
 
 **Implementation Details:**
 
 The wake-up greeting feature consists of three main components:
 
-1. **Meditation Completion Tracking** (TextToSpeechManager.kt):
-   - Added `PREF_MEDITATION_COMPLETED` SharedPreferences key to track successful meditation completion
-   - When meditation starts: Flag is cleared to ensure fresh state
-   - When meditation completes fully: Flag is set to true AND `isPlayingMeditation` state remains true (keeping leaf button green)
-   - When meditation is manually stopped: Flag is cleared
-   - This allows the system to distinguish between completed vs. interrupted meditations
+1. **Story Completion Tracking** (TextToSpeechManager.kt):
+   - Added `PREF_MEDITATION_COMPLETED` SharedPreferences key to track successful story completion
+   - When story starts: Flag is cleared to ensure fresh state
+   - When story completes fully: Flag is set to true AND `isPlayingStory` state remains true (keeping leaf button green)
+   - When story is manually stopped: Flag is cleared
+   - This allows the system to distinguish between completed vs. interrupted storys
 
 2. **Greeting TTS Engine** (AudioService.kt):
-   - Added dedicated `greetingTts` TextToSpeech instance separate from meditation TTS
-   - Initialized with same voice settings as meditations (speech rate: 0.6f, pitch: 0.58f)
+   - Added dedicated `greetingTts` TextToSpeech instance separate from story TTS
+   - Initialized with same voice settings as storys (speech rate: 0.6f, pitch: 0.58f)
    - Five randomized greeting phrases: "Welcome back", "Greetings", "Here we are", "Returning to awareness", "Welcome back to this space"
    - Intentionally avoids time-specific words like "morning" (user might wake from afternoon nap)
 
 3. **Alarm Integration** (AudioService.kt):
-   - Modified `startAlarm()` to check meditation completion flag when alarm triggers
+   - Modified `startAlarm()` to check story completion flag when alarm triggers
    - If alarm is SILENCE (selectedAlarmIndex is null or -1): No greeting plays, ambient fades to nothing
-   - If alarm is non-SILENCE AND meditation was completed: Greeting is scheduled
+   - If alarm is non-SILENCE AND story was completed: Greeting is scheduled
    - `scheduleWakeUpGreeting()` waits 5 seconds after alarm audio starts
    - `playWakeUpGreeting()` speaks random phrase and clears completion flag
    - Greeting plays only ONCE (does not repeat with alarm loop)
 
 **Bug Fix - Leaf Button State:**
 
-Fixed a significant UX issue where the leaf button would turn grey (toggle off) when a meditation completed successfully, making it impossible to distinguish between a completed meditation and one that was never started.
+Fixed a significant UX issue where the leaf button would turn grey (toggle off) when a story completed successfully, making it impossible to distinguish between a completed story and one that was never started.
 
 **Previous Behavior:**
-- Meditation completes → `isPlayingMeditation` set to false → Leaf turns grey
-- User has no visual indication that meditation completed successfully
+- Story completes → `isPlayingStory` set to false → Leaf turns grey
+- User has no visual indication that story completed successfully
 
 **New Behavior:**
-- Meditation completes → `isPlayingMeditation` stays true → Leaf stays green
-- User can see meditation completed successfully (green leaf)
+- Story completes → `isPlayingStory` stays true → Leaf stays green
+- User can see story completed successfully (green leaf)
 - User can manually toggle leaf off by tapping it if desired
 - Wake-up greeting system can detect successful completion
 
 **Trigger Conditions (ALL must be met for greeting to play):**
 1. Alarm/wake time is reached
 2. Non-SILENCE waking room selected (alarm sound plays)
-3. Guided meditation completed successfully the night before (leaf is green)
+3. Guided story completed successfully the night before (leaf is green)
 
 **Exclusions:**
 - Does NOT play if SILENCE is selected (no alarm sound means no greeting)
-- Does NOT play if meditation was interrupted or manually stopped
-- Does NOT play if no meditation was started
+- Does NOT play if story was interrupted or manually stopped
+- Does NOT play if no story was started
 
 **User Scenarios:**
 
 *Scenario 1: Typical Weekday Morning (Greeting Plays)*
-- User toggles meditation on before sleep
-- Meditation plays to completion → Leaf stays green
+- User toggles story on before sleep
+- Story plays to completion → Leaf stays green
 - Alarm triggers with classical music (rooms 31-35)
 - ~5 seconds later: Random greeting phrase spoken
 - Flag cleared, ready for next night
 
 *Scenario 2: Weekend Morning with SILENCE (No Greeting)*
-- User toggles meditation on before sleep
-- Meditation completes → Leaf stays green
+- User toggles story on before sleep
+- Story completes → Leaf stays green
 - Alarm triggers with SILENCE selected
 - Ambient audio fades to nothing
 - No greeting plays (SILENCE means user doesn't want alarm sound)
 
-*Scenario 3: No Meditation (No Greeting)*
-- User sleeps without toggling meditation
+*Scenario 3: No Story (No Greeting)*
+- User sleeps without toggling story
 - Alarm triggers with classical music
-- No greeting plays (meditation wasn't completed)
+- No greeting plays (story wasn't completed)
 
-*Scenario 4: Interrupted Meditation (No Greeting)*
-- User toggles meditation on but manually stops it mid-session
+*Scenario 4: Interrupted Story (No Greeting)*
+- User toggles story on but manually stops it mid-session
 - Alarm triggers with classical music
-- No greeting plays (meditation wasn't completed successfully)
+- No greeting plays (story wasn't completed successfully)
 
 **Files Modified:**
-- [app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt](app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt) - Added SharedPreferences tracking for meditation completion state, fixed leaf button to stay green after completion
+- [app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt](app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt) - Added SharedPreferences tracking for story completion state, fixed leaf button to stay green after completion
 - [app/src/main/java/com/jmisabella/zrooms/AudioService.kt](app/src/main/java/com/jmisabella/zrooms/AudioService.kt) - Added wake-up greeting TTS engine, scheduling logic, and alarm integration
 
 ## 2025-12-21
-- Added better variation to the preset meditations.
+- Added better variation to the preset storys.
 
 ## 2025-12-21
 
-**Problem:** Two meditation playback issues were discovered after the previous fix:
-1. **Resume Instead of New Selection**: When toggling the leaf button off and back on, the app would sometimes resume the previous meditation instead of selecting a new random one, reducing variety and creating a confusing user experience.
-2. **Caption/Audio Delay on First Play**: When first toggling meditation on, there was a significant delay between when the closed caption text appeared and when the TTS audio actually started playing, creating an awkward pause.
+**Problem:** Two story playback issues were discovered after the previous fix:
+1. **Resume Instead of New Selection**: When toggling the leaf button off and back on, the app would sometimes resume the previous story instead of selecting a new random one, reducing variety and creating a confusing user experience.
+2. **Caption/Audio Delay on First Play**: When first toggling story on, there was a significant delay between when the closed caption text appeared and when the TTS audio actually started playing, creating an awkward pause.
 
 **Root Cause:**
-1. The `startSpeakingWithPauses()` function checked `if (isSpeaking)` and would exit early, which could cause timing issues where the old meditation state wasn't fully cleared before starting a new one. The `startSpeakingRandomMeditation()` also checked `isSpeaking`, preventing a fresh meditation from being selected.
+1. The `startSpeakingWithPauses()` function checked `if (isSpeaking)` and would exit early, which could cause timing issues where the old story state wasn't fully cleared before starting a new one. The `startSpeakingRandomStory()` also checked `isSpeaking`, preventing a fresh story from being selected.
 2. The caption text (`currentPhrase`) was being set immediately when calling `tts?.speak()`, but the actual TTS audio had a processing delay before it started, causing the caption to appear well before the audio began.
 
 **Solution:**
-1. Modified `startSpeakingWithPauses()` to always call `stopSpeaking()` first, ensuring a clean state before starting any new meditation. Removed the `isSpeaking` check from `startSpeakingRandomMeditation()` so it always selects a new random meditation.
+1. Modified `startSpeakingWithPauses()` to always call `stopSpeaking()` first, ensuring a clean state before starting any new story. Removed the `isSpeaking` check from `startSpeakingRandomStory()` so it always selects a new random story.
 2. Introduced a `pendingPhrase` variable that stores the phrase text, and only updates `currentPhrase` (which controls the caption display) when the TTS engine's `onStart()` callback is triggered, ensuring perfect synchronization between caption display and audio playback.
 
 **Files Modified:**
-- [app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt](app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt) - Fixed meditation restart logic and synchronized caption display with TTS audio start
+- [app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt](app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt) - Fixed story restart logic and synchronized caption display with TTS audio start
 
 ## 2025-12-20
 
-**Problem:** Random meditation selection was only using the first 10 preset meditations (preset_meditation1 through preset_meditation10) and completely ignoring preset meditations 11-35. This significantly reduced meditation variety and meant users were missing out on 25 of the 35 available preset meditations. This bug was discovered in the iOS version of the app and was confirmed to exist in the Android version as well.
+**Problem:** Random story selection was only using the first 10 preset storys (preset_story1 through preset_story10) and completely ignoring preset storys 11-35. This significantly reduced story variety and meant users were missing out on 25 of the 35 available preset storys. This bug was discovered in the iOS version of the app and was confirmed to exist in the Android version as well.
 
-**Root Cause:** In the `loadRandomMeditationFile()` function within TextToSpeechManager.kt, the loop that loads preset meditation files was incorrectly limited to `for (i in 1..10)` instead of iterating through all 35 preset meditation files.
+**Root Cause:** In the `loadRandomStoryFile()` function within TextToSpeechManager.kt, the loop that loads preset story files was incorrectly limited to `for (i in 1..10)` instead of iterating through all 35 preset story files.
 
-**Solution:** Replaced the hardcoded loop range (`1..10`, later `1..35`) with dynamic discovery logic that automatically finds all available preset meditation files without any upper limit. The function now uses a while loop that continues checking for `preset_meditation$i` files until it finds a gap, ensuring all preset meditations are included regardless of how many exist. This future-proofs the code so that adding new preset meditations (e.g., preset_meditation36 through preset_meditation40) will automatically work without any code changes. Custom meditations were already being loaded correctly via the `forEach` loop over all custom meditation entries.
+**Solution:** Replaced the hardcoded loop range (`1..10`, later `1..35`) with dynamic discovery logic that automatically finds all available preset story files without any upper limit. The function now uses a while loop that continues checking for `preset_story$i` files until it finds a gap, ensuring all preset storys are included regardless of how many exist. This future-proofs the code so that adding new preset storys (e.g., preset_story36 through preset_story40) will automatically work without any code changes. Custom storys were already being loaded correctly via the `forEach` loop over all custom story entries.
 
-**Content Update:** All 35 preset meditation files have been updated to incorporate more breathwork guidance, enhancing the meditation experience with structured breathing exercises integrated throughout the guided sessions.
+**Content Update:** All 35 preset story files have been updated to incorporate more breathwork guidance, enhancing the story experience with structured breathing exercises integrated throughout the guided sessions.
 
 **Files Modified:**
-- [app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt](app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt) - Updated loop range to include all 35 preset meditations
-- All 35 preset meditation text files (preset_meditation1.txt through preset_meditation35.txt) - Enhanced with additional breathwork guidance
+- [app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt](app/src/main/java/com/jmisabella/zrooms/TextToSpeechManager.kt) - Updated loop range to include all 35 preset storys
+- All 35 preset story text files (preset_story1.txt through preset_story35.txt) - Enhanced with additional breathwork guidance
 
 ## 2025-12-13 16:30 EST
 
 **Problem:** After exiting from ExpandingView (room view) back to ContentView, the bottom row and half of the second-to-last row of room tiles incorrectly displayed as rectangles instead of squares in portrait mode. Additionally, on first app launch in portrait mode followed by rotation to landscape mode, the tiles appeared oversized and didn't fit on the screen properly. This regression was introduced by the recent change that added `android:configChanges="keyboardHidden|orientation|screenSize"` to prevent Activity recreation during rotation.
 
-**Root Cause:** The `android:configChanges` attribute prevents the Activity from being destroyed and recreated during orientation changes. While this successfully preserved meditation playback state (as intended), it created an unintended side effect: Compose's `BoxWithConstraints` component in ContentView was not automatically recomposing when orientation changed. This caused the aspect ratio calculations (`aspect = itemW.value / itemH.value`) to retain stale dimension values from the previous orientation, resulting in incorrectly sized tiles.
+**Root Cause:** The `android:configChanges` attribute prevents the Activity from being destroyed and recreated during orientation changes. While this successfully preserved story playback state (as intended), it created an unintended side effect: Compose's `BoxWithConstraints` component in ContentView was not automatically recomposing when orientation changed. This caused the aspect ratio calculations (`aspect = itemW.value / itemH.value`) to retain stale dimension values from the previous orientation, resulting in incorrectly sized tiles.
 
-**Solution:** Wrapped the `LazyVerticalGrid` component inside a `androidx.compose.runtime.key(configuration.orientation)` block. This forces Compose to completely recompose the grid layout whenever the device orientation changes, ensuring that BoxWithConstraints recalculates dimensions and the aspect ratio is always computed with current screen dimensions. The fix maintains the benefit of preserving meditation state during rotation while ensuring the tile grid layout correctly adapts to orientation changes.
+**Solution:** Wrapped the `LazyVerticalGrid` component inside a `androidx.compose.runtime.key(configuration.orientation)` block. This forces Compose to completely recompose the grid layout whenever the device orientation changes, ensuring that BoxWithConstraints recalculates dimensions and the aspect ratio is always computed with current screen dimensions. The fix maintains the benefit of preserving story state during rotation while ensuring the tile grid layout correctly adapts to orientation changes.
 
-**Link to Previous Change:** This issue was a direct regression from the 2025-12-13 13:03 EST change which added `android:configChanges="keyboardHidden|orientation|screenSize"` to AndroidManifest.xml. That change successfully prevented meditation interruption during rotation but inadvertently broke the responsive layout behavior of ContentView's tile grid.
+**Link to Previous Change:** This issue was a direct regression from the 2025-12-13 13:03 EST change which added `android:configChanges="keyboardHidden|orientation|screenSize"` to AndroidManifest.xml. That change successfully prevented story interruption during rotation but inadvertently broke the responsive layout behavior of ContentView's tile grid.
 
 **Files Modified:**
 - [app/src/main/java/com/jmisabella/zrooms/ContentView.kt](app/src/main/java/com/jmisabella/zrooms/ContentView.kt) - Added orientation-keyed recomposition wrapper around LazyVerticalGrid
@@ -1361,17 +2326,17 @@ Fixed a significant UX issue where the leaf button would turn grey (toggle off) 
 
 **Problem:** In landscape mode, the closed captioning gradient overlay had a visible gap between the bottom of the gradient and the bottom edge of the screen, making the app appear unpolished. This gap was not present in portrait mode, creating an inconsistent visual experience.
 
-**Solution:** Restructured the padding in MeditationTextDisplay component to apply padding only to the text content Column (24dp bottom) instead of the outer gradient Box (which previously had 96dp bottom padding). Also removed the additional 40dp bottom padding that was being applied in ExpandingView. This allows the gradient to extend fully to the screen edge in both orientations while maintaining appropriate spacing for the text content.
+**Solution:** Restructured the padding in StoryTextDisplay component to apply padding only to the text content Column (24dp bottom) instead of the outer gradient Box (which previously had 96dp bottom padding). Also removed the additional 40dp bottom padding that was being applied in ExpandingView. This allows the gradient to extend fully to the screen edge in both orientations while maintaining appropriate spacing for the text content.
 
 **Files Modified:**
-- [app/src/main/java/com/jmisabella/zrooms/MeditationTextDisplay.kt](app/src/main/java/com/jmisabella/zrooms/MeditationTextDisplay.kt) - Moved padding from Box to Column for proper gradient extension
-- [app/src/main/java/com/jmisabella/zrooms/ExpandingView.kt](app/src/main/java/com/jmisabella/zrooms/ExpandingView.kt) - Removed bottom padding from MeditationTextDisplay modifier
+- [app/src/main/java/com/jmisabella/zrooms/StoryTextDisplay.kt](app/src/main/java/com/jmisabella/zrooms/StoryTextDisplay.kt) - Moved padding from Box to Column for proper gradient extension
+- [app/src/main/java/com/jmisabella/zrooms/ExpandingView.kt](app/src/main/java/com/jmisabella/zrooms/ExpandingView.kt) - Removed bottom padding from StoryTextDisplay modifier
 
 ## 2025-12-13 13:03 EST
 
-**Problem:** When a guided meditation was playing and the device was rotated from portrait to landscape (or vice versa), the Leaf button would become untoggled and the guided meditation speech along with closed captioning would stop playing, while the ambient audio continued. This created an inconsistent user experience where rotation interrupted the meditation session.
+**Problem:** When a guided story was playing and the device was rotated from portrait to landscape (or vice versa), the Leaf button would become untoggled and the guided story speech along with closed captioning would stop playing, while the ambient audio continued. This created an inconsistent user experience where rotation interrupted the story session.
 
-**Solution:** Added `android:configChanges="keyboardHidden|orientation|screenSize"` attribute to the MainActivity declaration in AndroidManifest.xml. This configuration change handling prevents the Activity from being destroyed and recreated during rotation, preserving the meditation playback state. Now when users rotate their device during a meditation session, the guided meditation and closed captions continue playing seamlessly, just like the ambient audio does.
+**Solution:** Added `android:configChanges="keyboardHidden|orientation|screenSize"` attribute to the MainActivity declaration in AndroidManifest.xml. This configuration change handling prevents the Activity from being destroyed and recreated during rotation, preserving the story playback state. Now when users rotate their device during a story session, the guided story and closed captions continue playing seamlessly, just like the ambient audio does.
 
 **Files Modified:**
 - [app/src/main/AndroidManifest.xml](app/src/main/AndroidManifest.xml) - Added configChanges attribute to MainActivity

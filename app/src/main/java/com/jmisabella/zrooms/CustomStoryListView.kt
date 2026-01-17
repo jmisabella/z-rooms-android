@@ -23,8 +23,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.preference.PreferenceManager
 
 @Composable
-fun CustomPoemListView(
-    manager: CustomPoetryManager,
+fun CustomStoryListView(
+    manager: CustomStoryManager,
     onDismiss: () -> Unit,
     onPlay: (String) -> Unit
 ) {
@@ -46,7 +46,7 @@ fun CustomPoemListView(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Custom Poems",
+                        text = "Custom Stories",
                         style = MaterialTheme.typography.h6,
                         color = Color.White
                     )
@@ -63,7 +63,7 @@ fun CustomPoemListView(
                 Divider(color = Color(0xFF424242))
 
                 // Reuse content component
-                CustomPoemListContent(
+                CustomStoryListContent(
                     manager = manager,
                     onPlay = { text ->
                         onPlay(text)
@@ -76,17 +76,17 @@ fun CustomPoemListView(
 }
 
 /**
- * Reusable content component for poem list (used in both dialog and tab views)
+ * Reusable content component for story list (used in both dialog and tab views)
  */
 @Composable
-fun CustomPoemListContent(
-    manager: CustomPoetryManager,
+fun CustomStoryListContent(
+    manager: CustomStoryManager,
     onPlay: (String) -> Unit
 ) {
     val context = LocalContext.current
     val prefs = PreferenceManager.getDefaultSharedPreferences(context)
 
-    var editingPoem by remember { mutableStateOf<CustomPoem?>(null) }
+    var editingStory by remember { mutableStateOf<CustomStory?>(null) }
     var showStoryText by remember {
         mutableStateOf(prefs.getBoolean("showStoryText", true))
     }
@@ -100,11 +100,11 @@ fun CustomPoemListContent(
             horizontalArrangement = Arrangement.End,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            if (manager.poems.isNotEmpty()) {
+            if (manager.stories.isNotEmpty()) {
                 IconButton(
                     onClick = {
-                        manager.getRandomPoem()?.let { poem ->
-                            onPlay(poem.text)
+                        manager.getRandomStory()?.let { story ->
+                            onPlay(story.text)
                         }
                     }
                 ) {
@@ -126,7 +126,7 @@ fun CustomPoemListContent(
             ) {
                 Icon(
                     Icons.Filled.ClosedCaption,
-                    contentDescription = if (showStoryText) "Hide Poem Text" else "Show Poem Text",
+                    contentDescription = if (showStoryText) "Hide Story Text" else "Show Story Text",
                     tint = if (showStoryText) Color(0xFF64B5F6) else Color(0xFF757575)
                 )
             }
@@ -134,34 +134,34 @@ fun CustomPoemListContent(
 
         Divider(color = Color(0xFF424242))
 
-        // Add New Poem button (always visible)
+        // Add New Story button (always visible)
         if (manager.canAddMore) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable {
-                        editingPoem = CustomPoem(title = "", text = "")
+                        editingStory = CustomStory(title = "", text = "")
                     }
                     .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
                     Icons.Filled.AddCircle,
-                    contentDescription = "Add New Poem",
-                    tint = Color(0xFFAB47BC)
+                    contentDescription = "Add New Story",
+                    tint = Color(0xFF4CAF50)
                 )
                 Spacer(Modifier.width(8.dp))
                 Text(
-                    "Add New Poem",
-                    color = Color(0xFFAB47BC),
+                    "Add New Story",
+                    color = Color(0xFF4CAF50),
                     style = MaterialTheme.typography.body1
                 )
             }
             Divider(color = Color(0xFF424242))
         }
 
-        // Poem List
-        if (manager.poems.isEmpty()) {
+        // Story List
+        if (manager.stories.isEmpty()) {
             // Empty state
             Column(
                 modifier = Modifier
@@ -171,7 +171,7 @@ fun CustomPoemListContent(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Icon(
-                    Icons.Filled.TheaterComedy,
+                    Icons.Filled.FormatQuote,
                     contentDescription = null,
                     modifier = Modifier.size(60.dp),
                     tint = Color.Gray
@@ -180,7 +180,7 @@ fun CustomPoemListContent(
                 Spacer(Modifier.height(16.dp))
 
                 Text(
-                    text = "No Custom Poems",
+                    text = "No Custom Stories",
                     style = MaterialTheme.typography.h6,
                     color = Color.Gray
                 )
@@ -188,7 +188,7 @@ fun CustomPoemListContent(
                 Spacer(Modifier.height(8.dp))
 
                 Text(
-                    text = "Create your own poetry reading\nwith custom pauses and pacing",
+                    text = "Create your own guided story\nwith custom pauses and pacing",
                     style = MaterialTheme.typography.body2,
                     color = Color.Gray,
                     fontSize = 12.sp
@@ -198,33 +198,33 @@ fun CustomPoemListContent(
 
                 Button(
                     onClick = {
-                        editingPoem = CustomPoem(title = "", text = "")
+                        editingStory = CustomStory(title = "", text = "")
                     },
-                    colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFAB47BC))
+                    colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF4CAF50))
                 ) {
                     Icon(Icons.Filled.AddCircle, contentDescription = null)
                     Spacer(Modifier.width(8.dp))
-                    Text("Create First Poem", color = Color.White)
+                    Text("Create First Story", color = Color.White)
                 }
             }
         } else {
             LazyColumn(
                 modifier = Modifier.fillMaxSize()
             ) {
-                items(manager.poems) { poem ->
-                    PoemRow(
-                        poem = poem,
+                items(manager.stories) { story ->
+                    StoryRow(
+                        story = story,
                         onPlay = {
-                            onPlay(poem.text)
+                            onPlay(story.text)
                         },
                         onEdit = {
-                            editingPoem = poem
+                            editingStory = story
                         },
                         onDuplicate = {
-                            manager.duplicatePoem(poem)
+                            manager.duplicateStory(story)
                         },
                         onDelete = {
-                            manager.deletePoem(poem)
+                            manager.deleteStory(story)
                         }
                     )
                     Divider(color = Color(0xFF424242))
@@ -234,18 +234,18 @@ fun CustomPoemListContent(
     }
 
     // Editor dialog
-    editingPoem?.let { poem ->
-        CustomPoemEditorView(
+    editingStory?.let { story ->
+        CustomStoryEditorView(
             manager = manager,
-            poem = poem,
-            onDismiss = { editingPoem = null }
+            story = story,
+            onDismiss = { editingStory = null }
         )
     }
 }
 
 @Composable
-fun PoemRow(
-    poem: CustomPoem,
+fun StoryRow(
+    story: CustomStory,
     onPlay: () -> Unit,
     onEdit: () -> Unit,
     onDuplicate: () -> Unit,
@@ -264,7 +264,7 @@ fun PoemRow(
             modifier = Modifier.weight(1f)
         ) {
             Text(
-                text = if (poem.title.isEmpty()) "Untitled" else poem.title,
+                text = if (story.title.isEmpty()) "Untitled" else story.title,
                 style = MaterialTheme.typography.body1,
                 color = Color.White
             )
@@ -272,7 +272,7 @@ fun PoemRow(
             Spacer(Modifier.height(4.dp))
 
             Text(
-                text = poem.text.take(60) + if (poem.text.length > 60) "..." else "",
+                text = story.text.take(60) + if (story.text.length > 60) "..." else "",
                 style = MaterialTheme.typography.caption,
                 color = Color.Gray,
                 maxLines = 2,
@@ -305,7 +305,7 @@ fun PoemRow(
             Icon(
                 Icons.Filled.PlayCircle,
                 contentDescription = "Play",
-                tint = Color(0xFFAB47BC),
+                tint = Color(0xFF4CAF50),
                 modifier = Modifier.size(32.dp)
             )
         }
@@ -315,8 +315,8 @@ fun PoemRow(
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
-            title = { Text("Delete Poem?") },
-            text = { Text("Are you sure you want to delete this poem?") },
+            title = { Text("Delete Story?") },
+            text = { Text("Are you sure you want to delete this story?") },
             confirmButton = {
                 TextButton(
                     onClick = {

@@ -5,6 +5,6 @@ package com.jmisabella.zrooms
  */
 enum class ContentMode {
     OFF,         // No content playing (gray leaf icon)
-    MEDITATION,  // Meditation playing (green leaf icon)
+    STORY,       // Story playing (green leaf icon)
     POETRY       // Poetry playing (purple theater masks icon)
 }
