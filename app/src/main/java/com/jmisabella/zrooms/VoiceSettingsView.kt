@@ -136,7 +136,7 @@ fun VoiceSettingsView(
                                 previewingVoice = voice
                                 voiceManager.previewVoice(
                                     voice = voice,
-                                    text = "Welcome to your story session. Take a deep breath and relax.",
+                                    text = "Close your eyes and listen as words become worlds, stories unfold.",
                                     onComplete = {
                                         if (previewingVoice == voice) {
                                             previewingVoice = null
