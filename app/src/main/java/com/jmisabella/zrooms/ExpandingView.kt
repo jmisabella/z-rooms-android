@@ -139,9 +139,13 @@ fun ExpandingView(
     // Story collection manager
     val storyCollectionManager = remember { StoryCollectionManager(context) }
 
-    // Load collections on first composition
+    // Track whether collections have been loaded
+    var collectionsLoaded by remember { mutableStateOf(false) }
+
+    // Load collections on first composition - MUST complete before TTS can access stories
     LaunchedEffect(Unit) {
         storyCollectionManager.loadCollections()
+        collectionsLoaded = true
     }
 
     // Text-to-speech manager (needs both managers for random content selection)
@@ -582,8 +586,10 @@ fun ExpandingView(
                     Box(
                         modifier = Modifier
                             .clickable {
-                                scope.launch {
-                                    ttsManager.cycleContentMode()
+                                if (collectionsLoaded) {
+                                    scope.launch {
+                                        ttsManager.cycleContentMode()
+                                    }
                                 }
                             }
                             .background(Color.Black.copy(alpha = 0.5f), CircleShape)

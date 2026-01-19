@@ -142,13 +142,17 @@ class StoryCollectionManager(private val context: Context) {
     val selectedCollection: StoryCollection?
         get() {
             val id = selectedCollectionId
-            return if (id != null) {
+            val found = if (id != null) {
                 collections.find { it.id == id }
             } else {
-                collections.firstOrNull()?.also {
-                    selectedCollectionId = it.id
-                    saveSelectedCollection()
-                }
+                null
+            }
+
+            // If we have a saved ID but it doesn't match any collection, or if we have no saved ID,
+            // fallback to first available collection and save it
+            return found ?: collections.firstOrNull()?.also {
+                selectedCollectionId = it.id
+                saveSelectedCollection()
             }
         }
 

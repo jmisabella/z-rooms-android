@@ -1,5 +1,31 @@
 # Z Rooms Android - Change Log
 
+## 2026-01-18: Bug Fix - Story Mode Race Condition & Collection Fallback
+
+### **BUG FIX**
+
+Fixed critical bug where the Leaf button (Story mode toggle) became unresponsive after adding new story collections or when saved collection IDs became invalid.
+
+**Root Causes:**
+1. **Race Condition:** Collections were loading asynchronously via `LaunchedEffect`, but the Leaf button could be clicked before loading completed, causing `selectedCollection` to be null.
+2. **Missing Fallback Logic:** If the saved collection ID in SharedPreferences didn't match any loaded collection (e.g., after adding/removing stories), `selectedCollection` would return null with no recovery mechanism.
+
+**Symptoms:**
+- Leaf button completely unresponsive (no story playback)
+- Issue persisted even after removing newly added story directories
+- Logs showed: `selectedCollection is null` or `Failed to start story - collection not loaded`
+
+**Solutions:**
+1. Added `collectionsLoaded` state flag in `ExpandingView` that's set after `loadCollections()` completes. Leaf button now checks this flag before attempting to cycle content modes.
+2. Enhanced `selectedCollection` getter to automatically fallback to first available collection when saved ID is invalid or null, then saves the new selection.
+
+**Files Modified:**
+- [ExpandingView.kt](app/src/main/java/com/jmisabella/zrooms/ExpandingView.kt):143-149 - Added `collectionsLoaded` flag and wait for loading completion
+- [ExpandingView.kt](app/src/main/java/com/jmisabella/zrooms/ExpandingView.kt):590-596 - Added guard check in Leaf button onClick handler
+- [StoryCollectionManager.kt](app/src/main/java/com/jmisabella/zrooms/StoryCollectionManager.kt):142-158 - Enhanced fallback logic in `selectedCollection` getter to auto-recover from invalid IDs
+
+---
+
 ## 2026-01-17: Bug Fix - Story Title Overlay Re-trigger
 
 ### **BUG FIX**
