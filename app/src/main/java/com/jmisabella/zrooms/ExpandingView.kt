@@ -914,6 +914,12 @@ fun ExpandingView(
             onDismiss = { showStorySelector = false },
             onSelectCollection = { collection ->
                 storyCollectionManager.setSelectedCollection(collection.id)
+                // If currently playing a story, restart with the newly selected collection
+                if (ttsManager.contentMode == ContentMode.STORY) {
+                    val preservedMode = ttsManager.contentMode
+                    ttsManager.startSpeakingSequentialStory()
+                    ttsManager.contentMode = preservedMode
+                }
             }
         )
     }

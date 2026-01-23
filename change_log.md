@@ -1,5 +1,33 @@
 # Z Rooms Android - Change Log
 
+## 2026-01-18: Enhancement - Immediate Story Switching
+
+### **ENHANCEMENT**
+
+Improved story collection switching to provide immediate feedback when selecting a different story while Story mode is active.
+
+**Previous Behavior:**
+- When switching from one story collection to another (e.g., "Signal Decay" to "The Eighteen Paradox") while Story mode was active, the TTS would change to the new story but the UI would break:
+  - Leaf button became untoggled (turned gray)
+  - Closed caption box disappeared
+  - User had to click Leaf button again to restore Story mode and captions
+  - New story would restart from the beginning
+
+**New Behavior:**
+- When switching stories while Story mode is active:
+  - New story begins playing immediately
+  - Leaf button remains toggled (green)
+  - Closed caption box stays visible with new story text
+  - Seamless transition without requiring user to re-enable Story mode
+
+**Technical Details:**
+The `startSpeakingWithPauses()` function internally calls `stopSpeaking()`, which sets `contentMode = ContentMode.OFF`. The fix preserves the content mode before restarting playback and immediately restores it after.
+
+**Files Modified:**
+- [ExpandingView.kt](app/src/main/java/com/jmisabella/zrooms/ExpandingView.kt):915-922 - Enhanced `onSelectCollection` callback to preserve and restore STORY mode when switching collections during active playback
+
+---
+
 ## 2026-01-18: Bug Fix - Story Mode Race Condition & Collection Fallback
 
 ### **BUG FIX**
