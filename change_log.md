@@ -1,5 +1,48 @@
 # Z Rooms Android - Change Log
 
+## 2026-01-30: Enhancement - Voice Accept-List Filtering
+
+### **ENHANCEMENT**
+
+Implemented curated voice filtering for enhanced text-to-speech, restricting voice options to those appropriate for dark sci-fi story narration.
+
+**Previous Behavior:**
+- Voice settings showed all available English voices on device (often 50+ voices)
+- Included many overly cheerful, novelty, or inappropriate voices for dark sci-fi content
+- No locale prioritization or quality-based filtering
+- Users had to manually identify suitable voices from the full list
+
+**New Behavior:**
+- Voice settings show only curated voices (typically 8-15 voices)
+- Filters to specific locales: British English (priority 1), Australian English, Indian English, and American English (priority 4)
+- Automatically prioritizes British English voices for their serious, narrative-appropriate tone
+- Excludes network-required voices (maintains 100% offline functionality)
+- Excludes low-quality voices
+- Provides consistent UX matching iOS implementation
+
+**Accept-List Criteria:**
+- **Locales:** en-GB, en-AU, en-IN, en-US only
+- **Quality:** Excludes QUALITY_LOW voices
+- **Offline:** Excludes network-required voices
+- **Automatic selection priority:** British > Australian > Indian > American
+
+**Technical Details:**
+Voice filtering now uses accept-list approach rather than simple exclusion. The `discoverVoices()` method filters voices through `isVoiceAccepted()` which validates locale against accept-list, quality level, and offline availability. The `getPreferredVoice()` hierarchy prioritizes user selection first, then locale-based hierarchy (en-GB → en-AU → en-IN → en-US), then previously saved voice for backward compatibility, then random from accepted list, with system default as final fallback. Removed special "Daniel voice" logic in favor of locale-based prioritization.
+
+**Files Modified:**
+- [VoiceManager.kt](app/src/main/java/com/jmisabella/zrooms/VoiceManager.kt):1-7 - Added android.util.Log import for debugging
+- [VoiceManager.kt](app/src/main/java/com/jmisabella/zrooms/VoiceManager.kt):48-63 - Added accept-list constants (ACCEPTED_LOCALES, LOCALE_PRIORITY_ORDER)
+- [VoiceManager.kt](app/src/main/java/com/jmisabella/zrooms/VoiceManager.kt):91-105 - Added isVoiceAccepted() filter method validating locale, quality, and offline requirements
+- [VoiceManager.kt](app/src/main/java/com/jmisabella/zrooms/VoiceManager.kt):107-131 - Updated discoverVoices() to use accept-list filtering with locale priority sorting
+- [VoiceManager.kt](app/src/main/java/com/jmisabella/zrooms/VoiceManager.kt):138-194 - Replaced getPreferredVoice() with new 5-step hierarchy, removed Daniel voice special case
+- [VoiceManager.kt](app/src/main/java/com/jmisabella/zrooms/VoiceManager.kt):196-213 - Added getVoiceFromHierarchy() helper method for locale-based voice selection
+- [VoiceSettingsView.kt](app/src/main/java/com/jmisabella/zrooms/VoiceSettingsView.kt):139-140 - Updated preview text to dark sci-fi sample ("The signal decayed into static...")
+- [VoiceSettingsView.kt](app/src/main/java/com/jmisabella/zrooms/VoiceSettingsView.kt):97 - Updated info section to clarify voice curation and filtering
+- [CONTEXT.md](CONTEXT.md):7-9 - Updated voice options documentation to reflect curated system TTS voices (not robotic altered voices)
+- [CONTEXT.md](CONTEXT.md):18-25 - Added voice filtering section documenting accept-list criteria and prioritization
+
+---
+
 ## 2026-01-18: Enhancement - Immediate Story Switching
 
 ### **ENHANCEMENT**

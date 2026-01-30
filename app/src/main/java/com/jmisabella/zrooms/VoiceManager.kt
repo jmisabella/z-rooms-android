@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.speech.tts.TextToSpeech
 import android.speech.tts.Voice
+import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.preference.PreferenceManager
 import java.util.Locale
@@ -44,6 +45,22 @@ class VoiceManager private constructor(private val context: Context) {
 
         // Voice volume (shared across story playback and preview)
         const val VOICE_VOLUME = 0.20f
+
+        // Voice filtering - Accept-list for story-appropriate voices
+        private val ACCEPTED_LOCALES = listOf(
+            "en-GB",  // British English (highest priority - serious tone)
+            "en-AU",  // Australian English (neutral, narrative-friendly)
+            "en-IN",  // Indian English (deeper voices available)
+            "en-US"   // American English (lowest priority - many too bright)
+        )
+
+        // Priority order for automatic voice selection
+        private val LOCALE_PRIORITY_ORDER = listOf(
+            "en-GB",
+            "en-AU",
+            "en-IN",
+            "en-US"
+        )
 
         fun getInstance(context: Context): VoiceManager {
             return INSTANCE ?: synchronized(this) {
@@ -89,21 +106,58 @@ class VoiceManager private constructor(private val context: Context) {
     }
 
     /**
-     * Discovers all available voices and filters for English voices
+     * Determines if a voice meets the accept-list criteria for story narration
+     * Filters based on locale, quality, and offline availability
+     */
+    private fun isVoiceAccepted(voice: Voice): Boolean {
+        val locale = voice.locale
+
+        // Check if locale is in accept-list
+        val localeString = "${locale.language}-${locale.country}"
+        val isLocaleAccepted = ACCEPTED_LOCALES.any {
+            localeString.equals(it, ignoreCase = true)
+        }
+
+        if (!isLocaleAccepted) return false
+
+        // Must not require network (offline requirement)
+        if (voice.isNetworkConnectionRequired) return false
+
+        // Filter by quality if available (exclude low-quality voices)
+        // Note: Some devices may not properly report quality, so we don't fail if quality is unknown
+        if (voice.quality == Voice.QUALITY_LOW) return false
+
+        return true
+    }
+
+    /**
+     * Discovers available TTS voices on device
+     * Filters to story-appropriate voices only (British, Australian, Indian, American English)
      */
     private fun discoverVoices() {
-        val voices = tts?.voices?.filter { voice ->
-            // Filter for English voices and offline-capable voices only
-            voice.locale.language == "en" && !voice.isNetworkConnectionRequired
-        }?.sortedWith(compareByDescending<Voice> {
-            // Sort by quality (high to low)
-            it.quality
-        }.thenBy {
-            // Then by locale (US first)
-            if (it.locale == Locale.US) 0 else 1
-        }) ?: emptyList()
+        if (!isInitialized) return
 
-        availableVoices.value = voices
+        val allVoices = tts?.voices ?: emptySet()
+
+        // Filter using accept-list
+        val filtered = allVoices
+            .filter { isVoiceAccepted(it) }
+            .sortedWith(
+                compareBy<Voice> { voice ->
+                    // Sort by locale priority
+                    val localeString = "${voice.locale.language}-${voice.locale.country}"
+                    val priorityIndex = LOCALE_PRIORITY_ORDER.indexOfFirst {
+                        localeString.equals(it, ignoreCase = true)
+                    }
+                    if (priorityIndex == -1) Int.MAX_VALUE else priorityIndex
+                }
+                .thenByDescending { it.quality }  // Then by quality (highest first)
+            )
+
+        availableVoices.value = filtered
+
+        // Log for debugging
+        Log.d("VoiceManager", "Discovered ${filtered.size} story-appropriate voices (filtered from ${allVoices.size} total)")
     }
 
     /**
@@ -118,51 +172,74 @@ class VoiceManager private constructor(private val context: Context) {
 
     /**
      * Gets the preferred voice for story narration
-     * Priority: User's selected enhanced voice -> Daniel (if available and enhanced disabled) -> Any high-quality voice -> Default system voice
+     * Priority hierarchy:
+     * 1. User's explicitly selected voice (if still available and accepted)
+     * 2. Locale-based hierarchy (en-GB > en-AU > en-IN > en-US)
+     * 3. Previously auto-selected voice (backward compatibility)
+     * 4. Random from story-appropriate list
+     * 5. System default (last resort)
      */
     fun getPreferredVoice(): Voice? {
         if (!isInitialized) return null
 
-        // If enhanced voice is disabled, try to use Daniel voice if already available on device
-        if (!useEnhancedVoice.value) {
-            // Check if Daniel voice (voice code "iom") is available
-            val danielVoice = availableVoices.value.firstOrNull { voice ->
-                val name = voice.name.lowercase()
-                val voiceCode = when {
-                    name.contains("-x-") -> {
-                        name.substringAfter("-x-").substringBefore("-").substringBefore("#")
-                    }
-                    else -> ""
+        // STEP 1: Check if user explicitly selected a voice (when enhanced voice is enabled)
+        if (useEnhancedVoice.value) {
+            selectedVoice.value?.let { voice ->
+                if (isVoiceAvailable(voice) && isVoiceAccepted(voice)) {
+                    return voice
+                } else {
+                    // User's voice no longer available or not accepted - clear selection
+                    selectedVoice.value = null
                 }
-                voiceCode == "iom" && isVoiceAvailable(voice)
             }
-
-            // If Daniel is available, use it as the default (unless user explicitly disabled enhanced voices)
-            if (danielVoice != null) {
-                return danielVoice
-            }
-
-            // Otherwise, fall back to system default
-            return null
         }
 
-        // Try to use the selected enhanced voice
-        selectedVoice.value?.let { voice ->
-            if (isVoiceAvailable(voice)) {
+        // STEP 2: Try voice hierarchy (locale-based priority)
+        val acceptedVoices = availableVoices.value.filter { isVoiceAccepted(it) }
+        val hierarchyVoice = getVoiceFromHierarchy(acceptedVoices.toSet())
+        if (hierarchyVoice != null) {
+            return hierarchyVoice
+        }
+
+        // STEP 3: Check previously auto-selected voice (backward compatibility)
+        val savedVoiceName = prefs.getString(PREF_PREFERRED_VOICE_NAME, null)
+        if (savedVoiceName != null) {
+            val voice = tts?.voices?.find { it.name == savedVoiceName }
+            if (voice != null && isVoiceAvailable(voice) && isVoiceAccepted(voice)) {
                 return voice
             }
         }
 
-        // Fallback to any available high-quality voice for English (US preferred)
-        val highQualityVoice = availableVoices.value.firstOrNull { voice ->
-            voice.quality >= Voice.QUALITY_HIGH && isVoiceAvailable(voice)
+        // STEP 4: Random from story-appropriate list (provides variety)
+        if (acceptedVoices.isNotEmpty()) {
+            return acceptedVoices.random()
         }
 
-        if (highQualityVoice != null) {
-            return highQualityVoice
+        // STEP 5: System default fallback (edge case: no accepted voices available)
+        Log.w("VoiceManager", "No accepted voices available - falling back to system default")
+        return null  // null triggers system default
+    }
+
+    /**
+     * Helper: Gets the highest-priority voice from locale hierarchy
+     */
+    private fun getVoiceFromHierarchy(availableVoices: Set<Voice>): Voice? {
+        // Try each locale in priority order
+        for (localePrefix in LOCALE_PRIORITY_ORDER) {
+            // Find best quality voice for this locale
+            val voicesForLocale = availableVoices
+                .filter { voice ->
+                    val localeString = "${voice.locale.language}-${voice.locale.country}"
+                    localeString.equals(localePrefix, ignoreCase = true)
+                }
+                .sortedByDescending { it.quality }
+
+            // Return first (highest quality) voice found
+            if (voicesForLocale.isNotEmpty()) {
+                return voicesForLocale.first()
+            }
         }
 
-        // Final fallback to default system voice
         return null
     }
 
