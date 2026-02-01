@@ -543,26 +543,6 @@ fun ExpandingView(
 
                     Spacer(Modifier.width(40.dp))
 
-                    // Custom Storys Button
-                    Box(
-                        modifier = Modifier
-                            .clickable {
-                                showContentBrowser = true
-                            }
-                            .background(Color.Black.copy(alpha = 0.5f), CircleShape)
-                            .padding(12.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            Icons.Outlined.FormatQuote,
-                            contentDescription = "Storys & Poems",
-                            tint = Color(0xFF9E9E9E),
-                            modifier = Modifier.size(28.dp)
-                        )
-                    }
-
-                    Spacer(Modifier.width(40.dp))
-
                     Box(
                         modifier = Modifier
                             .clickable {

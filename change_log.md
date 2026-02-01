@@ -1,5 +1,25 @@
 # Z Rooms Android - Change Log
 
+## 2026-01-31 12:00 PM: UI Modification - Removed Custom Stories/Poems Button
+
+### **UI MODIFICATION**
+
+Removed the custom stories/poems browser button from the ExpandingView bottom button row while the team continues to evaluate this feature.
+
+**Previous Behavior:**
+- ExpandingView displayed 4 buttons at bottom: Voice Settings, Custom Stories/Poems Browser, Alarm Time Wake-up, and Mode Toggle (Ambient/Story/Poetry)
+- Users could access the custom stories and poems browser via the second button from the left
+
+**New Behavior:**
+- ExpandingView displays 3 buttons at bottom: Voice Settings, Alarm Time Wake-up, and Mode Toggle (Ambient/Story/Poetry)
+- Custom stories/poems browser button has been removed from the UI
+- Feature is being actively contemplated for future inclusion
+
+**Files Modified:**
+- [ExpandingView.kt](app/src/main/java/com/jmisabella/zrooms/ExpandingView.kt):544-564 - Removed Custom Storys Button and surrounding spacer
+
+---
+
 ## 2026-01-30: Enhancement - Voice Accept-List Filtering
 
 ### **ENHANCEMENT**
