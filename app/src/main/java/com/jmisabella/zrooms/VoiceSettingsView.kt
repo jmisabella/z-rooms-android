@@ -94,7 +94,7 @@ fun VoiceSettingsView(
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                text = "Voices are provided by your device's Text-to-Speech engine. The voices shown here are currently available on your device.",
+                                text = "High-quality voices for dark sci-fi narration. Voices are filtered to British, Australian, Indian, and American English variants. Some voices may need to be downloaded from your device's Text-to-Speech settings.",
                                 color = Color.Gray,
                                 fontSize = 14.sp,
                                 lineHeight = 20.sp
@@ -136,7 +136,8 @@ fun VoiceSettingsView(
                                 previewingVoice = voice
                                 voiceManager.previewVoice(
                                     voice = voice,
-                                    text = "Welcome to your story session. Take a deep breath and relax.",
+                                    text = """The signal decayed into static, leaving only the void between stars.
+In the darkness, something responded.""".trimIndent(),
                                     onComplete = {
                                         if (previewingVoice == voice) {
                                             previewingVoice = null

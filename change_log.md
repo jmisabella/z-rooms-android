@@ -1,5 +1,122 @@
 # Z Rooms Android - Change Log
 
+## 2026-01-31 12:00 PM: UI Modification - Removed Custom Stories/Poems Button
+
+### **UI MODIFICATION**
+
+Removed the custom stories/poems browser button from the ExpandingView bottom button row while the team continues to evaluate this feature.
+
+**Previous Behavior:**
+- ExpandingView displayed 4 buttons at bottom: Voice Settings, Custom Stories/Poems Browser, Alarm Time Wake-up, and Mode Toggle (Ambient/Story/Poetry)
+- Users could access the custom stories and poems browser via the second button from the left
+
+**New Behavior:**
+- ExpandingView displays 3 buttons at bottom: Voice Settings, Alarm Time Wake-up, and Mode Toggle (Ambient/Story/Poetry)
+- Custom stories/poems browser button has been removed from the UI
+- Feature is being actively contemplated for future inclusion
+
+**Files Modified:**
+- [ExpandingView.kt](app/src/main/java/com/jmisabella/zrooms/ExpandingView.kt):544-564 - Removed Custom Storys Button and surrounding spacer
+
+---
+
+## 2026-01-30: Enhancement - Voice Accept-List Filtering
+
+### **ENHANCEMENT**
+
+Implemented curated voice filtering for enhanced text-to-speech, restricting voice options to those appropriate for dark sci-fi story narration.
+
+**Previous Behavior:**
+- Voice settings showed all available English voices on device (often 50+ voices)
+- Included many overly cheerful, novelty, or inappropriate voices for dark sci-fi content
+- No locale prioritization or quality-based filtering
+- Users had to manually identify suitable voices from the full list
+
+**New Behavior:**
+- Voice settings show only curated voices (typically 8-15 voices)
+- Filters to specific locales: British English (priority 1), Australian English, Indian English, and American English (priority 4)
+- Automatically prioritizes British English voices for their serious, narrative-appropriate tone
+- Excludes network-required voices (maintains 100% offline functionality)
+- Excludes low-quality voices
+- Provides consistent UX matching iOS implementation
+
+**Accept-List Criteria:**
+- **Locales:** en-GB, en-AU, en-IN, en-US only
+- **Quality:** Excludes QUALITY_LOW voices
+- **Offline:** Excludes network-required voices
+- **Automatic selection priority:** British > Australian > Indian > American
+
+**Technical Details:**
+Voice filtering now uses accept-list approach rather than simple exclusion. The `discoverVoices()` method filters voices through `isVoiceAccepted()` which validates locale against accept-list, quality level, and offline availability. The `getPreferredVoice()` hierarchy prioritizes user selection first, then locale-based hierarchy (en-GB → en-AU → en-IN → en-US), then previously saved voice for backward compatibility, then random from accepted list, with system default as final fallback. Removed special "Daniel voice" logic in favor of locale-based prioritization.
+
+**Files Modified:**
+- [VoiceManager.kt](app/src/main/java/com/jmisabella/zrooms/VoiceManager.kt):1-7 - Added android.util.Log import for debugging
+- [VoiceManager.kt](app/src/main/java/com/jmisabella/zrooms/VoiceManager.kt):48-63 - Added accept-list constants (ACCEPTED_LOCALES, LOCALE_PRIORITY_ORDER)
+- [VoiceManager.kt](app/src/main/java/com/jmisabella/zrooms/VoiceManager.kt):91-105 - Added isVoiceAccepted() filter method validating locale, quality, and offline requirements
+- [VoiceManager.kt](app/src/main/java/com/jmisabella/zrooms/VoiceManager.kt):107-131 - Updated discoverVoices() to use accept-list filtering with locale priority sorting
+- [VoiceManager.kt](app/src/main/java/com/jmisabella/zrooms/VoiceManager.kt):138-194 - Replaced getPreferredVoice() with new 5-step hierarchy, removed Daniel voice special case
+- [VoiceManager.kt](app/src/main/java/com/jmisabella/zrooms/VoiceManager.kt):196-213 - Added getVoiceFromHierarchy() helper method for locale-based voice selection
+- [VoiceSettingsView.kt](app/src/main/java/com/jmisabella/zrooms/VoiceSettingsView.kt):139-140 - Updated preview text to dark sci-fi sample ("The signal decayed into static...")
+- [VoiceSettingsView.kt](app/src/main/java/com/jmisabella/zrooms/VoiceSettingsView.kt):97 - Updated info section to clarify voice curation and filtering
+- [CONTEXT.md](CONTEXT.md):7-9 - Updated voice options documentation to reflect curated system TTS voices (not robotic altered voices)
+- [CONTEXT.md](CONTEXT.md):18-25 - Added voice filtering section documenting accept-list criteria and prioritization
+
+---
+
+## 2026-01-18: Enhancement - Immediate Story Switching
+
+### **ENHANCEMENT**
+
+Improved story collection switching to provide immediate feedback when selecting a different story while Story mode is active.
+
+**Previous Behavior:**
+- When switching from one story collection to another (e.g., "Signal Decay" to "The Eighteen Paradox") while Story mode was active, the TTS would change to the new story but the UI would break:
+  - Leaf button became untoggled (turned gray)
+  - Closed caption box disappeared
+  - User had to click Leaf button again to restore Story mode and captions
+  - New story would restart from the beginning
+
+**New Behavior:**
+- When switching stories while Story mode is active:
+  - New story begins playing immediately
+  - Leaf button remains toggled (green)
+  - Closed caption box stays visible with new story text
+  - Seamless transition without requiring user to re-enable Story mode
+
+**Technical Details:**
+The `startSpeakingWithPauses()` function internally calls `stopSpeaking()`, which sets `contentMode = ContentMode.OFF`. The fix preserves the content mode before restarting playback and immediately restores it after.
+
+**Files Modified:**
+- [ExpandingView.kt](app/src/main/java/com/jmisabella/zrooms/ExpandingView.kt):915-922 - Enhanced `onSelectCollection` callback to preserve and restore STORY mode when switching collections during active playback
+
+---
+
+## 2026-01-18: Bug Fix - Story Mode Race Condition & Collection Fallback
+
+### **BUG FIX**
+
+Fixed critical bug where the Leaf button (Story mode toggle) became unresponsive after adding new story collections or when saved collection IDs became invalid.
+
+**Root Causes:**
+1. **Race Condition:** Collections were loading asynchronously via `LaunchedEffect`, but the Leaf button could be clicked before loading completed, causing `selectedCollection` to be null.
+2. **Missing Fallback Logic:** If the saved collection ID in SharedPreferences didn't match any loaded collection (e.g., after adding/removing stories), `selectedCollection` would return null with no recovery mechanism.
+
+**Symptoms:**
+- Leaf button completely unresponsive (no story playback)
+- Issue persisted even after removing newly added story directories
+- Logs showed: `selectedCollection is null` or `Failed to start story - collection not loaded`
+
+**Solutions:**
+1. Added `collectionsLoaded` state flag in `ExpandingView` that's set after `loadCollections()` completes. Leaf button now checks this flag before attempting to cycle content modes.
+2. Enhanced `selectedCollection` getter to automatically fallback to first available collection when saved ID is invalid or null, then saves the new selection.
+
+**Files Modified:**
+- [ExpandingView.kt](app/src/main/java/com/jmisabella/zrooms/ExpandingView.kt):143-149 - Added `collectionsLoaded` flag and wait for loading completion
+- [ExpandingView.kt](app/src/main/java/com/jmisabella/zrooms/ExpandingView.kt):590-596 - Added guard check in Leaf button onClick handler
+- [StoryCollectionManager.kt](app/src/main/java/com/jmisabella/zrooms/StoryCollectionManager.kt):142-158 - Enhanced fallback logic in `selectedCollection` getter to auto-recover from invalid IDs
+
+---
+
 ## 2026-01-17: Bug Fix - Story Title Overlay Re-trigger
 
 ### **BUG FIX**

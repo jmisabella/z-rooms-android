@@ -139,9 +139,13 @@ fun ExpandingView(
     // Story collection manager
     val storyCollectionManager = remember { StoryCollectionManager(context) }
 
-    // Load collections on first composition
+    // Track whether collections have been loaded
+    var collectionsLoaded by remember { mutableStateOf(false) }
+
+    // Load collections on first composition - MUST complete before TTS can access stories
     LaunchedEffect(Unit) {
         storyCollectionManager.loadCollections()
+        collectionsLoaded = true
     }
 
     // Text-to-speech manager (needs both managers for random content selection)
@@ -539,26 +543,6 @@ fun ExpandingView(
 
                     Spacer(Modifier.width(40.dp))
 
-                    // Custom Storys Button
-                    Box(
-                        modifier = Modifier
-                            .clickable {
-                                showContentBrowser = true
-                            }
-                            .background(Color.Black.copy(alpha = 0.5f), CircleShape)
-                            .padding(12.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            Icons.Outlined.FormatQuote,
-                            contentDescription = "Storys & Poems",
-                            tint = Color(0xFF9E9E9E),
-                            modifier = Modifier.size(28.dp)
-                        )
-                    }
-
-                    Spacer(Modifier.width(40.dp))
-
                     Box(
                         modifier = Modifier
                             .clickable {
@@ -582,8 +566,10 @@ fun ExpandingView(
                     Box(
                         modifier = Modifier
                             .clickable {
-                                scope.launch {
-                                    ttsManager.cycleContentMode()
+                                if (collectionsLoaded) {
+                                    scope.launch {
+                                        ttsManager.cycleContentMode()
+                                    }
                                 }
                             }
                             .background(Color.Black.copy(alpha = 0.5f), CircleShape)
@@ -908,6 +894,12 @@ fun ExpandingView(
             onDismiss = { showStorySelector = false },
             onSelectCollection = { collection ->
                 storyCollectionManager.setSelectedCollection(collection.id)
+                // If currently playing a story, restart with the newly selected collection
+                if (ttsManager.contentMode == ContentMode.STORY) {
+                    val preservedMode = ttsManager.contentMode
+                    ttsManager.startSpeakingSequentialStory()
+                    ttsManager.contentMode = preservedMode
+                }
             }
         )
     }
