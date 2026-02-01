@@ -1,0 +1,137 @@
+CHAPTER 1: DOMAIN
+
+The office was quiet at this hour, which was exactly why Kira Venn preferred it.
+
+Her workspace occupied a corner of the Traverse Authority's investigative wing, deliberately chosen for its distance from the collaborative hubs where teams gathered to cross-reference findings and build consensus. The walls were transparent aluminum, offering a view of the planetary surface below—a sprawl of settlement clusters connected by transport corridors, all of it bathed in the orange-tinged light of the system's aging star. She'd disabled the privacy tinting years ago. Let people see her working alone. Let them draw whatever conclusions they needed.
+
+Kira was thirty-seven years old, lean and deliberate in her movements, with dark brown hair kept short for practicality and gray-green eyes that rarely blinked when she was focused. The faint shadows under those eyes told the story of Vela's twenty-six-hour days wearing against her circadian rhythm—she'd never quite adjusted, even after seven years. On her collar, almost invisible against the dark fabric of her Traverse Authority field jacket, sat a small silver pin: a stylized bend-space diagram, elegant and simple. Most people didn't notice it. She preferred it that way.
+
+The isolation wasn't loneliness—it was methodology. When you worked alone, the data couldn't be contaminated by groupthink, by the subtle pressures of committee dynamics that bent conclusions toward palatability rather than truth. Every investigator at the Authority had access to the same databases, the same analytical tools, the same training in bend-travel physics and anomaly detection. The difference wasn't capability. It was willingness to trust your own analysis when everyone else in the room disagreed.
+
+She rotated the holographic display with a gesture, watching the thermal signature collapse and expand in three-dimensional space. The freighter in question had emerged from bend-travel six hours ago with an elevated wake signature—not dangerous, but irregular. Standard protocol called for investigation. The shipmaster claimed equipment malfunction in the fold regulators. Probably true. Probably.
+
+But "probably" was where investigations died.
+
+She isolated the thermal bloom frame by frame, tracking the dissipation pattern against the baseline for that class of vessel. Bend-travel compressed space rather than breaking through it—folded distances into themselves until arrival and departure occupied the same moment from different perspectives. The physics were elegant once you accepted that space itself was negotiable. Every ship emerging from a fold carried residual energy: the warm wake, a thermal and electromagnetic signature that bled off over hours like heat from a stone pulled from fire.
+
+This freighter's wake ran point-seven degrees hotter than standard. Well within acceptable variance for most investigators. But variance had patterns, and patterns had causes.
+
+She queried the vessel's maintenance logs, cross-referenced the fold regulator replacement schedule against the manufacturer's thermal output specifications. The data populated across her secondary display in cascading columns—installation dates, component serial numbers, performance metrics across the last two hundred fold transits.
+
+There—a mismatch. The installed regulator was third-party, slightly more efficient than standard, which meant slightly higher thermal conversion during fold compression. She pulled the manufacturer's white papers, verified the thermal coefficient against the observed wake signature. The math aligned perfectly. The elevated wake wasn't malfunction. It was exactly what you'd expect from that specific component operating correctly.
+
+She documented her findings in the case file: component specifications attached, thermal analysis appended, conclusion supported by primary source data. No interpretation required. No committee vote necessary. The physics told the story completely.
+
+Case closed. Paperwork filed. The shipmaster would receive clearance within the hour.
+
+She allowed herself a moment of satisfaction—not at being correct, but at the efficiency. Seventeen minutes from case assignment to resolution.
+
+Seventeen minutes of work that another investigator might have stretched into a committee meeting, three specialists, and a day of back-and-forth analysis. She'd seen it happen too many times—simple questions inflated by the need to distribute responsibility, to ensure no single person bore the weight of being wrong.
+
+She'd learned what that weight felt like.
+
+"Working late again?"
+
+The voice came from the doorway. Meris, one of the shift coordinators, leaning against the frame with the casual familiarity of someone who'd long since given up trying to draw her into the social fabric of the department. Not unkind, just resigned.
+
+"Closing a case," she said without looking up.
+
+"The freighter wake? Chen's team was planning to convene on that tomorrow morning."
+
+"It's resolved. Third-party regulator explains the variance."
+
+Meris stepped closer, glancing at the display. "You're sure? Chen mentioned wanting to pull historical data on similar signatures, maybe pattern-match across—"
+
+"Pattern-match to what?" She finally looked up. "The physics are straightforward. The component specifications explain the observation completely. Adding more people doesn't add more truth."
+
+A flicker of something passed through Meris's expression. Not quite frustration—more like the weariness of an old argument neither of them wanted to revisit.
+
+"You know how it works here," Meris said carefully. "Collaborative verification. Multiple perspectives reduce error."
+
+"Multiple perspectives reduce accountability."
+
+The words came out sharper than intended, carrying an edge honed over five years of the same conversation. She softened her tone marginally. "I've documented everything. Chen's team can review my findings if they want verification. But the case doesn't require a committee to be correct."
+
+Meris nodded slowly, recognizing the boundary. "I'll let them know it's filed. You should go home sometime, you know. The office doesn't disappear when you're not in it."
+
+"I know."
+
+But she didn't move, and Meris didn't expect her to. After a moment, the coordinator withdrew, footsteps fading down the corridor toward the collaborative hubs where the second shift would be gathering, comparing notes, building their careful consensus-driven conclusions.
+
+She returned to her display, but the freighter data no longer held her attention. Instead, her eyes drifted to the small notation in the corner of her workspace interface: her clearance designation. Traverse Investigator, Level IV. Specialized cases.
+
+They called her for the weird ones.
+
+Not officially—the assignment protocols were carefully neutral, never explicitly acknowledging that certain cases went to certain people. But everyone knew. When something didn't fit the standard patterns, when the preliminary data resisted easy categorization, when a case needed someone who wouldn't be swayed by peer pressure to accept the comfortable explanation—they called her.
+
+It was recognition and isolation in the same breath.
+
+Five years ago, she'd been part of a team. A real team, six investigators analyzing a catastrophic bend-travel accident that had killed twenty-three people when a passenger liner emerged from fold with structural collapse across three decks. The inquiry demanded answers, and her team had provided them: pilot error. Premature fold exit, insufficient energy dispersal, cascading failure. The consensus had been nearly unanimous.
+
+Except for her.
+
+She'd found an anomaly in the fold generator's maintenance logs, a small discrepancy in the spatial calibration systems that suggested equipment failure rather than pilot mistake. The numbers didn't align quite right—a degradation pattern in the power couplings that indicated slow failure over multiple transits, not sudden pilot incompetence. She'd presented her findings to the team, walked them through the data point by point.
+
+They'd discussed it. Debated the interpretation. Examined her evidence with what they'd probably thought was appropriate rigor. And ultimately voted to maintain the pilot error conclusion. Five to one. The physics supported both interpretations, they'd argued, but the pilot error explanation was cleaner, more consistent with witness accounts, more likely given the statistical frequency of human mistake versus equipment failure.
+
+It was a reasonable position. Well-argued. Supported by respected colleagues who'd spent decades doing this work.
+
+It was also wrong.
+
+She'd been overruled, and she'd accepted it. That was how teams worked. You presented your case, you listened to others, you accepted the majority decision. Democracy applied to physics. Consensus as methodology.
+
+Six months later, three ships failed identically. Fold generator malfunctions, spatial calibration systems corrupted by a manufacturing defect that had been missed during standard inspections. The failures happened within two weeks of each other—different ships, different routes, same catastrophic result. Forty-seven people died before the pattern was recognized and the fleet-wide recall issued.
+
+The same defect she'd identified in that first accident.
+
+Her team had been correct by consensus. She'd been correct by data. The difference was measured in lives—seventy total, counting the original twenty-three. Seventy people who might have survived if a single dissenting voice had been trusted over committee wisdom.
+
+She'd attended four of the memorial services. Sat in the back, said nothing, carried the weight of knowing that her silence after being overruled had contributed to those deaths as surely as the defective components had. One of the dead was Dr. Salla Orin, a young bend-space analyst Kira had befriended during the initial investigation—someone who had privately agreed with Kira's assessment but hadn't spoken up publicly. After Salla's death, Kira had started wearing her memorial pin. A reminder of the cost of silence and consensus.
+
+She could have pushed harder, made more noise, refused to accept the majority decision. Instead, she'd trusted the process. Trusted that five experienced investigators couldn't all be wrong.
+
+The process had killed forty-seven people.
+
+She'd requested solo assignment the following week. The Authority had granted it without comment, recognizing perhaps that some investigators functioned better outside the collaborative structure. Or perhaps they'd simply wanted to avoid the friction, the uncomfortable reminder that consensus and truth weren't always synonymous.
+
+Either way, she'd been alone ever since.
+
+The display chimed softly—another case flagged for review. She opened it reflexively: a mineral survey ship reporting minor navigation drift during fold transit. Probably solar wind interference. Probably instrument calibration. Probably nothing.
+
+But "probably" was where investigations died, so she began pulling the data.
+
+The drift was minor, just point-three-two degrees off projected trajectory over a six-hour fold. Within standard margins. But she traced the ship's path against stellar cartography anyway, mapping the fold corridor against known gravitational anomalies. Nothing unusual. She checked the ship's navigation computer logs, looking for sensor errors or calibration drift.
+
+There—a timestamp discrepancy. The navigation computer had logged the fold entry thirty-seven seconds later than the drive system recorded fold initiation. Thirty-seven seconds of missing data, like a gap in memory.
+
+She queried deeper, pulling diagnostic logs from the ship's sensor array. The gap appeared there too, consistently across all systems. Not malfunction. Not drift. The ship had experienced thirty-seven seconds of... what? Missing time? Sensor blackout?
+
+She flagged it for follow-up investigation and made a note to interview the crew. Probably nothing—sensor glitches happened, especially in the compressed physics of fold-space. But "probably" wasn't certainty, and certainty was what the work required.
+
+Case marked pending. Next file.
+
+Hours passed. The office emptied completely as second shift cycled to third, then to the skeleton crew that monitored systems through the deep night when most of the planet slept. She worked through it all, case after case, each one a small puzzle that required only attention and rigor to solve. No meetings. No votes. No compromises with people who wanted certainty more than they wanted truth.
+
+The planet's rotation carried the Traverse Authority complex through local midnight and into the deep morning hours. Beyond her transparent walls, the settlement clusters below began to dim as residential sectors entered sleep cycles. The transport corridors glowed like veins carrying the lifeblood of commerce and movement through the sprawl.
+
+She'd lived on Vela for seven years—first as part of a team, then alone. The planet earned its name honestly: Vela, meaning "sails" in an ancient Earth language, a fitting designation for a major hub world where multiple bend-travel routes converged. Nearly five million people called it home, most of them connected to the Authority or its supporting industries. Dozens of other worlds existed within bend-travel range, each with their own settlements and populations. Her work touched all of them, every ship that folded space to move between stars passing through Vela's monitoring net like fish through water.
+
+This was her domain: the quiet space between question and answer, where data spoke in languages that didn't require consensus to be understood.
+
+She knew what others said about her. The loner. The difficult one. The investigator who didn't play well with others. Let them say it. She'd been on a team once, had trusted the wisdom of collective judgment, had believed that more perspectives meant better outcomes.
+
+She still had the casualty reports from those three ships to remind her otherwise.
+
+When she finally stood to leave, the station's time display read 0347. Third shift would be winding down soon, the cycle beginning again. She gathered her things, secured her workspace, and walked through corridors empty enough that her footsteps echoed against the walls.
+
+The observation deck was deserted, as she'd known it would be. She paused there, looking out at the darkness between stars—the vast nothing that bend-travel folded into negotiable distance. Somewhere out there, ships were moving through compressed space, carrying cargo and passengers and questions not yet answered.
+
+Some of those questions would find their way to her desk eventually. The weird ones. The cases that resisted easy explanation. The investigations that required someone willing to sit alone with uncomfortable data until it revealed its truth, regardless of what committees might prefer to believe.
+
+She understood, standing there in the observation deck's dim illumination, that isolation was a choice she'd made deliberately. Not punishment, not exile, but methodology. A way of navigating that trusted instrumentation over intuition, data over consensus, solitary clarity over collective comfort.
+
+The stars beyond the viewport offered no answers, only questions measured in light-years and bent space. But questions were enough. Questions were the foundation from which truth could be built, one careful observation at a time, alone in the dark where groupthink couldn't distort the signal.
+
+She'd learned to navigate by dead stars—ancient light from collapsed sources, arriving after the thing that created it had ceased to exist. Beautiful isolation that guided but didn't illuminate, that showed the path without promising warmth.
+
+In the vast and folded distances between worlds, she'd found her domain. And if it was lonely, at least it was true.

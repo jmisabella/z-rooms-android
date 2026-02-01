@@ -1,0 +1,169 @@
+CHAPTER 2: THE WARM WAKE
+
+The alert came at 0623, interrupting Kira's second coffee.
+
+She'd returned to her office after four hours of sleep that wasn't quite rest, her mind still turning over the navigation discrepancy from the mineral survey ship. Thirty-seven seconds of missing data. Probably sensor error. Probably.
+
+The alert tone was different from routine case assignments—higher priority, broader distribution. She pulled it up on her primary display, already knowing from the classification code that something had shifted in the ordinary rhythm of investigations.
+
+PRIORITY ALERT: BEND-TRAVEL ANOMALY - QUARANTINE PROTOCOL INITIATED
+MONITORING STATION: Vela-Watch-Seven
+TIMESTAMP: 0547 LOCAL
+STATUS: INITIAL RESPONSE COMPLETE - VESSEL SECURED
+
+She opened the full briefing, the data populating across her workspace in ordered hierarchies. Monitoring Station Vela-Watch-Seven had detected a vessel emerging from bend-travel at 0547. Standard procedure—every fold exit triggered automated monitoring, thermal and electromagnetic sensors cataloging the warm wake signature for traffic control and safety verification.
+
+Except this vessel had arrived cold.
+
+She read the notation three times, certain she'd misunderstood. But the language was unambiguous: THERMAL SIGNATURE: NEGLIGIBLE. ELECTROMAGNETIC WAKE: ABSENT. ENERGY ACCOUNTING: CRITICAL DISCREPANCY.
+
+Impossible.
+
+Every ship that folded space carried residual energy upon emergence. The warm wake wasn't optional physics—it was fundamental to how bend-travel worked. When you compressed space, you paid for it in energy that bled off slowly after the fold collapsed. Conservation laws didn't negotiate. A ship emerging from fold without thermal and electromagnetic residue was like water flowing uphill, like fire that didn't radiate heat.
+
+The universe didn't permit violations on this scale.
+
+She scrolled through the sensor data, looking for the error she knew had to exist. Equipment malfunction, calibration failure, corrupted data transmission—something that would explain why the monitoring station had recorded readings that contradicted established physics.
+
+The sensor logs were clean. Multiple redundant systems, all reporting identical data. The vessel had emerged from bend-travel with an energy signature consistent with having been inert for decades, possibly longer. Yet the fold-space displacement confirmed it had absolutely just completed active bend-travel transit.
+
+The energy accounting didn't just fail to balance—it was off by orders of magnitude. Like spending a fortune and arriving with pockets fuller than when you'd left.
+
+She pulled up the initial response team's boarding report. Standard protocol for unknown vessels: automated perimeter drones first, then a manned inspection team if no immediate threat was detected. The drones had found the ship unpowered, non-responsive, drifting in stable orbit. No energy signatures beyond minimal decay heat. No active systems. No communication.
+
+The inspection team had boarded forty minutes ago.
+
+Their preliminary report was still updating in real-time, notes appending as they moved through the vessel. She watched the entries populate:
+
+EXTERIOR: Foreign design. No identification markings. Hull composition analysis pending. Age indeterminate. No recognizable origin.
+
+AIRLOCK: Manual operation required. Ship's power completely offline.
+
+CABIN ACCESS: Achieved. Pressurized environment stable but stale. No life support active. Air composition breathable but ancient—trace analysis suggests sealed environment for extended period.
+
+And then the entry that made her sit forward:
+
+CABIN INTERIOR: Obstruction. Soil or soil-like material filling approximately 80% of pressurized space. Estimated volume: 45 cubic meters. Difficult to navigate. No crew visible. No pilot station accessible due to soil volume.
+
+PRELIMINARY DESIGNATION: UVO-1 (Unidentified Vessel Origin, #1)
+
+Soil.
+
+She reread it twice, searching for context that would make it sensible. Cargo hold full of soil? That would be unusual but explicable—mineral samples, agricultural transport, terraforming supplies. But the report specified cabin interior. The pressurized crew space. Seventy percent filled.
+
+The updates continued:
+
+CONTROLS: Located forward section, partially buried. Appear completely inactive. No power feed, no standby systems, no indication of recent use. Preliminary assessment: controls have been offline for years, possibly decades. Physical wear consistent with extended dormancy.
+
+SOIL COMPOSITION: Organic material. Dry. Preliminary scan suggests dead biological matter—no active microbial life detected. Awaiting laboratory analysis.
+
+THREAT ASSESSMENT: None identified. No crew, no active systems, no weapons, no hazardous materials beyond standard space travel risks. Vessel poses no immediate danger.
+
+CLASSIFICATION: Unmanned derelict. Origin unknown. Recommend full scientific investigation.
+
+QUARANTINE ASSIGNMENT: Transfer to Quarantine Station Vela-Q2 for detailed analysis.
+
+She sat back, trying to assemble the pieces into coherent understanding. An unmanned ship completing bend-travel navigation with controls that had been dead for years. Arriving cold when the physics demanded it arrive hot. Filled with soil.
+
+None of it made sense individually. Together, it formed a pattern of wrongness so fundamental it bypassed confusion and went straight to unease.
+
+Her workspace chimed—incoming message from Division Chief Marek Torven, head of the Investigation Division and the man who assigned her specialized cases. She accepted it.
+
+"I assume you've seen the alert from Vela-Watch-Seven." Torven's voice carried the careful neutrality of someone preparing to make a request they suspected would be complicated.
+
+"I'm reading the boarding report now."
+
+"Good. I'm formally assigning the investigation to you. Full clearance, priority access to all sensor data and physical samples. Initial response team is finishing their sweep now, then the vessel will be transferred to Quarantine Station Vela-Q2 for detailed analysis."
+
+She'd expected this. The weird ones came to her. But something in Torven's tone suggested more than routine assignment.
+
+"Why me specifically?" she asked.
+
+A pause. Then Torven said, "Because this doesn't fit any profile we have. The physics are wrong, the circumstances are impossible, and everyone who's looked at the preliminary data has a different theory about what's happening. We need someone who won't be swayed by committee speculation. Someone who'll look at the evidence without preconceptions."
+
+Someone who works alone. Torven didn't say it, but the implication was clear.
+
+"Understood," she said. "When can I access the vessel?"
+
+"Quarantine protocols complete in six hours. I'll notify you when it's cleared for secondary investigation. In the meantime, we're routing all sensor data to your workspace. Full monitoring station logs, boarding team recordings, everything we have."
+
+"What about the soil?"
+
+"Samples are being prepared for laboratory analysis. Biological safety protocols, standard contamination precautions. You'll have access once preliminary screening is complete."
+
+The connection ended. Torven was efficient like that—deliver the assignment, provide the resources, then step back and let investigators work. It was one of the few aspects of the Authority's structure she appreciated.
+
+The sensor data began populating across her secondary displays. She organized it chronologically, building a timeline of the vessel's arrival from first detection through boarding completion.
+
+The fold-space emergence signature was clean—mathematically perfect, actually, which was itself unusual. Most fold exits showed minor variations, tiny imperfections in the space compression that manifested as ripples in the displacement wave. This one was textbook ideal, as if the ship had been following a navigation solution calculated to impossible precision.
+
+But the thermal signature at emergence: negligible. Point-zero-three degrees above absolute background radiation. Cold as empty space. Cold as something that had never known heat.
+
+She pulled comparison data from the archives, examining thousands of previous fold emergences. Every single one showed the warm wake—thermal blooms ranging from a few degrees to several hundred depending on vessel mass and fold duration. The distribution followed predictable physics. Energy in equaled energy out, just redistributed across time as the fold collapsed.
+
+This vessel's energy accounting showed massive expenditure during the fold—normal, expected. But then the emergence showed almost zero energy return. The math failed so completely it suggested either catastrophic sensor malfunction or a violation of thermodynamic principles that had held true since humans first understood fire.
+
+She examined the electromagnetic data next. Fold travel created distinctive EM signatures—charged particle displacement, magnetic field distortions, exotic radiation from space compression. Ships emerging from fold practically glowed with electromagnetic aftereffects for hours afterward.
+
+This ship's EM signature: absent. Like it had never touched fold-space. Like it had been sitting cold in normal space for years and simply appeared when someone looked.
+
+She spent ninety minutes with the data, approaching it from different analytical angles, looking for the explanation that would make the impossible merely improbable. Equipment failure. Sensor error. Data corruption. Unprecedented but natural physical phenomenon.
+
+Nothing fit. The data was too clean, too internally consistent, too thoroughly verified by redundant systems.
+
+The ship had done something that shouldn't be possible. And it had arrived full of soil.
+
+By 0830, the preliminary biological screening results arrived. She opened the report, scanning the technical summary:
+
+MATERIAL: Organic matter, primarily decomposed plant material with trace mineral content.
+
+BIOLOGICAL ACTIVITY: None detected. No viable microorganisms, no active decay processes, no cellular activity.
+
+AGE ESTIMATION: Inconclusive. Carbon dating suggests extreme antiquity, but preservation state inconsistent with projected age. Recommend advanced analysis.
+
+COMPOSITION: Complex mixture of degraded organic compounds. Trace elements suggest non-local origin—mineral signatures don't match any known planetary profile in database.
+
+SAFETY CLASSIFICATION: Level 2 biohazard (precautionary). No active pathogens detected, but foreign biological material requires standard containment protocols.
+
+Soil from somewhere else. Somewhere not in the database. Old beyond reliable measurement, yet somehow preserved in impossible condition.
+
+The vessel was being transported to Quarantine Station Vela-Q2 now, the boarding team accompanying it to ensure secure transfer. She'd have access in a few hours. Time enough to review everything the initial team had documented, to prepare her own investigation checklist, to approach this with the methodical rigor the impossibility demanded.
+
+She opened a new case file, creating the documentation framework that would structure her analysis. Observations, hypotheses, tests, conclusions. The same process she applied to every investigation, whether it was a freighter with a hot wake or a ship that arrived cold from the impossible.
+
+Title: UVO-1 - COLD ARRIVAL ANOMALY
+Status: Active Investigation
+Lead Investigator: [Her authorization code populated automatically]
+Classification: Priority / Physics Anomaly
+
+She began entering the established facts, building the foundation from which understanding might eventually emerge. Vessel emerged from bend-travel. Thermal signature absent. EM signature absent. Interior filled with ancient soil. Controls inactive. No crew. Foreign origin unknown.
+
+Each fact was verifiable, documented, beyond dispute. Together they formed a picture that violated everything she understood about how ships moved between stars.
+
+But "impossible" was just another word for "explanation not yet found."
+
+She'd solved impossible cases before. Found the pattern hidden in noise, the cause buried beneath layers of assumption. This would be no different. Harder, perhaps. Stranger, certainly. But data didn't lie, and physics had reasons even when those reasons weren't immediately apparent.
+
+The investigation had begun. The question was singular and vast: What had arrived in their space, and why?
+
+Somewhere in the sensor logs, the soil samples, the dead controls and cold hull—somewhere in the accumulated evidence—the answer waited. She just had to look at it correctly. Alone, without preconceptions, trusting only the data to tell its story.
+
+The warm wake's absence was impossible. But the ship existed, undeniably real despite its violation of physical law.
+
+And if reality contradicted physics, then her understanding of physics was incomplete.
+
+She pulled up the monitoring station's visual recordings, watching the vessel emerge from fold-space in silent video. One moment: empty space. The next: a ship, appearing as if it had always been there, carrying no heat signature, no electromagnetic glow, no evidence of the journey it had just completed.
+
+Like something dead that had learned to move anyway.
+
+The thought came unbidden, carrying an edge of unease she immediately dismissed as unprofessional. She dealt in facts, not impressions. The investigation required objectivity, not atmospheric interpretation.
+
+But watching the ship drift in the recording's silence, she couldn't quite shake the image: a vessel that arrived the way corpses were cold, carrying soil the way graves were full.
+
+She archived the thought with the rest of her preliminary observations and returned to the data, building her analysis toward whatever truth waited at Quarantine Station Vela-Q2.
+
+Between the possible and the true, there was space for mysteries to hide. And she'd learned long ago that mysteries, given enough scrutiny, eventually surrendered their secrets.
+
+This one would be no different.
+
+Probably.

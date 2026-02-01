@@ -1,0 +1,167 @@
+CHAPTER 3: FIRST CONTACT
+
+The transport shuttle carried her above Vela's atmosphere in silence.
+
+Kira watched the planet fall away through the viewport, the sprawl of Convergence City shrinking to geometric patterns against the curved horizon. The shuttle's autopilot handled navigation with mechanical precision, following the established corridor to Quarantine Station Vela-Q2. Forty thousand kilometers. Two hours of transit through empty space that gave her time to review everything she knew about what waited at the other end.
+
+Which wasn't much.
+
+She'd spent the previous eight hours analyzing sensor data, boarding reports, preliminary biological screening—building a framework of verified observations to structure her direct investigation. The data painted a picture of impossibility: a ship that violated physics, filled with ancient soil, arriving cold from folded space.
+
+But data was abstraction. Numbers and readouts, sensor interpretations twice-removed from physical reality. She needed to see it herself, touch it, understand it in the direct way that only proximity allowed.
+
+The quarantine station appeared as a point of light against the black, growing larger as the shuttle closed distance. Vela-Q2 was small by station standards—a modular facility designed for temporary housing of anomalous or contaminated vessels. Cylindrical core with docking arms extended like spokes, sensor arrays bristling from the central hub. Home to a skeleton crew of ten: security, technical analysts, station manager. Enough to maintain operations, few enough to evacuate quickly if whatever they were containing turned dangerous.
+
+The shuttle docked with mechanical precision. She gathered her equipment—sample containers, portable scanner, recording devices—and cycled through the airlock into the station's central corridor.
+
+Lieutenant Shen Rivka was waiting.
+
+Compact and alert, dark hair pulled into regulation braid, the security officer stood with the kind of stillness that suggested she could move very quickly when necessary. Her uniform bore the Traverse Authority enforcement insignia, and her eyes tracked Kira's arrival with professional assessment.
+
+"Investigator Venn." Rivka's greeting was economical. "I'm assigned as security escort for your examination. Station Manager wanted someone with you while you're aboard the vessel."
+
+"Standard protocol?" Kira asked.
+
+"Foreign vessel, unknown origin, unexplained phenomena. Yes, standard." Rivka gestured down the corridor. "This way. We've got it secured in docking bay three. No one's been aboard since the initial response team completed their sweep."
+
+They walked in silence through corridors that felt more industrial than the main Authority complex—exposed conduits, reinforced bulkheads, the aesthetic of function over comfort. Quarantine stations weren't built for long-term habitation. They were holding facilities, temporary containers for things that needed isolation.
+
+"Have you seen it?" Kira asked.
+
+"Through external cameras only. Haven't boarded yet. Waiting for your investigation." Rivka's tone suggested she wasn't particularly eager to change that situation. "The initial team's reports were... unusual."
+
+"That's one way to describe them."
+
+"What's your theory?"
+
+Kira glanced at her. "I don't form theories before I see evidence."
+
+Something that might have been approval flickered in Rivka's expression. "Sensible approach."
+
+They reached docking bay three. Through the observation window, Kira got her first direct view of UVO-1.
+
+She stopped, taking it in.
+
+The ship was larger than she'd expected—sixty meters of organic curves that seemed to flow rather than intersect, as if the hull had been grown rather than assembled. The color was difficult to describe: dark gray-brown, but with an iridescence like oil on water, shifting subtly in the station's work lights. The surface texture suggested something between stone and bark, aged and weathered by time measured in centuries.
+
+No seams. No welds. No visible construction points or maintenance hatches. The hull appeared to be a single continuous material, impossibly unified.
+
+"Doesn't match any design in our database," Rivka said quietly. "Materials analysis came back inconclusive. The alloy composition keeps shifting depending on which spectrum you scan it with. Like it doesn't want to be categorized."
+
+Kira pulled out her portable scanner, taking readings through the observation window. The hull's electromagnetic signature was negligible—cold and inert, exactly as the sensor logs had indicated. But there was something else, something her scanner couldn't quite resolve. A quality to the ship that resisted measurement.
+
+"Let's go aboard," she said.
+
+Rivka led her to the airlock interface. The station had connected via an external umbilical, establishing access without requiring the ship's own systems to activate. Standard quarantine procedure—minimal contamination, maximum control.
+
+The airlock cycled. The inner door opened.
+
+And the smell hit her.
+
+Kira had read the boarding report's description—"organic matter, decomposed plant material"—but reading about smell and experiencing it were entirely different orders of magnitude. The air that leaked from the ship's interior carried an odor that bypassed rational analysis and went straight to some deeper, more primal response.
+
+Sweet-rotten. Ancient. Wrong.
+
+Not the clean decay of composting vegetation or the sterile absence of vacuum-preserved materials. This was organic death that had somehow stopped short of completion, preservation that suggested not dormancy but something more unsettling. The smell of earth from a grave that was never dug, soil that remembered what was buried in it even after the bodies had dissolved into mineral and memory.
+
+She forced herself to breathe normally, to catalog the sensation clinically. The boarding team had reported the air as safe—breathable oxygen-nitrogen mixture, no toxins, no biological hazards. But her body didn't trust those assurances, recoiling from the wrongness that data couldn't capture.
+
+"Takes some getting used to," Rivka said from behind her, voice carefully neutral.
+
+Kira stepped through the airlock into the ship's interior.
+
+The cabin was a single open space, and it was full.
+
+Soil packed the interior like organs filling a body—dense, deliberate, occupying perhaps seventy to eighty percent of available volume. Dark brown-black, the color of earth that had never known sunlight. The texture appeared dry but not dusty, clumped together with enough cohesion to maintain form but without the wet binding of moisture.
+
+Forty-five cubic meters, the initial team had estimated. Enough to fill a small room floor to ceiling, compressed into a ship's cabin with barely enough empty space to move.
+
+She pulled out a sample container, kneeling at the soil's edge. Her hand hesitated before touching it—some instinctive reluctance she couldn't quite explain. Professional hesitation, she told herself. Standard caution with unknown materials.
+
+But when her gloved fingers finally made contact, the sensation was somehow worse than the smell.
+
+The soil was cold. Space-cold, matching the ship's ambient temperature exactly. But it wasn't the temperature that disturbed her. It was the texture—dry and slightly granular, with a quality that suggested not just absence of life but active deadness. Like touching something that had been alive once, long ago, and had completed its dying so thoroughly that even decay had given up and moved on.
+
+She collected samples methodically, sealing them in containment vessels with deliberate precision. Different depths, different locations, each one documented and logged. Her hands moved through the routine while her mind struggled to process what her senses were reporting.
+
+This wasn't soil. Not in any conventional sense. It was the corpse of soil, preserved impossibly, transported between stars in a ship that shouldn't be able to navigate and arriving cold from journeys that should leave thermal scars.
+
+"The controls are forward," Rivka said, gesturing toward the far end of the cabin where soil had been partially cleared by the boarding team.
+
+They moved through the cramped space, soil shifting slightly under their feet with disturbing organic resistance. The ship's control console emerged from the soil like a fossil half-excavated—strange symbols and interfaces that bore no resemblance to any known navigation system.
+
+Kira ran her scanner across the controls. Dead. Completely inactive. The power feeds showed no energy signature, no standby systems, no indication that these controls had functioned in years. Possibly decades.
+
+"How did it navigate?" she said aloud, not really expecting an answer. "Bend-travel requires active course correction, real-time adjustments during fold-space transition. You can't just point a ship and hope. The controls have to be functional."
+
+"Maybe they were functional during the journey," Rivka suggested. "Then failed after arrival?"
+
+Kira shook her head. "The wear patterns indicate extended dormancy. These systems have been offline for much longer than the few hours since emergence." She examined the control interface more closely, noting the alien symbols carved or grown into the surface. "And even if we could access them, I'm not sure we could read them. This isn't any language in our database."
+
+She took photographs, documented the console's configuration, collected samples of the surrounding soil. Every observation added another piece to the growing picture of impossibility.
+
+No crew. No functional controls. No power systems. Just soil, filling a ship that had somehow crossed the folded distances between stars and arrived in their space like a message in a bottle that had traveled through vacuum instead of water.
+
+What was the message? And who had sent it?
+
+She moved through the cabin systematically, mapping the soil's distribution, noting how it had been packed with almost deliberate care—not random filling but purposeful arrangement. The boarding team had carved narrow paths through the densest sections, creating access routes that revealed the soil's depth.
+
+Everywhere she looked, the same dark earth. Everywhere she breathed, the same wrong smell. Everywhere she touched, the same cold deadness that her mind kept trying to categorize as merely lifeless and her instincts kept insisting was something worse.
+
+"I need to see the exterior hull more closely," she said.
+
+They exited the cabin, Rivka cycling the airlock with visible relief. The station's clean, recycled air felt like a gift after the ship's interior. Kira's nostrils still carried the smell—sweet-rotten, ancient, wrong—like a stain that lingered after the source had been removed.
+
+The external inspection was conducted via mag-boots and safety tethers, moving across the hull's surface in the station's microgravity docking area. Up close, the hull material revealed even more strangeness—the surface texture shifted subtly under direct observation, never quite settling into a consistent appearance. Not flowing or moving, but somehow uncertain, as if the material existed in multiple states simultaneously and couldn't decide which one to present.
+
+Her scanner confirmed what visual observation suggested: the hull defied consistent analysis. Each reading returned slightly different data, minor variations that added up to a comprehensive refusal to be categorized.
+
+She'd investigated strange cases before. Ships with unusual configurations, materials from exotic manufacturing processes, technologies that pushed the boundaries of established physics. But this was different. This felt less like advanced engineering and more like something that had bypassed the concept of engineering entirely.
+
+The ship wasn't built. It was.
+
+After three hours of documentation, sample collection, and increasingly frustrated attempts to extract coherent data from scanners that couldn't agree on what they were measuring, Kira called the initial investigation complete.
+
+She'd have more questions when the laboratory analysis returned. More mysteries when she examined the samples under controlled conditions. More impossibilities to categorize and attempt to understand.
+
+But the essential truth was already clear: something had arrived in their space that didn't belong. Not just foreign—fundamentally other. A vessel that violated known physics, filled with soil from somewhere not in any database, carrying a smell that suggested death hadn't finished dying.
+
+Back in the quarantine station's decontamination area, Kira stripped out of her examination suit and submitted to the standard biological screening. Clean. No contamination, no exposure to hazardous materials. Physically, she was unchanged.
+
+But the smell lingered in memory stronger than it had any right to, and the texture of that cold soil remained imprinted on her gloved fingers like a ghost sensation that wouldn't fade.
+
+"What's your assessment?" Rivka asked once the decontamination was complete.
+
+Kira considered the question carefully. "Insufficient data for conclusions. But..." She paused, weighing professional objectivity against visceral response. "Something about it feels wrong. Not just unexplained. Wrong."
+
+Rivka nodded slowly. "I thought I was being paranoid."
+
+"Paranoia is just pattern recognition operating on incomplete data," Kira said. "Sometimes the pattern is real even when you can't articulate what you're seeing."
+
+She gathered her samples, secured them in the transport container for the return journey to Vela's main laboratory facilities. The shuttle would depart in twenty minutes, giving her just enough time to file the preliminary field report.
+
+But as she sat in the quarantine station's small observation deck, looking out at the impossibly unified hull of UVO-1 floating in its isolation, Kira found herself reluctant to begin writing. How did you document wrongness? How did you put into clinical language the sensation of touching earth that shouldn't exist, breathing air that carried memories of graves never dug, seeing a ship that seemed to exist more as concept than construction?
+
+The data would speak for itself eventually. Laboratory analysis, spectrographic examination, materials testing—the accumulated evidence would build toward understanding whether she could articulate her unease or not.
+
+But sitting there in the observation deck's silence, watching the ship that had arrived cold from impossible journeys, she couldn't shake the feeling that she'd just made contact with something that didn't want to be understood.
+
+Something ancient and patient and very, very wrong.
+
+The smell still clung to her memory like soil remembers what's buried, and the cold texture still pressed against her thoughts like earth packed over something not quite finished dying.
+
+She'd built her career on trusting data over instinct, on following evidence toward truth regardless of where it led. But instinct was screaming now, bypassing rational analysis entirely, insisting that what waited aboard UVO-1 was more than mystery.
+
+It was violation. Presence wearing the shape of absence. Death that had learned to travel between stars.
+
+In the observation window's reflection, she could see her own face—methodical, controlled, professional. The face of an investigator confronting the unknown with scientific rigor and careful analysis.
+
+But beneath that surface, some deeper part of her recognized what the data couldn't yet prove: she'd just touched something that existed in the grammar of nightmares, and it had touched her back in ways that sample containers and documentation couldn't capture.
+
+The soil remembered. And somehow, impossibly, she suspected it would remember her too—the same way earth remembers everything buried in its cold and patient depths, waiting for the slow chemistry of time to render graves into geology, bodies into minerals, screams into silence.
+
+The ship floated in quarantine's embrace, full of soil from somewhere else, carrying its wrong smell and wronger silence into the spaces between stars where darkness folded into distance and distance into arrival.
+
+And she'd brought pieces of it back with her, sealed in containers, catalogued and contained.
+
+Probably.
