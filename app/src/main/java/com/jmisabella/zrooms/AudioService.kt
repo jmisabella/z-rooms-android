@@ -65,6 +65,15 @@ class AudioService : Service() {
         const val CHANNEL_ID = "audio_service_channel"
         const val NOTIFICATION_ID = 1
 
+        // Volume boost configuration (adjustable for different playback environments)
+        // Set to 12.0 dB for car audio playback - converts to ~4x linear multiplier
+        // Adjust this value as needed: 0 dB = no boost, 6 dB = 2x, 12 dB = 4x, 18 dB = 8x
+        private const val VOLUME_BOOST_DB = 12.0f
+
+        // Convert dB to linear multiplier: 10^(dB/20)
+        private val VOLUME_BOOST_MULTIPLIER: Float
+            get() = Math.pow(10.0, (VOLUME_BOOST_DB / 20.0)).toFloat()
+
         // Wake-up greeting phrases
         private val GREETING_PHRASES = arrayOf(
             "Welcome back",
@@ -292,8 +301,9 @@ class AudioService : Service() {
     }
 
     private fun setPreviewVolume(vol: Float) {
-        previewPlayer?.volume = vol
-        previewVolume = vol
+        val boostedVolume = vol * VOLUME_BOOST_MULTIPLIER // Apply volume boost
+        previewPlayer?.volume = boostedVolume
+        previewVolume = vol // Store original (non-boosted) volume for reference
     }
 
     fun stopAll(completion: () -> Unit = {}) {
@@ -531,13 +541,15 @@ class AudioService : Service() {
 
     fun setAmbientVolume(vol: Float) {
         targetAmbientVolume = vol.coerceIn(0f, 1.0f) // Store user's preferred volume (max 1.0)
-        ambientPlayer?.volume = vol
-        ambientVolume = vol
+        val boostedVolume = vol * VOLUME_BOOST_MULTIPLIER // Apply volume boost
+        ambientPlayer?.volume = boostedVolume
+        ambientVolume = vol // Store original (non-boosted) volume for reference
     }
 
     private fun setAlarmVolume(vol: Float) {
-        alarmPlayer?.volume = vol
-        alarmVolume = vol
+        val boostedVolume = vol * VOLUME_BOOST_MULTIPLIER // Apply volume boost
+        alarmPlayer?.volume = boostedVolume
+        alarmVolume = vol // Store original (non-boosted) volume for reference
     }
 
     private fun createNotificationChannel() {

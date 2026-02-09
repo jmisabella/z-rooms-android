@@ -1,5 +1,43 @@
 # Z Rooms Android - Change Log
 
+## 2026-02-09: Enhancement - Volume Boost for Car Audio Playback
+
+### **ENHANCEMENT**
+
+Added configurable volume boost to improve audio output levels when playing through car audio systems or other low-volume environments.
+
+**Implementation Details:**
+- Added `VOLUME_BOOST_DB` constant set to 12.0 dB (approximately 4x linear multiplier)
+- Easily adjustable hard-coded value in [AudioService.kt](app/src/main/java/com/jmisabella/zrooms/AudioService.kt) companion object
+- Applied to all audio players: ambient, alarm, and preview
+- Uses logarithmic dB-to-linear conversion formula: 10^(dB/20)
+- Reference values: 0 dB = no boost, 6 dB = 2x, 12 dB = 4x, 18 dB = 8x
+
+**Previous Behavior:**
+- All audio playback used unmodified volume levels (0.0 to 1.0 range)
+- Volume could be too quiet in certain playback environments (cars, external speakers)
+
+**New Behavior:**
+- All audio output is boosted by 12 dB (4x linear multiplier)
+- Volume boost is applied consistently across ambient tracks, alarm sounds, and preview playback
+- User-facing volume slider behavior remains unchanged (still 0-100%)
+- Boost multiplier can be easily adjusted by changing `VOLUME_BOOST_DB` constant
+
+**Files Modified:**
+- [AudioService.kt](app/src/main/java/com/jmisabella/zrooms/AudioService.kt):67-76 - Added volume boost constants
+- [AudioService.kt](app/src/main/java/com/jmisabella/zrooms/AudioService.kt):532-536 - Applied boost to ambient volume
+- [AudioService.kt](app/src/main/java/com/jmisabella/zrooms/AudioService.kt):538-541 - Applied boost to alarm volume
+- [AudioService.kt](app/src/main/java/com/jmisabella/zrooms/AudioService.kt):303-306 - Applied boost to preview volume
+
+**Configuration:**
+To adjust the volume boost, modify the `VOLUME_BOOST_DB` constant in AudioService.kt companion object (line 71). Common values:
+- `0.0f` - No boost (original behavior)
+- `6.0f` - 2x volume boost
+- `12.0f` - 4x volume boost (current setting)
+- `18.0f` - 8x volume boost
+
+---
+
 ## 2026-01-31 12:00 PM: UI Modification - Removed Custom Stories/Poems Button
 
 ### **UI MODIFICATION**
