@@ -68,7 +68,7 @@ class AudioService : Service() {
         // Volume boost configuration (adjustable for different playback environments)
         // Set to 12.0 dB for car audio playback - converts to ~4x linear multiplier
         // Adjust this value as needed: 0 dB = no boost, 6 dB = 2x, 12 dB = 4x, 18 dB = 8x
-        private const val VOLUME_BOOST_DB = 12.0f
+        private const val VOLUME_BOOST_DB = 9.0f
 
         // Convert dB to linear multiplier: 10^(dB/20)
         private val VOLUME_BOOST_MULTIPLIER: Float

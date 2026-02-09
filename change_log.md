@@ -7,7 +7,7 @@
 Added configurable volume boost to improve audio output levels when playing through car audio systems or other low-volume environments.
 
 **Implementation Details:**
-- Added `VOLUME_BOOST_DB` constant set to 12.0 dB (approximately 4x linear multiplier)
+- Added `VOLUME_BOOST_DB` constant set to 9.0 dB (approximately 4x linear multiplier)
 - Easily adjustable hard-coded value in [AudioService.kt](app/src/main/java/com/jmisabella/zrooms/AudioService.kt) companion object
 - Applied to all audio players: ambient, alarm, and preview
 - Uses logarithmic dB-to-linear conversion formula: 10^(dB/20)
