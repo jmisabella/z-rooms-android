@@ -1,0 +1,142 @@
+CHAPTER SIX
+
+
+She noticed it most clearly in the Common.
+
+Not the individuals — she had been watching individuals for weeks, cataloguing their small wrongnesses with the care she usually reserved for the archive. She had learned to notice the fixed gaze, the held quality of a person attending to something the room did not contain, the way a body could be present in a chair and also, somehow, elsewhere. She had grown accustomed to the particulars.
+
+What she noticed now was the aggregate. The ratio had shifted. A third of the tables held at least one person who was not entirely there — not eating, not looking at anyone, their attention pooled inward or outward or in some direction that did not correspond to the room. The acknowledgment phrase came up at the start of the meal and she said it and heard it — by the design — and then heard it subside, unevenly, some voices already trailing off before the second word, some not present enough to say it at all. The ritual that had endured three generations was fraying at its edges, and the fraying was quiet enough that you could miss it if you were not already watching, if you had not already learned the texture of normal well enough to feel the departure from it.
+
+She finished her meal and left.
+
+
+*
+
+
+She knew before she reached the lower stairs.
+
+There was nothing different in the stairwell, nothing in the quality of the descent past maintenance and the narrowing boundary of the functional decks. But she had worked in the Stacks long enough to know its moods, and the archive had a mood this morning that was not its own — something added, like the quality of a room where someone has been waiting.
+
+Cassian was at his workspace. He looked up when she came in.
+
+"The clearance review is in process," he said. He said it the way he said things that had no warmer version — directly, without the preamble that had once softened such exchanges. The warmth was not replaced by anything. Just its absence, clean and functional. "Standard procedure. Digital access to the restricted archive layers will be suspended until it resolves. I've left a protocol note with Davan."
+
+She looked at him. He met her gaze with the expression of someone who has moved to a place beyond the need for apology and who does not expect to be thanked for the clarity.
+
+"I understand," she said.
+
+He returned to his work.
+
+She set down what she was carrying and found Davan at the intake desk, reading the protocol note with a careful expression that meant he was working very hard to look like a person who was not troubled. He was troubled. She could see the shape of it in the slight stiffness of his posture, the way he didn't quite look up when she approached.
+
+"The queue," she said.
+
+"Normal." He cleared his throat. "I've been thinking — there are physical holdings from the early generations that haven't been fully catalogued. I noticed them last week. I wasn't sure if it was a priority." He was giving her something to do. She recognized this and accepted it.
+
+"I'll take the early holdings today," she said. "You have intake."
+
+She went to the far end of the Stacks.
+
+
+*
+
+
+The boxes from the foundational era were stored in climate-controlled housings at the archive's deepest point, where the temperature and humidity could be kept within the tolerances the Architects had specified and the Continuance had maintained without deviation. Most of the material had been digitized across the decades — indexed, cross-referenced, absorbed into the electronic record with all its attendant redundancies. The work had never been completed. There were always more current matters, more pressing cataloguing needs, a rotating set of reasons why the oldest boxes waited. Calla had deferred them herself, in the ordinary way of work that was important but never urgent.
+
+She opened the third box in the sequence she had established, which contained records from approximately the second generation: population administration documents, navigational reports, technical assessments filed with the dry formality of people performing necessary functions. She worked through them in order, making the notes she could still make — physical condition, approximate date, approximate category — without access to the digital filing interface. The work was slower this way. It was still the work.
+
+She found the document near the bottom of the stack.
+
+It was a navigational planning record, printed on material that had aged to a slight yellowing at the edges, its language formal in the mode of a different era. She began reading it as she had read the others: for category, for content summary, for physical condition. Then she slowed. Then she read it again.
+
+The record described what it called the terminal phase parameters — the phrase she had found in the demographic report two months ago, which she had read then as standard modeling language. Here the phrase had no ambiguity. Here it was a technical designation with a specific meaning: the final interval of the mission before the designated arrival point. The record laid out the parameters of this phase in the bureaucratic language of the second generation, which was more explicit than any later documentation she had seen because the second generation had still been close enough to the Architects' original specifications to write from within them, before the knowledge calcified into institutional practice and the practice became the inherited shape of things.
+
+The record referred to the ship's name. Not as a name. As a description.
+
+Aphelion: the point of maximum distance from the solar system of origin. The farthest point. The turn.
+
+She read the phrase twice.
+
+Below it: the arrival designation, described in navigational coordinates she could not fully parse. And below that: a projection range. A window of cycles within which, if the original parameters held, the terminal phase would begin.
+
+She sat with the document in her hands and did her arithmetic.
+
+The terminal phase window had opened eleven months ago.
+
+
+*
+
+
+She left the Stacks without closing out the day's work. She stopped at the intake desk only long enough to tell Davan she was going and to see, in his expression, that he was learning the shape of a world where nothing required an explanation, and that this knowledge was aging him in real time.
+
+She went to Lisel.
+
+
+*
+
+
+The third knock, before the door opened.
+
+She had been counting, since Chapter Five, since the second knock became the new rhythm. Three was worse. Three was her mother surfacing from somewhere farther than before, finding the distance back to the door, managing it. Lisel stood in the doorway with the look she had been wearing for weeks — the look that was entirely herself and was also something happening to herself, both things visible at once, as though Calla were watching a landscape and a change in weather simultaneously.
+
+"I didn't expect you until later," Lisel said. Her voice was steady.
+
+"I came early."
+
+They sat in the familiar light — desk lamp, dark-leafed plant, the accumulated objects of a life long lived in the same few square meters. Lisel poured water. Her hands were careful with the cup in the way of someone who had learned to be careful.
+
+"I took myself off shift," Lisel said. "I told them I needed rest. Which is true." She turned the cup. "Some of my colleagues have stopped coming in entirely. Not rest. Something else." Her attention moved briefly to the wall and came back. "I've been going to the maintenance junction again. At the far end of the residential tier. I don't mean to. I find myself there."
+
+"What do you find, when you're there?"
+
+"Nothing. Just the junction." She was quiet for a moment. "The sounds are clearer near there. The — direction. The sense of a location." She stopped. Found the sentence. "I've been trying to decide whether to tell you this."
+
+"Tell me."
+
+"I think they're all going there. The people who are like me. I think we're being — collected. Held. I can't tell if it's the junction itself or something beyond it." She looked at her cup. "I know how that sounds."
+
+"I know it's true," Calla said.
+
+Her mother looked at her — the precise attention she had always had, still intact in this moment, still fully Lisel. Something passed through her expression that was too complex to name. Then she settled back in her chair and was quiet for a little while.
+
+"When you were small," she said, eventually. She said it with the quality of a person surfacing from a depth she had been at for a long time. "I made a decision about your care. I don't remember the details clearly — the specific reasoning. I remember the feeling. I was worried about something I couldn't name. Some quality of the air, some — I don't have the language for it now. I was very careful with you in your early years, in ways I wasn't careful with others. With myself."
+
+Calla did not move.
+
+"I've been thinking about that lately. About why I did it. About why I'm remembering it now." She turned the cup again, slowly. "I think I knew. Not what, exactly. But I knew there was something to protect you from, and I acted on it before I understood what I was doing." She met Calla's eyes. "Are you well?"
+
+"I'm well," Calla said.
+
+"I've been wondering. Whether it worked." Her voice was steady and measured and underneath it was everything she was not saying — the weight of it, carried across decades, a mother's unexamined instinct translated into action without language or intention, without any understanding of what she was defending against. "I've been wondering what it was I was so afraid of."
+
+"You didn't know," Calla said. "You couldn't have known."
+
+"No." She let out a slow breath. "But I acted anyway. That's the part I keep returning to."
+
+Calla stayed until the light shifted. When she rose, Lisel rose too, and they stood near the door in the way they always stood, and the ordinary ritual of parting was not ordinary and both of them knew it. She held her mother and felt the slight diminishment of her — not in size, not in any physical sense, but in some quality of presence, as though the world she was losing ground to was taking up residence in the space she had always occupied so entirely.
+
+"Come tomorrow," Lisel said.
+
+"Yes," Calla said.
+
+
+*
+
+
+She walked home through the Nave and did not count the people who were not quite there. There were too many now.
+
+At home she sat in the quiet and held what the day had given her. The navigational document, its formal second-generation language describing a window that had opened eleven months ago. The terminal phase. The Architects had always known when it would begin. They had designed the ship's name for the moment it described — a ship called Aphelion reaching the aphelion point, the turn, the farthest distance — and the name had been emptied of meaning across three generations until it was simply the word for home. Until no one thought about what it meant.
+
+She thought about her mother's hands, careful with the cup.
+
+The archive had given her what it could give her. The physical holdings, the ghost files, the monitoring data, the symptom routing, the navigational window — she had followed every thread the Stacks contained and they all resolved into the same absence: a center that had been removed, a truth classified out of existence, the shape of something too large to see directly from within the system designed to hide it. She could not get to it through any route that remained to her.
+
+What she needed now was not a document. It was a person. Someone who had been given the weight of this truth, or had found it, and had carried it long enough to make a private peace with silence. She had known such a person existed for some time. She had been moving toward them in the way you moved toward something that frightened you — sideways, with peripheral attention, never quite directly.
+
+She was done moving sideways.
+
+She thought: tomorrow I will find Vesper.
+
+Then she thought about her mother's hands going still on the table, about a decision made in the dark without language or understanding, about the particular courage of an action taken when you don't know what you're acting against. She thought about this for a long time in the quiet of her quarters, in the recycled air that had been circulating through the same closed system for three generations, carrying what it carried, doing what it was designed to do.
+
+She did not sleep for a very long time.

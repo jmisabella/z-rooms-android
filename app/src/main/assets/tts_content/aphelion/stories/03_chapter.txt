@@ -1,0 +1,118 @@
+CHAPTER THREE
+
+
+She was thinking about the phrase when she reached the mid-Nave junction.
+
+By the design. She had said it this morning without being in the Common to say it, which was unusual — had said it alone in her quarters while the morning light settled into its warmth, and then found it was still with her. Not as a complaint or a protest, nothing that sharp. Just a weight it had not had before, the way a word can shift under examination and become something you hadn't quite been saying all along.
+
+Someone had designed the Aphelion. That was simply true. The Architects had built the ship, had set the parameters, had established the structures that had persisted across three generations of inherited habit and passed-down procedure. This was not a thought she had ever resisted. It was the acknowledged fact of all their lives.
+
+But a signal had been received from outside the ship eleven months ago. Someone had classified it immediately. And in the eleven days that followed, quiet adjustments had been made across multiple domains of the ship's administration. She had spent those eleven months working in the same archive where those traces lived, and she had not known they were there.
+
+She was not angry. She was careful about what she permitted herself to feel when she was working, because feeling was a form of pressure on interpretation and pressure shaped conclusions away from what was there. She walked and held her thoughts at a careful distance and did not look at the man she was passing until she was already past him — a moment too late, she turned back.
+
+He was stopped at the wall panel at the junction. His palm was flat against the surface. Not reading it, not operating it. Just resting his hand against the ship's skin with an attention she could not name. His face was turned toward the wall.
+
+She kept walking.
+
+
+*
+
+
+In the Stacks, Cassian was already at his workspace — the third consecutive day of the Continuance audit, which evidently ran longer than she had assumed it would. She registered his presence without comment, set Davan on the intake queue, and descended to the deep archive.
+
+She had decided in the night what she needed to look for.
+
+The classification code class was not in the reference schema she maintained. That was the shape of it. If she could identify where the code class originated — what category it belonged to, what it was designed to mark — she would know more about the nature of the absent record than the record itself would have told her. A code was a label. Labels had origins. And the Stacks held everything, or nearly everything, because the Stacks were redundant by design.
+
+The foundational classification schema went back eleven generations. She had read it in pieces across the span of her career, never all at once, because there was no occasion that had ever required that. She read it now in the sections most likely to contain an expansion notation — the administrative revisions, the code-class additions, the amendments that had accumulated as the ship's bureaucratic needs evolved over time. The work was slow and required the particular patience of someone who knew how not to hurry and trusted that the answer was present if she followed the thread.
+
+She found it in an annotation layer from several generations back.
+
+The code class belonged to a category of records concerning external communications intercepts.
+
+She read it twice. Then she read the annotation language around it, which was dry administrative prose, entirely unremarkable, the language of a bureaucratic system expanding to include a new function. It did not say anything dramatic. It said that this code class was established to handle records involving transmissions received from outside the ship, and that such records would be administered under Continuance retention protocols.
+
+External transmissions. Something received from beyond the Aphelion.
+
+She sat with this in the dim steady light of the deep archive. The environmental hum. The distant sound of Davan working at the intake desk, one level above.
+
+She pulled the five documents again and read them with this as the frame.
+
+The demographic record — population projections, resource modeling — contained the phrase terminal phase parameters in its methodology section. She had read it as standard modeling language, an end-date convention. She read it again now. Terminal phase. The projection had been built with a terminus in its calculations — a point at which the model resolved into a final state. The kind of endpoint you modeled for if you had information about an actual endpoint.
+
+The medical inventory abstract contained an authorization for increased stores. The kind of increase you prepared for if you were anticipating conditions that did not currently exist — a period of elevated demand, a disruption to normal function, something the projections told you was coming.
+
+She did not pursue the interpretation further than the evidence warranted. The evidence warranted this much: eleven months ago, something from outside the ship reached them. The Continuance classified it instantly. In the eleven days that followed, five documents across five separate domains were filed, all pointing back to that absent center. The documents showed quiet adjustments — projections revised, supplies increased, models updated with new parameters.
+
+Whatever the signal had said, they had acted on it.
+
+There was a destination. The signal had told them something about the destination. And the Continuance had known for eleven months, and the Common still said by the design every morning, and the clinic still attributed disrupted sleep to cycle irregularity, and no one had been told.
+
+
+*
+
+
+Cassian came down from the upper level in the mid-afternoon, the physical records audit apparently at a pause. He moved with his usual ease, set something on the side table, glanced over the main floor. "How is the work?" he said.
+
+"Steady." She was sealing the deep archive layer back into its housing, which was an ordinary thing to do at this point in the day and carried no visible significance.
+
+He stood for a moment in the comfortable way he often stood — present without demanding anything of the space. Then: "You know that some of the older Continuance code classes aren't in the standard reference schema." He said it lightly. Collegial, informational. "If you come across something outside your schema during routine review, it's worth routing through me before you spend time on it. Those old classes tend to generate administrative questions that need seniority clearance to resolve cleanly."
+
+She looked at him. "I'll keep that in mind."
+
+He nodded. Said something brief about the audit timeline. Went back up.
+
+She stayed where she was until she was certain her face was doing nothing.
+
+He might have come down with that note for any number of reasons. He managed the Stacks with a light hand, which meant periodic guidance on things she might encounter that required his clearance. It was entirely possible that this was exactly that — a senior archivist noting something relevant before she spent unnecessary time on a dead end. Warm, collegial, appropriate.
+
+The timing was not something she could account for with certainty.
+
+She finished the remaining work and closed the systems and went to find her mother.
+
+
+*
+
+
+Lisel was moving when Calla arrived — had been moving, by the look of it. There was a quality of contained energy in her that settled when she saw who it was, and she opened the door the rest of the way and did not say you look tired, which she always said. She poured water instead and let the small heating element work.
+
+"Four patients this week," she said, once they were sitting. She held the cup in both hands. "Similar complaints. Disturbed sleep. Difficulty holding concentration. Two of them reported visual disturbances — not dramatic, peripheral. Lights in the wrong place. Shadows." She used the medical worker's careful language, the precision of someone who had not yet decided what they were describing. "There was a communication from administration some months ago. Sleep cycle irregularity."
+
+"Is that what you think it is?"
+
+Lisel looked at the cup. "I've seen cycle disruption produce strange effects. It's a reasonable explanation." She was quiet for a moment. "Four in one week is not unusual in itself."
+
+"No," Calla said.
+
+They sat. The heating element clicked off. Outside in the corridor someone passed, footsteps receding toward the far end of the tier.
+
+"You have something on your mind," Lisel said. Not a question.
+
+"A discrepancy in the archive. I'm following a thread." She said it plainly, which was mostly true, and which was all she was prepared to say.
+
+Her mother held the look for a moment — that precise maternal attention, the one Calla had never been entirely successful at deflecting — and then released it, with the patience of someone who knew there would be other opportunities.
+
+"Come again soon," she said, when Calla rose to leave.
+
+"In a couple of days."
+
+
+*
+
+
+On the Nave she walked slowly.
+
+A girl she didn't know — twelve, perhaps thirteen — was standing at a corridor junction with her face turned upward toward the ceiling. Not afraid. Not lost. Just attending to something with a quality of focused stillness that made no sense given that there was nothing there. Nothing above the junction but the ordinary ceiling of the ship at the meeting point of two corridors. Calla watched her for the space of several steps. The girl did not look down.
+
+Calla walked on.
+
+At home she sat in the quiet and held the shape of what she knew.
+
+Somewhere on the Aphelion, there was a destination. Someone had learned something specific about it eleven months ago and had made certain that learning would not reach anyone else. The Continuance had been managing it since — adjusting projections, preparing supplies, maintaining the daily phrase and the cultural abstraction of the Arrival as though none of it had any referent. As though the word were still just a word, still just the concept of an inevitability that asked nothing of anyone.
+
+She thought about the medical stores increase. The projected additional demand. The four patients in one week, reporting lights in the wrong places.
+
+The thread was still there. She had not reached its end.
+
+She would go back down tomorrow.

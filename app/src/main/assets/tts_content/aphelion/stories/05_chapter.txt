@@ -1,0 +1,132 @@
+CHAPTER FIVE
+
+
+She worked in the deep archive and wrote nothing.
+
+The log terminal sat idle in the upper room — she was aware of it as a constant, some residue of professional reflex, the pull toward documentation that had never before required deliberate suppression. Now it did. Every observation she made she carried only in her mind, adding it to the architecture of what she knew with a precision that was its own kind of record-keeping, private and unindexed. She could not decide whether this was a betrayal of the work or the purest form of it. She had stopped trying to decide.
+
+The monitoring data from the biological filtration systems had been filed in the administrative archive — not the research division, not medical, but the administrative layer that answered to the Continuance. She had found the access path the previous day and spent the morning working through what it contained.
+
+The data was not in a form she had been trained to read. She was an archivist, not a biologist — the structure of what she was looking at required translation she could only approximate. But the archive's design was her domain, and she knew what the output of a standard pathogen surveillance profile looked like because she had catalogued dozens of them across her career, the routine biological monitoring the ship's systems produced continuously as a condition of maintaining human life in a closed environment. She knew what ordinary looked like.
+
+What the additional sensors had been collecting for eleven months did not look ordinary.
+
+She spent the better part of two hours verifying this — reading the routine monitoring output against the elevated-frequency data from the additional attachment points, noting the discrepancy between what she could observe and what she could fully name. The agent present in the elevated data had a structural characteristic she had no referent for: not random in the way natural pathogens were random, not the accumulated complexity of something that had evolved over time and carried the scar tissue of its own history. This had a different quality. An architecture to it. Symmetrical in the way that no natural thing she had ever catalogued was symmetrical.
+
+She might have been wrong. She held this with the same careful distance she maintained around all her conclusions. She was reading data she was not equipped to fully interpret. But she had spent twenty-two years learning to feel the difference between accumulation and construction, between the record of something that grew and the record of something that was made. She knew what she was looking at.
+
+
+*
+
+
+She opened the routed patient records next.
+
+The symptom routing protocol had been in operation for eleven months. Eleven months of cases presenting with disrupted sleep and perceptual disturbances and behavioral irregularities not attributable to a diagnosed physical cause, all routed to the administrative archive rather than to anyone qualified to investigate them. She had known this was happening. She had not yet looked directly at what had accumulated.
+
+She read through them in the order they had been filed. De-identified in the standard way — patient codes assigned on intake, no names. Each written in the careful clinical language of someone trained to observe and document without interpretation. The form was familiar: initial presentation, symptom history, attending notes across multiple visits. Medical language, economical and precise.
+
+After the seventh report she stopped.
+
+The language was familiar. Not the content — the content was another case among many, initial presentation consistent with the earlier reports, symptom progression carefully noted across four visits. It was the language. The specific construction of a phrase. A clinical annotation style she had been reading for as long as she had been able to read anything — the particular economy of someone who had spent decades learning to say a great deal with very few words, whose writing had the quality of thought expressed directly without intermediate translation. She had seen it in notes left on her childhood meals, in letters passed across the years, in the brief communications of a medical worker whose time was always partially elsewhere.
+
+She checked the date of the first entry.
+
+Eight months ago.
+
+She checked the dates of the subsequent entries. Monthly at first, then every two weeks, then weekly. The pattern of a conscientious clinician tracking something with increasing attention. The final entry was dated twenty-three days ago.
+
+She sat in the deep archive in the dim unchanging light and held what she was looking at.
+
+Her mother had been attending the clinic for eight months, documenting herself in third person, filing her own case through a system she had been directed to use — a system designed to ensure that cases like this one were observed by the administrative tier and not by anyone with the capacity to ask what they were seeing. Lisel had followed the protocol she had been given. The protocol had ensured that no colleague saw what she was experiencing. Fifty cases into the same administrative archive as all the others, indistinguishable in the index from the maintenance worker, the technician, the girl standing in the corridor with her face turned toward the ceiling.
+
+The filings had stopped twenty-three days ago.
+
+Not because she had improved.
+
+
+*
+
+
+She heard him on the stairs before she saw him.
+
+Cassian had never come into the deep archive. In twenty-two years — first working under him, then beside him, then alone in the Stacks' lower sections — she had never seen him in this space. He had his elevated workspace, his audit materials, the comfortable authority of the upper floor. The archive deepened by rank and no one came down here uninvited.
+
+She heard his steps on the lower stairs and did not look up from the terminal.
+
+He stopped at the base of the stairs. She could hear him settling into the space — the slight adjustment of weight, the particular way a person occupied a room they had entered with intention.
+
+"Your archive access is being reviewed," he said. "I wanted you to hear it from me."
+
+She looked at him.
+
+He was standing with his hands at his sides, and he looked like himself — like the man she had worked beside for two decades, whose judgment she had trusted without examination. He was exactly himself. That was still the most unsettling thing. Whatever he was doing, he was not doing it falsely.
+
+"Review by whom," she said.
+
+"The administrative tier. Clearance assessment." He said it without the inflection that might have passed for warmth, which meant the warmth was gone. Not replaced by hostility — there was nothing hostile in his face. Something colder and more functional. The relationship had been real. This was what remained when the relationship was set aside. "I wanted you to know before you came in tomorrow."
+
+She thought she saw something move through his expression — the cost of it, the residue of what had been real and was now serving a different purpose — and then it was gone, and he turned and went back up the stairs, and she listened to his steps receding through the floor above until the deep archive was quiet again.
+
+She did not move for a long time.
+
+
+*
+
+
+She went directly from the Stacks to her mother's quarters. She did not wait until the end of the shift.
+
+Lisel answered the door on the second knock. She had always answered on the first. Calla stood in the doorway while her mother found herself — three seconds, four — and adjusted to the fact of who was there.
+
+"I wasn't expecting you today," Lisel said.
+
+"I wanted to come early."
+
+Lisel stepped back and Calla entered and looked at her mother in the particular light she had always known — the desk lamp, the dark-leafed plant, the printed photographs — and saw what she had been seeing for weeks without permitting herself to name it.
+
+They sat. Lisel began to say something about the clinic and lost the thread midway, her attention moving past Calla to the wall and back. She found the sentence and completed it. Her hands had a restless quality on the table between them that Calla did not recognize — not anxious, not nervous, something more involuntary than that. A reaching.
+
+"I've been sleeping strangely," Lisel said, after a while.
+
+"You've mentioned it."
+
+"Not just the sleep." She was quiet for a moment in the way of a person choosing words carefully, and Calla recognized the particular quality of that care — the medical worker's reflex, precision as a habit of decades — and felt its wrongness because this was not a case report. This was her mother, speaking to her carefully. "There are sounds sometimes. Below the hum. I know that isn't quite accurate — it's more a quality of direction. As though something has a location." She stopped. "I've had patients describe similar things. I know what I'm describing."
+
+Calla said nothing.
+
+"I keep returning to the same section of the maintenance corridor," Lisel said. "Near the processing junction. Not deliberately. I find myself there. I'm not certain how." She met Calla's eyes. The steadiness in her gaze was still Lisel — fully present, the clear steady attention she had always had — and the steadiness was in the process of becoming something else, and Calla could see both things at once. What had always been her mother and what was happening to it. "I've been documenting it. For some time now."
+
+She said this last part the way medical workers said things they had decided to stop pretending they had not thought about.
+
+Calla held the edge of the table. She held everything that was in the table, in the room, in her hands — the symmetrical architecture in the monitoring data, the fifty de-identified files, the clinical handwriting she had learned to read before she learned to read anything else, the final entry dated twenty-three days ago. She held all of it below the level of words, in the place where things lived that could not yet be said.
+
+"You'll tell me when it changes," she said.
+
+"Yes."
+
+"And if you need to come off shift."
+
+"Yes." Lisel's hands went still on the table. She was looking at Calla with the precise attention of a person who knew more than she was saying and understood that the person across from her also knew more than she was saying, and who had decided that this — the two of them, the same room, the same light, the plant alive on the desk — was the thing to hold rather than the rest of it.
+
+Calla stayed until the evening cycle began to shift the light.
+
+At the door Lisel held her and this time it was Lisel who held on a breath longer before she stepped back.
+
+"Come tomorrow," she said. Not in a couple of days.
+
+"Yes," Calla said.
+
+
+*
+
+
+She walked home through the Nave and the ship conducted its evening business around her. Near the mid-junction a man stood with his palm flat against the wall panel — not reading it, not operating it, just resting his hand against the ship's skin with an attention she recognized. She did not look at him for long.
+
+At home she sat in the dark that was not dark, just the evening cycle, the light the Architects had designed to approximate the passage of time.
+
+She knew the virus was not natural. She could not prove it conclusively — not with what she had access to, not with what she had been trained to read. But she knew what it was to look at a record and feel the difference between something that had grown and something that had been constructed. The biological filtration data was the record of something that had been constructed. Someone had made it. And someone — or the same someone, or the system they had built — had placed it where it needed to be, so that it could move through the air, the same recycled air the population had breathed for three generations, that Lisel had breathed, that the children she passed each morning in the Nave were breathing now.
+
+She could not write this down. She could not say it to anyone who could act on it. She could not change what had already been done.
+
+She sat in the ventilation hum that pressed around her from every surface, unchanged, exactly as it had always been — carrying what it carried, as it had always carried it — and thought about tomorrow, which she had promised, and about her mother's hands going still on the table. She held this with the same deliberate precision with which she held everything now.
+
+She would go tomorrow. That was the shape of what was true.
