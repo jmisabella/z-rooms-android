@@ -1,11 +1,8 @@
 CHAPTER EIGHT
 
-
 The acknowledgment phrase came up at the start of the meal and she said it with the handful who still said it, and let it settle, and finished eating, and left.
 
-
-*
-
+--
 
 She went down before Davan arrived.
 
@@ -19,7 +16,7 @@ She sat at the terminal and wrote.
 
 She wrote it as she had been trained to write any holdings document: precisely, with sources cited and dates noted and language stripped of everything that was not necessary to the fact being recorded. She was an archivist. She knew how to be exact. She let herself be exactly that.
 
-*Aphelion.* She wrote the word and then its meaning, which the word had always held and which three generations had spoken without knowing they were speaking it. The point of maximum distance from the solar system of origin. The farthest reach. The turn. Not a name given in aspiration. A technical designation for a moment — the moment at which the people who had built this vessel had always intended to retrieve it, to take back the ship, to take back the data it had accumulated across three generations of human lives. The word for home had been the word for what they were, from the first day the first passengers had spoken it. It had not needed hiding. It had hidden itself in the ordinary way a truth could shelter inside something everyone used and no one examined.
+--Aphelion.-- She wrote the word and then its meaning, which the word had always held and which three generations had spoken without knowing they were speaking it. The point of maximum distance from the solar system of origin. The farthest reach. The turn. Not a name given in aspiration. A technical designation for a moment — the moment at which the people who had built this vessel had always intended to retrieve it, to take back the ship, to take back the data it had accumulated across three generations of human lives. The word for home had been the word for what they were, from the first day the first passengers had spoken it. It had not needed hiding. It had hidden itself in the ordinary way a truth could shelter inside something everyone used and no one examined.
 
 She wrote the shape of the five documents and the empty Continuance slot they had all pointed toward. The ghost file, the gap in the index where a signal's removal had been imperfectly erased. The code class that had told her what kind of signal it had been: external transmission, received from outside the ship, classified immediately, the retirement trail modified to eliminate the record of modification. A signal had arrived eleven months ago and the Continuance had ensured the archive could not show that it had.
 
@@ -29,11 +26,11 @@ She wrote: the biological monitoring data that had accumulated in the administra
 
 She wrote the navigational document from the second-generation holdings — she had handled the physical document herself, had read its formal period language, had done the arithmetic. The terminal phase window, as described in the foundational specifications, had opened eleven months ago.
 
-She wrote what Vesper had said. She noted the source and the context and the date. She did not editorialize. She did not have to. The flat language of someone who had carried a fact long enough that it had become as ordinary as breathing: *the destination was never intended for anyone alive on this ship.* A terminal phase induction mechanism. Biological in nature. Designed to generate measurable population-level response data in the final interval of the mission. *Every structure you have worked inside your entire life was designed by them, for this.*
+She wrote what Vesper had said. She noted the source and the context and the date. She did not editorialize. She did not have to. The flat language of someone who had carried a fact long enough that it had become as ordinary as breathing: --the destination was never intended for anyone alive on this ship.-- A terminal phase induction mechanism. Biological in nature. Designed to generate measurable population-level response data in the final interval of the mission. --Every structure you have worked inside your entire life was designed by them, for this.--
 
 Including the archive.
 
-She wrote: including the archive. And below it, in the same even hand: *The redundancy built into this system was also a structural guarantee that what was placed here would persist. This record was placed here by the senior archivist in the knowledge that it was built to last.*
+She wrote: including the archive. And below it, in the same even hand: --The redundancy built into this system was also a structural guarantee that what was placed here would persist. This record was placed here by the senior archivist in the knowledge that it was built to last.--
 
 She reviewed it once for accuracy, corrected two imprecisions of language, and let it stand.
 
@@ -46,15 +43,14 @@ The experiment had been designed to observe and record. She had done what an arc
 She closed out the holdings entry and climbed back through the lower decks into the ship.
 
 
-*
-
+--
 
 The Nave was in its mid-morning rhythm. She walked it without attending to the particular wrongnesses she had spent months cataloguing, the catalogue of faces at varying distances from themselves. She knew what caused it. She had made her record of what caused it. There was nothing more to extract from watching.
 
 Near the maintenance junction at the far end of the residential tier she slowed as she passed, the way she had learned to slow. Five people, six — more than the last time she had come past. The inward gaze. The body present and the attention elsewhere. She did not stop. She walked on toward her mother's door.
 
 
-*
+--
 
 
 Three knocks, and a long interval, and then Lisel.
@@ -94,7 +90,7 @@ The ventilation hum pressed its familiar sound from the walls. Outside in the co
 The pull continued its patient work below all of it. Calla felt not the pull but the knowledge of it — the weight of what she knew was happening in the closed air of this room, in her mother's body, with mechanical precision, on schedule, exactly as designed. She held this and did not move. The grip of her mother's hand was real and immediate and she stayed inside it.
 
 
-*
+--
 
 
 At some point in the long evening Lisel said: "I know I'll go to the junction eventually. I won't always be able to stop myself."
