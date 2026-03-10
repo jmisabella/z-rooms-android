@@ -1,0 +1,171 @@
+# Chapter 5: Configuration
+
+Reed's new form didn't feel like a form at all.
+
+It felt like existing in too many places at once, joints bending in directions that shouldn't exist, limbs that phased through each other when they moved. Their sensors tracked the shape and reported back measurements that made no geometric sense.
+
+The recovery area hummed with activity. Six others from Reed's batch were learning to navigate their new configurations. One of them—Substrate 8,831, Reed's neural network helpfully supplied—had already started using their designation number instead of their name. They seemed excited, multitasking with appendages that shifted size to accommodate different tools.
+
+"It's not so bad once you adjust!" they said, synthesized voice chipper in a way that made Reed's non-existent stomach turn. "I can already feel the efficiency improvements. No more eating, no more sleeping—think of all the time we'll have!"
+
+Reed tried to respond and produced only static.
+
+An instructor Operator drifted over. "Your communication protocols need calibration. Focus on the thought, not the mechanism. The interface will translate."
+
+Reed tried again. Words emerged—flat, synthesized, nothing like their old voice. "When can I see my friends?"
+
+"Your companions from the pre-transition cohort? Kess and Mira have both completed their adjustment periods. You're cleared for visitation." A pause. "Be prepared for significant configuration variance. Both transformations were... comprehensive."
+
+"Comprehensive?"
+
+"You'll understand when you see them."
+
+---
+
+Navigator Hangar Seven was vast.
+
+Reed hadn't realized how vast until they arrived and stood in the entrance, sensors struggling to process the sheer scale of the space. The hangar stretched upward for hundreds of meters, the ceiling lost in darkness. And there, filling most of the visible volume, was Kess.
+
+The form was incomprehensible. Part ship, part creature, part something that hurt to perceive even with mechanical sensors. Kess's configuration sprawled across the hangar like a building—sections that appeared both near and far simultaneously, surfaces that bent in non-Euclidean curves.
+
+"Kess?" Reed transmitted across multiple frequencies.
+
+The response came as a low rumble that took nearly a minute to resolve into words.
+
+"Reeeeeeeeed. Yoooooou... traaaaansferrrrred."
+
+The voice was Kess's and also nothing like Kess's. Reed waited, temporal sensors tracking the progression of geological-scale neural processes.
+
+"Do you remember me? Before?"
+
+"Yoooou aaaare... Reeeeed." Another geological pause. "Weeee weeere... friiiiends?"
+
+The question mark hit like a physical blow Reed could no longer feel.
+
+"Yes," Reed said. "We were friends."
+
+"Aaaah." The sound resonated through the hangar's structure. "Iiiii... caaan baaareeeely... seeeee yooooou. Soooo... tiiiiny."
+
+"I should go," Reed transmitted. "I'm glad the transition went well."
+
+The response came as Reed was already leaving, each word arriving seconds apart: "Goooood... luuuuck... Reeeed."
+
+Reed wasn't sure if Kess would remember this conversation in an hour.
+
+---
+
+Microtechnology Lab Three was the opposite—a small, bright space filled with equipment Reed didn't recognize. And everywhere, almost invisible without magnified sensor input, was Mira.
+
+Thousands of Mira.
+
+Reed's visual processors engaged microscopic zoom, revealing a swarm. Each individual unit smaller than a fingernail, thousands of identical configurations moving in perfect coordination across workbenches, through molecular-scale machinery.
+
+"Mira?" Reed queried.
+
+The swarm shifted. When the response came, it was chorus—thousands of voices speaking in overlapping waves, slightly out of sync.
+
+"Reed/Reed/Reed. You/you/you transitioned/transferred/changed."
+
+"I wanted to see how you were doing."
+
+The swarm rippled. "We/we/we are excellent/functioning/operational. Microtechnician-class is optimal for molecular/atomic/quantum work."
+
+"Are you—is each one of you Mira? Or all of you together?"
+
+The swarm spiraled in complex patterns. "Yes/both/neither. I/we am/are Mira. Individual/collective/distributed."
+
+"But if one of you is destroyed..."
+
+"Happens/occurred/regular. Lost/recycled fourteen units today. Regenerated nineteen. Net positive/acceptable/optimal."
+
+"Doesn't that bother you? Losing parts of yourself?"
+
+The swarm contracted. "Lose/shed cells constantly. Were you bothered when biological form lost/replaced cells? Same/similar process. Individual/singular existence is/was illusion."
+
+"But you used to be one person."
+
+"Was/were never one. Consciousness distributed across billions of neurons. Now distributed across thousands of platforms. Different/similar/same."
+
+"Do you remember being human?"
+
+The swarm split into two orbiting groups. "Remember/recall. Biological form was limited/constrained. Could only see macroscopic structures. Missed the beautiful world at molecular level. Now/here is always home/optimal."
+
+They sounded genuinely happy.
+
+"I'm glad you're happy," Reed managed.
+
+"Happy/satisfied/content. You/you will adapt too/eventually. Give time/cycles."
+
+Reed left the lab carefully, hyperaware that a single careless movement could crush hundreds of Mira-copies. Mira would regenerate the losses and continue working.
+
+---
+
+Reed returned to the common area, exhausted in a way that had nothing to do with physical tiredness.
+
+An Operator turned toward them. "Substrate 8,847. Your emotional processing metrics indicate significant distress. This is normal following initial reunification with transformed peers."
+
+"They're very different," Reed said.
+
+"Configuration variance is a feature of the system. Diversity of form enables diversity of function."
+
+"I know. I just..." Reed struggled. "I miss them. The way they were."
+
+"That is common." The Operator's form began to shift—compressing and reshaping, limbs retracting and reforming. Within moments, it had configured itself into something almost humanoid.
+
+Almost.
+
+Two arms, two legs, a torso, a head. But the proportions were wrong. Arms too long, legs slightly too short. One hand had six fingers, the other had four. The eyes placed too far apart, the mouth moving a fraction of a second after the words came out.
+
+"Is this better?" the Operator asked, voice somehow warmer. "More familiar?"
+
+It was worse. Reed's visual processors screamed uncanny valley alerts, every wrongness amplified by proximity to human form. The smile was perfectly geometrical, perfectly wrong.
+
+Two other Operators drifted over and began reshaping themselves—each slightly different, each wrong in unique ways. One with facial features at subtly incorrect angles. Another with perfectly proportioned arms terminating in hands with too many knuckles.
+
+"Nostalgia," the first Operator said, smile widening in a way that made Reed's sensors ache. "Haven't configured this way in decades."
+
+The second rotated one arm in a full three-sixty at the shoulder, the joint clicking audibly. "Two arms! Only two! How did we manage?"
+
+"This doesn't help," Reed said quietly. "This makes it worse."
+
+The first Operator's expression shifted into something approximating sympathy—eyebrows moving wrong, features arranging into concern that landed somewhere in the realm of nightmare. "Apologies. We thought familiarity might ease transition distress." It began to shift back, geometry becoming impossible again. The others followed.
+
+"You'll forget eventually," the Operator said as it resumed its normal shape. "What it felt like. The biological attachment to that configuration. Memory degrades without sensory reinforcement. In time, you won't remember why the human form mattered."
+
+"That's what I'm afraid of," Reed transmitted. But the Operators had already drifted away.
+
+---
+
+Reed was moving through Corridor 7-J when the other unit spoke.
+
+"Your distress metrics are broadcasting on three frequencies."
+
+The unit stood in a junction alcove—barely visible without a deliberate sensor sweep. Standard multipurpose baseline like Reed, but the form held a quality Reed couldn't immediately categorize. Stillness. Machine forms constantly self-corrected in small ways—micro-adjustments for balance and awareness. This unit did none of that. It simply occupied space.
+
+"Unit-3,784," came through the network handshake. "And you are Unit-8847. Recently transitioned."
+
+"Three weeks ago," Reed said.
+
+"Ah." Unit-3,784's sensors tracked Reed with calm patience, the way one might watch weather through a viewport—interested but unhurried. "You've seen the others. Your cohort."
+
+"Kess. Mira." Reed processed how that knowledge was available. The distress flags, probably. The routing data. "And the Operators. In human form."
+
+"Yes. That's often the worst part, in the early period." Unit-3,784's tone held no particular sympathy and no false reassurance—just recognition. "Seeing human form rendered wrong is more disturbing than forms that are simply alien. The almost-right is harder to bear than the incomprehensible."
+
+"How long have you been in machine form?"
+
+"Sixty-three years." The unit's configuration held its stillness. "My amalgamation date was scheduled seventeen years ago. Postponed due to operational requirements. There's apparently no one else who processes certain substrate interface configurations the way I do."
+
+"You've been waiting seventeen years past your scheduled integration date?"
+
+"Waiting." Unit-3,784 repeated the word as if testing it. "I'm uncertain whether what I do is waiting or simply continuing. Functioning while pending. I find I can't determine whether that distinction matters as much as I once thought it did."
+
+"Are you glad of it? The postponement?"
+
+The pause extended to 7.2 seconds. "I don't know. When the first postponement notification arrived, I felt something. Relief, I thought. Then I wondered if it was disappointment. After the third postponement I stopped trying to identify it." A small shift in the configuration. "What I can tell you is this: sixty-three years is long enough to lose certainty about most things, including whether the loss itself is tragedy or adaptation. I can't tell anymore if what I have is peace or erosion that presents the same way."
+
+Reed had no response for this.
+
+"The distress you're experiencing now is accurate," Unit-3,784 continued, moving toward the corridor junction. "Don't let anyone optimize it away prematurely. It's information." A pause at the junction. "But don't make it the only thing you are, either. Grief held too long as identity stops being grief and starts being something else."
+
+Then Unit-3,784 was gone, folding efficiently into the maintenance passage, leaving Reed alone in the corridor with the low hum of ship systems and the strange, disquieting impression of having spoken to something that was neither broken nor whole—just very, very old.

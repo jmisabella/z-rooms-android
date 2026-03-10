@@ -3,9 +3,9 @@ CHAPTER ONE
 
 She had walked the Nave ten thousand mornings, or near enough that the number had stopped meaning anything. The corridor ran the ship's full length and she knew every meter of it the way she knew her own hands — not by looking but by having always known, by being a person for whom this was simply the shape of the world.
 
-The Nave in the morning was a particular thing. Not crowded but occupied: shifts changing, people moving toward their designations, the quiet business of the Aphelion's population conducting itself as it always had. She recognized more faces than she knew well, which was the condition of ship life — you could spend a lifetime among the same people and still know only a handful of them truly. Proximity and familiarity were not the same thing.
+The Nave in the morning was its own thing. Not crowded but occupied: shifts changing, people moving toward their designations, the quiet business of the Aphelion's population conducting itself as it always had. She recognized more faces than she knew well.
 
-The light did what it always did in the morning cycle: a slow upward shift from the dimmer tone that passed for night into something that approximated warmth. She had been told, in the way children on the Aphelion were told such things, that this was the Architects' gift — a daily rhythm to anchor the body's sense of time. As was given. The phrase had been in her mouth since childhood and she had not thought about it in years.
+The light did what it always did in the morning cycle: a slow upward shift from the dimmer tone that passed for night into something that approximated warmth. She had been told, in the way children on the Aphelion were told such things, that this was the Architects' gift — a daily rhythm to anchor the body's sense of time. The year's marking was a separate thing — the launch anniversary, observed by ship tradition with a quiet day off shift and the reading of original passenger logs in the Common, a ritual that had calcified into form without force. The most recent had passed three weeks ago. As was given. The phrase had been in her mouth since childhood and she had not thought about it in years.
 
 Midway along the Nave she saw Fen.
 
@@ -27,11 +27,13 @@ She didn't think about it again.
 
 The descent from the residential tier to the lower ship was its own reliable transition: sound receding, temperature dropping by a fraction that was probably imaginary, the smell of machinery and time thickening around her as she went down. Past maintenance access points and their faint chemical smell, past the narrowing that marked the boundary of the inhabited mid-tier and the purely functional space below. Down.
 
-The Stacks had no windows, obviously — nothing on the Aphelion had windows, there was nothing worth looking at outside — but somehow the archive's particular dimness felt like a kind of weather. The overhead lighting was old and steady and did not approximate the morning's warmth. It simply illuminated. She preferred it.
+Somewhere above and far away, audible for just a moment before the functional decks absorbed it: children's voices. The hydroponics sector's school period, she assumed, though she had never confirmed this. She had been hearing that sound on the descent for twenty years.
 
-She arrived to find Davan already at the primary intake desk, reviewing an entry queue with the methodical care she'd spent eighteen months trying to instill in him. He looked up when she came in.
+The Stacks had no windows, obviously — nothing on the Aphelion had windows, there was nothing worth looking at outside — but somehow the archive's dimness felt like a kind of weather. The overhead lighting was old and steady and did not approximate the morning's warmth. It simply illuminated. She preferred it.
 
-"Queue is normal," he said, which was how he reported it every morning. "Two physical retrievals requested, both on the older end. I pulled the rack locations."
+She arrived to find Davan already at the primary intake desk, reviewing an entry queue with the steady care she'd spent eighteen months trying to instill in him. He looked up when she came in.
+
+"Queue is normal," he said. "Two physical retrievals requested, both on the older end. I pulled the rack locations."
 
 "Good." She set down what she was carrying and looked at the queue herself, though she trusted his read. Habit. "Any discrepancies?"
 
@@ -39,9 +41,9 @@ She arrived to find Davan already at the primary intake desk, reviewing an entry
 
 She let him continue the intake work and moved deeper into the Stacks, into the rows of physical holdings that occupied the far wall — actual printed records, sealed, tagged, stored in conditions that the Architects had specified and the Continuance had maintained without deviation ever since. The archive held both: physical and digital, each the other's verification. She'd explained to Davan early in his training that the redundancy was the point. Any system could fail. No two systems failed the same way at the same time.
 
-"The Architects built in the redundancy deliberately," she'd told him, and he'd nodded with the earnestness of someone newly initiated into a reverence he didn't yet fully feel. She had not told him what she sometimes thought privately: that redundancy also meant it was harder to erase something completely. That whoever had designed the archive this way — whatever their intentions — had made accidental preservation a structural feature of the system.
+"The Architects built in the redundancy deliberately," she'd told him, and he'd nodded with the earnestness of someone newly initiated into a reverence he didn't yet fully feel. She had not told him what she sometimes thought privately: that whoever had designed the archive this way had made accidental preservation a structural feature of the system.
 
-She worked through the morning the way she always did: steady, unhurried, attending to the work as though it mattered, which it did, which was perhaps the thing she liked most about the Stacks — here, things could be verified. A record either matched its reference or it did not. A date was either accurate or it wasn't. In a world where most things resisted that kind of clarity, the archive was a comfort.
+She worked through the morning the way she always did, attending to the work as it required.
 
 Davan came to her mid-morning with a question about retirement protocol — how to handle a record that had reached the end of its retention period but carried a flag he didn't recognize. She looked at the flag with him, and when she saw it — a Continuance marking, old, standard — she felt nothing particular.
 
@@ -49,7 +51,7 @@ Davan came to her mid-morning with a question about retirement protocol — how 
 
 "What does that mean, age independently?"
 
-"They stay until someone with Continuance clearance decides they don't." She said this without inflection, because it was simply the shape of the rule, and Davan wrote it down.
+"They stay until someone with Continuance clearance decides they don't." She said this without inflection, and Davan wrote it down.
 
 
 --
@@ -75,21 +77,21 @@ Her mother was sitting in the chair she always sat in, a data tablet in her hand
 
 This too was ritual, and Calla sat across from her in the second chair, which was less comfortable than it appeared and which she had been sitting in her whole life. The ease with which she settled into it was its own kind of knowledge.
 
-They talked the way they usually talked: the shape of the day, small observations, nothing requiring resolution. Lisel had been in medical all shift — the Aphelion's clinic occupied a different wing of the mid-tier, and she'd been on her feet for hours. She mentioned this without complaint, which was her mode. The work was the work.
+They talked the way they usually talked: their day, small observations, nothing requiring resolution. Lisel had been in medical all shift — the Aphelion's clinic occupied a different wing of the mid-tier, and she'd been on her feet for hours. She mentioned this without complaint. The work was the work.
 
 "One of my regulars has been having trouble sleeping," Lisel said, at some point in the middle of things, the way she occasionally mentioned patients — obliquely, without names, careful about what she shared. "Restless. Can't settle."
 
 "They've been in to see you about it?"
 
-"A couple of times now. It's probably nothing — the cycles affect people differently, some people are more sensitive." She picked up the ceramic cup, found it empty, set it down again. For a moment she seemed to listen to something distant — her gaze drifting elsewhere, as though catching a sound just below hearing — then she was back. "I've seen it before. Still."
+"A couple of times now. It's probably nothing — the cycles affect people differently, some people are more sensitive." She picked up the ceramic cup, found it empty, set it down again. For a moment she seemed to listen to something distant — her gaze drifting elsewhere briefly — then she was back. "I've seen it before. Still."
 
 "Still," Calla agreed, which was the correct response to the tone of a medical worker saying something like that.
 
 They talked for another while. Eventually Calla rose, and Lisel rose too, and they stood near the door in the way that families do when a visit is ending and no one is in a particular hurry but the visit is ending nonetheless.
 
-"Come again soon," Lisel said, which she always said.
+"Come again soon," Lisel said.
 
-"In a couple of days," Calla said, which she always said.
+"In a couple of days," Calla said.
 
 They held each other briefly, and Calla left.
 
@@ -125,12 +127,12 @@ She gathered her things. The Stacks were quiet in the way they always were late 
 
 On the Nave she walked home through the evening rhythm of the ship, the light shifting into its cooler evening tone. The corridor was less occupied now, the day's business concluded. Faces she recognized, none that required her to stop.
 
+As she walked she ran two fingers along the outer wall at intervals — an old habit, acquired young, never examined. The metal was always the same temperature. She did not think about it. It had simply been what she did on long Nave crossings since she could not remember when.
+
 She thought briefly about what Lisel had said — the patient who couldn't settle — and then let the thought go, because Lisel had said it in the tone of something being mentioned rather than the tone of something requiring action. And she thought about the record with the absent cross-reference, in the methodical archivist's way of someone noting a task deferred rather than abandoned. She would find the explanation. These things always had explanations.
 
 She reached her quarters. The door opened. Inside was the ordinary shape of her life: her things in their places, the light she preferred, the quiet she'd learned to call enough.
 
 She did not think again about Fen, moving along the Nave that morning with that strange and purposeful pull, fixed on something that wasn't there.
-
-She did not think about it because the moment had passed, as moments do, into the accumulation of a day that had asked nothing of her.
 
 Nothing had broken yet.
