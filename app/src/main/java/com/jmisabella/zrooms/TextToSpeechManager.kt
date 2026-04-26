@@ -639,6 +639,8 @@ class TextToSpeechManager(
         // IMPORTANT: Strip <<PB>> marker before speech (never spoken aloud)
         val cleanedPhrase = phrase
             .replace("<<PB>>", "")
+            .replace(Regex("—+"), ", ")   // em dash runs → pause cue
+            .replace(Regex("–+"), ", ")   // en dash runs → pause cue
             .replace("-", " ")
             .replace("#", "")
             .replace("*", "")
