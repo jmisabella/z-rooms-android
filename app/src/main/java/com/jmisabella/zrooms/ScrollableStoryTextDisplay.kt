@@ -23,8 +23,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import android.content.res.Configuration
@@ -76,6 +81,38 @@ private fun groupIntoParagraphs(phraseHistory: List<String>, currentPhrase: Stri
     }
 
     return paragraphs
+}
+
+/**
+ * Parses single-asterisk markdown (*text*) into an AnnotatedString with italic spans.
+ * Double-asterisks (**text**) are treated as bold+italic.
+ */
+private fun parseItalics(text: String): AnnotatedString = buildAnnotatedString {
+    val boldItalicPattern = Regex("""\*\*(.+?)\*\*""")
+    val italicPattern = Regex("""\*(.+?)\*""")
+
+    var cursor = 0
+    // Merge both patterns and process in order of appearance
+    val allMatches = (boldItalicPattern.findAll(text) + italicPattern.findAll(text))
+        .sortedBy { it.range.first }
+        .distinctBy { it.range.first } // drop italic match if bold-italic already consumed it
+
+    for (match in allMatches) {
+        if (match.range.first < cursor) continue // already consumed by a prior match
+        // Append plain text before this match
+        append(text.substring(cursor, match.range.first))
+        val isBoldItalic = match.value.startsWith("**")
+        val inner = match.groupValues[1]
+        withStyle(SpanStyle(
+            fontStyle = FontStyle.Italic,
+            fontWeight = if (isBoldItalic) FontWeight.Bold else null
+        )) {
+            append(inner)
+        }
+        cursor = match.range.last + 1
+    }
+    // Append any trailing plain text
+    if (cursor < text.length) append(text.substring(cursor))
 }
 
 /**
@@ -188,7 +225,7 @@ fun ScrollableStoryTextDisplay(
                             paragraph.sentences.forEachIndexed { _, sentence ->
                                 val isCurrentSentence = sentence == currentPhrase
                                 Text(
-                                    text = sentence,
+                                    text = parseItalics(sentence),
                                     fontSize = if (isCurrentSentence) 18.sp else 16.sp,
                                     fontWeight = if (isCurrentSentence) FontWeight.Medium else FontWeight.Normal,
                                     color = if (isCurrentSentence) Color.White else Color.White.copy(alpha = 0.7f),
@@ -201,7 +238,7 @@ fun ScrollableStoryTextDisplay(
                     } else {
                         // Historical paragraph: combine sentences into a block
                         Text(
-                            text = paragraph.sentences.joinToString(" "),
+                            text = parseItalics(paragraph.sentences.joinToString(" ")),
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Normal,
                             color = Color.White.copy(alpha = 0.7f),
