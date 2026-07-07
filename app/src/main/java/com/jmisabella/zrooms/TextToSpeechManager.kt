@@ -464,9 +464,8 @@ class TextToSpeechManager(
      */
     private fun loadRandomPoemFile(): String? {
         val manager = storyCollectionManager ?: return null
-        val collection = manager.selectedCollection ?: return null
 
-        val poemText = manager.getRandomPoem(collection)
+        val poemText = manager.getRandomPoem()
         if (poemText != null) {
             lastPlayedPoem = poemText
         }
@@ -639,6 +638,8 @@ class TextToSpeechManager(
         // IMPORTANT: Strip <<PB>> marker before speech (never spoken aloud)
         val cleanedPhrase = phrase
             .replace("<<PB>>", "")
+            .replace(Regex("—+"), ", ")   // em dash runs → pause cue
+            .replace(Regex("–+"), ", ")   // en dash runs → pause cue
             .replace("-", " ")
             .replace("#", "")
             .replace("*", "")

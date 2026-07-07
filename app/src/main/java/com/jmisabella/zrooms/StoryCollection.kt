@@ -3,8 +3,7 @@ package com.jmisabella.zrooms
 data class StoryCollection(
     val directoryName: String,
     val displayName: String,
-    val storyFiles: List<StoryFile> = emptyList(),
-    val poemFiles: List<String> = emptyList()
+    val storyFiles: List<StoryFile> = emptyList()
 ) {
     val id: String
         get() = directoryName
@@ -26,7 +25,4 @@ data class StoryCollection(
 
     val chapterCount: Int
         get() = storyFiles.size
-
-    val poemCount: Int
-        get() = poemFiles.size
 }

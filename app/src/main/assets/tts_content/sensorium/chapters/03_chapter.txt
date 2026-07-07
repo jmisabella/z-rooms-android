@@ -1,0 +1,45 @@
+Chapter 3 — Work  
+  
+The attack on the processing archive had been clean. She had looked at the incident file three times: the entry point, the targeting pattern, no hesitation between the primary records terminal and the secondary storage. Whoever had been there knew the layout. She noted that.  
+Soren came in with two cups and set one on her side of the table without asking. He had been doing this for four years.  
+“Third one in the month,” he said, pulling out his chair. He had the wall map up on his screen — four pins, three incidents and the open investigation, color-coded the way the department had been doing since before either of them arrived. “We have three facilities and three operational signatures. That’s what I want to talk about.”  
+She moved the incident file right and looked at the map. “Show me the third.”  
+He pulled up the north-end transfer center. The night of the twelfth. Equipment destroyed on the pre-procedure floor, which was already different — the first two had targeted records, administrative infrastructure. This one had gone for the candidates. The two technicians who died had been maintenance staff working a late shift. The transfer candidate had been three hours from the procedure; she’d been in recovery prep when the ceiling section came down.  
+“Different methods,” Maren said.  
+“Different methods, different risk tolerance.” He opened the technical summary and moved through it the way he always did: directly, without getting ahead of the data. “First two: precision. In and out, specific targets, no casualties, nothing left that tells us anything. Third one: this.” He gestured at the image. “Someone went in angry, or decided it was time to escalate, or they’re not the same group.”  
+“All three.”  
+He looked up.  
+“All three are possible at once,” she said. “The first two look like a cell that’s been doing this a while — trained for this kind of access, knows what it’s doing with entry points. Third one is adjacent. Shared information, maybe shared resources, not the same discipline.” She tapped the location. “The north-end center is on the public transit coordination maps. Anyone with patience could have found the layout.”  
+Soren looked at the map. “Philosophical core, violent fringe drawing from it.”  
+“Something like that.”  
+“So we close down the fringe and the core keeps organizing.”  
+“Yes.”  
+He said it the way you note an operational complication — an additional variable, a constraint to account for — and moved on, which was the right thing to do.  
+He pulled up the detention files from the first incident: two people picked up in the adjacent building the night of the records attack, held for questioning, released when they came up clean. She had read these already. One of them had given a statement before her advocate arrived — technically inadmissible, not pursued.  
+Maren pulled the statement back up.  
+“The second witness statement,” she said. “The one we can’t use.”  
+“Nothing operational in it.”  
+“No.” She read it again. *The process extracts the pattern and disposes of the body. What remains in the rat is not the person. It believes it is. That is the design of the program.* The officer’s note: the woman had said this calmly. Explanatory, not distressed. As if she expected the argument to be found interesting.  
+“No.” She read it again. *The process extracts the pattern and disposes of the body. What remains in the rat is not the person. It believes it is. That is the design of the program.* The officer’s note: the woman had said this calmly. Explanatory, not distressed. As if she expected the argument to be found interesting.  
+Maren closed the file.  
+“Nothing operational,” she agreed.  
+Soren had moved on to the logistics documentation — the supply access points, the vendor connections, the thread she would need to pull to find the network’s shape. He was good at this. He moved at the surface of the work and didn’t lose time descending where there was nothing operational to find. It was the right way to run an investigation.  
+“The records damage at the archive site,” she said. “What did they actually get?”  
+“Pre-procedure scan files. Four months of candidate intake documentation.” He found the summary. “Thirty-eight cases. Most redundant — the Institute keeps copies — but eight candidates were in early intake, not yet transferred to the main database. Those are effectively lost.”  
+*Thirty-eight cases. Most redundant.* She noted that formulation.  
+“Any pattern in the eight?”  
+He looked. He hadn’t looked at that specifically. After a moment, he said, “Early-stage. All eight were in early-stage intake.”  
+“So not people who were about to go under.”  
+“People who were still deciding.” A pause. “Or hadn’t decided yet and were in the information-gathering phase.”  
+The rain moved against the window. The facility lighting hummed at its usual frequency — something in the wiring she had stopped hearing years ago. She was hearing it now. It had always been like this in here. Equipment that worked, fluorescent and faintly reluctant, in rooms that were adequate and had never been more than that.  
+“Get me the supply chain connections from all three incidents,” she said. “I want to see what overlaps.”  
+“That’s going to be a lot of cross-referencing.”  
+“Yes.”  
+He nodded and went back to his screen. This was something she had always valued in him: she didn’t have to explain what she was after. He trusted that she would find it if she went where she was going, and he let her.  
+She looked at the map again.  
+The resistance had been building for seven years — ever since the program went operational at scale. The early groups: advocacy organizations, legal challenges, a petition that had briefly caught the Council’s attention. Methods had escalated as transplant numbers went up. Sabotage had started approximately two years ago. The deaths were new.  
+The Oversight Authority’s working theory: a centralized organization with distributed cells, loose enough that most members didn’t know anyone outside their immediate group. Probably correct, she thought. Not complete.  
+She looked at the space between the pins on the map. The records destruction at the archive site had targeted early-stage candidates. People in the threshold space — not yet committed, not yet transferred. That was not a symbolic act. That was tactical. Someone had decided that the candidates who were still deciding were worth the risk of a facility breach, worth the operational exposure. Which meant someone had thought carefully about where the program was most vulnerable.  
+She wrote it in her log.  
+Someone at the center of this was thinking carefully. She looked at the space between the pins and did not give it more shape than it had yet earned.  
+

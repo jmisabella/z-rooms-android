@@ -1,0 +1,50 @@
+Chapter 5 — Signals  
+  
+The lobby terminal was installed at floor level, in the corner behind the main entry — a gray box the size of a shoebox, screen angled for a rat’s line of sight. The city had put them in some buildings two years ago. Maren’s building had gotten one late.  
+She almost walked past it.  
+The screen was active. She stopped.  
+*twelve degrees in the east corridor today. not twelve in fahrenheit, twelve in something better. I have been developing a system.*  
+She crouched down. “Dael.”  
+*Maren. I thought you were Jens from the third floor. He always walks fast like that.*  
+“Sorry to disappoint.”  
+*Don’t be. Jens never crouches. You’re already better company.*  
+This was Dael. She had known him — neighborly, no more — for three years before the transplant: a man she passed in the stairwell, at the mailboxes, occasionally in the supply line when it moved to the east side of the building. Former machinist. He had worked the maintenance grid for eleven years before the grid contracted and he’d taken early exit. He’d spent the time since fixing things people brought him — not charging enough, Eli said, but that was the kind of man he was. He had a wife, grown daughter somewhere in the south district. He had made bread, before the flour supply shortened, and had strong opinions about what had happened to the recipe since.  
+The transplant was four months ago. She had not attended the ceremony.  
+“How’s the system,” she said.  
+*Thermodynamics. The rat body is very efficient at moving heat around but not good at generating it independently, so I have been learning the building. Dael’s Guide to Thermal Infrastructure, chapter seven: the east corridor runs warm because there is a water pipe in the wall with a slow failure. Has been there for years, probably. Someone was supposed to fix it.*  
+“I think that someone was you.”  
+*I had the right body for it then. Now I have other advantages.*  
+She smiled — briefly, without meaning to.  
+*How is Eli. I haven’t heard from him this week.*  
+“He’s been tired,” she said. It was true and was not the whole truth. “I’ll tell him you asked.”  
+*Tell him also that the east corridor is fifteen degrees and that if he wants to compare notes on thermal management I am available. We have discussed the subject before but I have new data.*  
+“I’ll tell him.”  
+*Thank you, Maren.*  
+She straightened up. The screen held for a moment — not waiting, she told herself; that was the human interpretation, the reflex of assuming a pause meant something unfinished. She had been making these assumptions without examining them. She went upstairs.  
+—————  
+The procurement thread she had been building since Monday had three junctions and a gap.  
+The junctions were useful. The north-end attack had required components: modified timing relays, a specific coupling stripped from decommissioned processing equipment and reconditioned. She had traced these through two salvage brokers, one registered and one not, to a distribution node in the mid-district that had never appeared in any OA file she could locate. The node was not a person but a warehouse: unit twelve in a row of eight along the canal service road, registered to a holding company that had changed names three times in four years.  
+The second time she went, she found someone.  
+His name was Peret. He was approximately fifty, with the look of someone who had been working with his hands since before it was interesting and would still be doing it after everyone else had stopped. He was not afraid of her. He was also not talking, which was its own information.  
+She came back a third time with a different set of questions.  
+“I’m not asking about the components,” she said. They were standing near the warehouse door, both of them positioned with the exit available. “I’m asking about the coordination. Who tells unit twelve that units eight and fourteen need to not know about each other.”  
+Peret looked at the middle distance. “I move things through here. People want things moved, I move them. I don’t ask a lot of questions about the rest of it.”  
+“But you hear things.”  
+“Everybody hears things.”  
+“I’m asking about what you’ve specifically heard.”  
+He was quiet. Not thinking — she recognized the shape of it, the particular quality of someone deciding how much. He was running the calculation: what she already knew against what it would cost him to give her something small. She waited.  
+“There’s a name that moves around,” he said, finally. “Not a real name. What people say when they’re talking about whoever thought this up. Not the cells. The philosophy under it.”  
+“What do they call it.”  
+He looked at her. “They say: the researcher figured it out. That’s all. That’s the whole sentence, usually. Nobody I’ve talked to knows more than that.”  
+She wrote it in her notebook. *the researcher.* Lowercase, the way she wrote a phrase rather than a name.  
+“When did you first hear it.”  
+“Eight, nine months ago. Then more recently. It’s been coming up more.”  
+“In what context.”  
+“In the context of—“ He stopped. Started again. “In the context of people saying the resistance isn’t just violence. That there’s a reason. That the researcher found something the Institute buried and built the whole thing around it.” He shrugged. Not a dismissal. A limit: that was the wall of what he knew. “That’s all I have.”  
+She took the rest of what he had — two broker names, a routing pattern along the canal service road, a date she had not known. She thanked him. She left.  
+Outside, the rain came in layers, steady and unresolved. She stopped at the canal railing.  
+*The researcher figured it out.*  
+She didn’t know who this was yet. Below, in the canal, something moved along the far bank at the waterline — fast, gone before she turned toward it.  
+She wrote a second note beneath the first: *Institute. Former. Left under circumstances Harlan would describe carefully.*  
+She put the notebook away. Below, in the canal, the water moved east, keeping nothing.  
+

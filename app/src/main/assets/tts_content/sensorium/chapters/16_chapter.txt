@@ -1,0 +1,93 @@
+Chapter 16 — The Archive  
+  
+The data management wing was on the lower east corridor, two floors below the clinical levels. Voss had been efficient and had not asked what the question was for — a junior researcher in records would not, would simply give the archive location and return to her own work. She had been apologetic about the age of the files, apologetic about the seal, apologetic in the way of someone trained in institutional deference who has not yet learned when not to apply it. Maren had thanked her and gone.  
+The corridor lights were on the conservation cycle. Half of them, alternating, the passage striped with dark and light in a way she had learned to ignore in this building. She knew which doors required a card and which required a code. She had been inside the Institute many times after hours.  
+She found the terminal at the end of the row. She sat down.  
+The file record opened on a standard header: date of creation, originating department, principal researcher.  
+*N. Vasquez, bioscience division.*  
+She noted it. She didn’t know the name yet, not in this form.  
+She copied it to her log and kept reading.  
+The files were organized as preliminary research usually was — methodology first, then early results, then what the researcher had planned for the next stage. Maren read methodically, the way she read everything: not looking for anything in particular yet, reading to understand what she was looking at before she decided what to make of it.  
+The methodology was careful. An inhibitor pathway — not an approach to ash lung’s symptoms but something earlier, an intervention at the progression mechanism itself. The binding target in the CDFS protein cascade was described in precise notation. The early results were limited by sample size, as early results always were, but the direction was clear. The data pointed somewhere. The data said: *this is worth following.*  
+She read slowly.  
+The data was good.  
+Not good as in certain. Good as in: the methodology was clean, the early results were real, and the direction pointed somewhere. Someone who knew how to read this would have read it and thought: *this needs more time and more work*. Someone who knew how to read this would not have read it and thought: *set this aside*.  
+Not good as in certain. Good as in: the methodology was clean, the early results were real, and the direction pointed somewhere. Someone who knew how to read this would have read it and thought: *this needs more time and more work*. Someone who knew how to read this would not have read it and thought: *set this aside*.  
+She went back to the methodology notes and read them a second time.  
+The pathway would have required years to develop into anything usable — clinical testing infrastructure that did not exist in intact form, sample populations, controlled conditions, time the plague did not give freely. The researcher had known this; she had written a timeline, a resource estimate, a list of what would need to be in place. The timeline was ambitious. The list was long. This was not a cure. It was the beginning of a path toward investigating whether a cure was possible.  
+Maren held this for a moment. Somewhere in the walls, the drainage system working.  
+Then she scrolled to the bottom of the record.  
+The administrative note was one line. Date-stamped twelve years ago.  
+*REVIEWED — REASSIGNED — ARCHIVE.*  
+She read it once. She read it again. She looked at the date. She looked at the data above it — the care in the methodology, the early results pointing somewhere real, the researcher’s mapped timeline, the resource list, a plan for something that might have become something.  
+*REVIEWED — REASSIGNED — ARCHIVE.*  
+She was an investigator. She knew what finding the thing felt like: the moment when pieces assembled into a shape that had no other explanation. She had felt it many times. She had learned to hold it carefully, without hurrying, because hurrying was how you got the shape wrong.  
+She sat with this one.  
+She scrolled back to the header. *N. Vasquez, bioscience division.*  
+She had been following “the researcher” for three months. The phrase had come up first as a reference, then with context: *she left the Institute. Twelve years ago. Harlan reassigned her.* She had followed it through the resistance’s margins, through the way the network’s philosophical center seemed organized around something specific — something that had happened before the first facility was hit, something that had happened to a person and not merely to a cause.  
+She had been following “the researcher” for three months. The phrase had come up first as a reference, then with context: *she left the Institute. Twelve years ago. Harlan reassigned her.* She had followed it through the resistance’s margins, through the way the network’s philosophical center seemed organized around something specific — something that had happened before the first facility was hit, something that had happened to a person and not merely to a cause.  
+She looked at the name.  
+The data and the person were the same thing.  
+The researcher who had left and built twelve years of resistance around a conviction she could not prove. She had her memory of her own work, which was unverifiable — exactly the category of thing that was easy to dismiss. The work was here. It was real. The note at the bottom was the note she had suspected existed for twelve years and had not been able to verify. Maren had the data. She was sitting in front of it.  
+She did not know if it would have led anywhere. She had read it carefully and it looked like something worth following, but she knew that looking like something and being something were not the same.  
+She knew it had been buried. She knew what deliberate looked like. These two things she was certain of.  
+—————  
+She closed the file. She logged the session as a standard records inquiry.  
+The cure, if it had ever become a cure, worked only pre-transplant. Eli’s appointment had been months ago. There was no version of these two facts in which one undid the other.  
+She made herself not think about herself. She was, briefly, almost successful.  
+She picked up her bag and left the archive as she had found it.  
+At the service entrance, the rain had returned in the hour she’d been inside — not hard, just steady, the drainage channel in the eastern street running dark and fast. She stood on the step for a moment. She was not ready to go home and had no reason to go anywhere else, so she walked. The rain did not require her attention. She let it not require her attention.  
+She knew where she was going. She had known since she copied the name.  
+She walked.  
+—————  
+The man who opened the door looked at her face and then at her hands, and stepped aside.  
+She went up the two flights. The water-stain record on the landing wall — geological, patient, indifferent to what passed in front of it. She did not look at it long.  
+The room was the same: the two salvaged lamps, adequate; the table at center; the boarded windows and the interior shaft going dark behind the third. Nadia was in the same chair she had occupied the first time, hands still on the table, watching Maren cross the room.  
+Maren set the device on the table between them. The archive record was open.  
+She didn’t explain what it was. Nadia looked at the device, and then at Maren, and then at the device again.  
+She did not reach for it yet.  
+“I want to tell you what’s in it first,” Nadia said.  
+Maren said nothing.  
+“The principal inhibitor pathway targets the protein-binding cascade at the second stage of CDFS progression,” Nadia said. “The binding mechanism in human lung tissue — the surfactant variant — is where the fibrosis initiates. The inhibitor approach doesn’t address the symptoms. It addresses the cascade itself. If you interrupt it early enough, the scarring doesn’t progress.”  
+Maren was still.  
+“The early-stage patient population was thirteen individuals — all within the first eight months of onset. The sample was too small for clinical conclusions, but the methodology was designed for scalability. The next stage would have required a controlled environment, sixty participants minimum, and approximately four years of monitored data collection.”  
+Nadia paused for a moment.  
+“The protein binding target is a variant we called CDFS-7 internally — not the common designation. We named it ourselves — it wasn’t in the literature yet. That’s what’s in the file.”  
+“Read it,” Maren said.  
+Nadia picked up the device and read.  
+It was not a long file. She read it slowly anyway. Maren watched her face, which did not change much — not in the way of someone suppressing feeling, in the way of someone who has been living with a thing for twelve years and no longer has a version of themselves who would be surprised. The expression she made was the expression of someone recognizing a room they had last seen from the other side of a locked door.  
+When she finished, she set the device back on the table.  
+“Everything I remember is there,” Nadia said.  
+For a while, neither of them said anything.  
+The lamp on the left made a faint cycling sound — a loose connection, something in the ballast. Maren had noticed it the first time she was in this room. It was quieter now, or she had stopped hearing it as separate from everything else.  
+She looked at the file. Twelve years old. The methodology clean, the early results real, the direction pointing somewhere. She looked at it and could not tell, from inside it, whether it would have worked. The data pointed somewhere; the data was not the somewhere it pointed to. She was not a bioscientist. She had read it carefully and it looked like something worth following, but she had known other things that looked worth following and led nowhere useful, and she could not read the gap between what this was and what it might have become.  
+She could read the single line at the bottom of the file.  
+“He didn’t misread it,” Nadia said. “He’s too careful to misread it. He knew what it was.”  
+“Yes,” Maren said.  
+“Twelve years,” Nadia replied.  
+She didn’t say it as an accusation. She said it as a measurement. Twelve years was what it was — a count of winters, a period during which a cohort of ash lung patients had progressed through the middle stage and into the late and into the terminal, a period during which the transplant program had reached scale, a period during which she had been building a network around a conviction she had not been able to prove.  
+The data was on the table between them now.  
+“It may not have led anywhere,” Maren said.  
+Nadia looked at her.  
+“I’m not defending it,” Maren said. “I’m saying the data is preliminary. The pathway was real. Whether it worked —”  
+She stopped. She had said what she was going to say. The window of uncertainty was real; she had read the file and the uncertainty was real and it was part of what she was holding.  
+“I know,” Nadia said. “I designed the study. I know exactly how preliminary it was.” She paused. “I also know what I found, and what I planned to find next, and what I would have needed to find it, and whether those things were possible in a city with this infrastructure.”  
+“I cannot prove it would have worked,” she said. “I have never been able to prove that. That was always the problem.”  
+A pause.  
+“But it was buried,” she said. “That I can prove now.”  
+Maren looked at the file. She looked at Nadia.  
+Nadia’s hands were still on the table. Still, not tense — the quality of someone who had waited for something for a very long time and was now in the presence of what they had been waiting for and was finding that its arrival did not feel the way waiting had suggested it would.  
+Maren thought about the note at the bottom. One line. Date-stamped twelve years ago. She thought about what was in the file above it, and what had been said in this room when she’d first come here, and the man in the observation room three years ago going still mid-sentence and orienting toward something she couldn’t perceive, and the screen going dark in the recovery room, and the way Eli had come back from the freeze: *I don’t have the word. A pressure. It needed following. *She thought about the timeline in the file — four years, sixty participants, controlled conditions — and what had been happening to the program during those four years. What had been happening to Eli. What could not be undone.  
+She did not think about herself. She was, this time, less successful.  
+—————  
+Neither of them said anything for a while longer.  
+The rain worked its way through the building’s walls — she could hear it in the shaft behind the boarded window, in the small pressure changes that found their way down from the street.  
+“What are you going to do with it?” Nadia finally asked.  
+“I don’t know yet,” Maren said.  
+Nadia looked at her for a moment. Something in her expression shifted — not softening exactly, but a recognition of a kind.  
+“I’ve been there,” she said.  
+Maren picked up the device from the table. She stood.  
+She went down the two flights. On the landing, the water-stain record on the wall. At the street door, the rain.  
+She stood for a moment in the doorway.  
+She had the data. She had known what she was going to do with it before she came up the stairs. She didn’t know yet. Both things were true, standing in the doorway with the rain coming down in front of her and the lamplight from the street barely reaching the channel where the water was running fast and dark.  
+The channel ran in one direction, carrying what the city put in. She stepped out and followed the same direction, without deciding to.  

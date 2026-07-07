@@ -1,0 +1,69 @@
+Chapter 9 — Threads  
+  
+The procurement records came from four different administrative registries, none of which had reason to talk to each other. That was the point.  
+She had been cross-referencing them since Tuesday — the salvage transport logs from the eastern district clearinghouses, the facility supply contracts flagged from all three earlier attacks, the independent delivery schedules from the canal network, and the Oversight Authority’s own infrastructure maintenance files, which nobody had thought to pull until she asked. The files spread across three surfaces in the corner office the OA gave her when she needed to work horizontally. She stood at them, usually.  
+The pattern was not in any single record. It was in the gaps: the way a timing component moved through a registered salvage broker to an unregistered one before arriving at a distribution node that appeared in two different logistics chains simultaneously. The way that distribution node never appeared twice under the same contract name. The way the delivery routes were always one step removed from anything that connected directly to a known resistance cell — not because the cells weren’t there, but because someone had built a buffer and maintained it.  
+She drew the structure out on paper. She still did this when she wanted to see something clearly — the act of putting it in her own sequence, her own hand, the way a teacher made students copy things out.  
+The pattern had three properties she hadn’t expected.  
+The first was patience. The materials moved slowly — weeks, sometimes months, between their appearance in a supply chain and their arrival closer to the target facilities. This wasn’t scarcity. She’d checked the component availability; none of it was hard to find. The delay was deliberate.  
+The second was separability. Each intermediary handled one category, one leg of the route. None of them, as far as she could reconstruct, would have known more than two adjacent steps. Someone had built the structure so that pressure on any single node would not unlock the rest.  
+The third was what settled in her chest in an unasked-for way. The people she could identify — the intermediaries with names, with addresses, with records — were not resistance members. She had run them against every register the OA maintained. Nothing. Not sympathizers, not family members of transplanted people, not known agitators from any of the advocacy networks. They had done what they’d done and left no discernible record of conviction. Someone had recruited them this way deliberately. Someone had made a careful calculation about how much belief to put in any single person’s hands.  
+She looked at her diagram. The center was still empty. She knew it wasn’t.  
+—————  
+She pulled the facility report from the inciting incident again.  
+Room four’s emergency override had been on her desk for five days, filed under *anomalous — pending.* The lock had been activated from inside before the team came through. The candidate in room four was the only person who came out unharmed. The room had been untouched — no equipment damage, no structural destruction. She had been sitting inside with the door locked. She had known they were coming.  
+Maren set the page down. She had cross-referenced the candidate’s name against the OA’s program database, the facility intake records, the standard personal registry. Clean. Mid-forties. Administrative work in the third district. Ash lung diagnosed fourteen months ago, in early-stage intake. Nothing to indicate contact with any resistance network.  
+Nothing visible was a different thing.  
+She made a note in her log. She would not bring this thread to Soren yet — not because she was withholding it, she told herself, but because she did not know yet where it led, and she needed to know where it led before it became part of the official picture.  
+This was not entirely true. She put the report back in the folder. She put the folder back in the horizontal stack. She would return to it.  
+—————  
+Soren came to the corner office mid-afternoon, carrying a file and his own cup. He had that efficient movement she recognized — the walk of someone who had already assessed the route.  
+He sat down without preamble. “I’ve got a face.”  
+She waited.  
+“Third person at the inciting facility — the one who came in through the main entry.” He set the file on the surface between them. A surveillance capture, low resolution but legible: a man, mid-to-late thirties, wearing clothes that had been chosen unremarkably on purpose. “He’s in the second attack site too — the equipment facility in the north quarter. Same operational signature in both.” He turned to the next page. “He’s driving for a salvage service registered to a holding company that changed names twice in three years.”  
+Maren looked at the image. She had not seen this face before. She recognized the holding company structure.  
+“Not in any resistance database,” she said.  
+“Not in any database,” Soren confirmed. “Which tells us the databases are incomplete.”  
+“Or the network built around the gap.”  
+He considered this. “Both things can be true.”  
+She handed him the supply chain diagram she’d made. He studied it — thoroughly, which was his way, not taking a shortcut through her reasoning. She watched him follow the connections she’d traced.  
+“This is careful,” he said.  
+“Yes.”  
+“Someone with experience building distributed systems. Or enough patience to think one through.”  
+“Same result,” she said.  
+He handed the diagram back. She noticed what he did with it: he looked at what she had and returned it to her hands, rather than copying it to his own files. Four years of working together had established this rhythm — she kept her threads, he kept his, they brought them together when they were ready. It was efficient. It worked. She felt something she did not name when he handed the diagram back.  
+“We’re close to enough to give the Council a structure,” he said. Not a question.  
+“Close,” she said. “Not yet.”  
+He accepted this. He stood, gathered his file. At the door he paused. “The researcher reference. You’re still tracking it?”  
+“Still a phrase,” she said. “Not a name.”  
+“Let me know when it’s a name.”  
+He left. The corner office settled back into its institutional quiet — the lighting with something wrong in its wiring, the recycled air, the rain coming in at an angle against the single window.  
+She sat down.  
+He had a face she didn’t have. He would have the network’s operational structure mapped before she would — his method was cleaner, his approach to the work uncomplicated by anything outside the work. He was good at this. She could see how good, because she had been good at it in exactly this same way: the supply chain as puzzle, the network as architecture to dismantle, the investigation as a structure that had a correct solution if you applied enough patient pressure. She had worked like that for eleven years. She recognized it the way you recognized a city you had lived in and left.  
+She turned back to her diagram. The center was still empty.  
+—————  
+She found the contact through a transport contract at the fourth intermediary node — a woman running a salvage sorting operation in the outer-ring district, two kilometers past the last functional streetlight. Not in any resistance file. Not ideologically flagged. She had appeared in the supply chain twice, a year apart, and both times the timing had aligned with materials movement toward the inciting facility’s network.  
+Maren took a car as far as the road allowed and walked the rest.  
+The sorting operation was in a covered yard behind a machinist workshop that still stood, its windows blocked, doing something else now or nothing. The woman who came to the gate was mid-fifties, a working jacket with a hem mended more than once, the steadiness of someone who had been found before and understood that running was a calculation. She looked at Maren’s identification without apparent concern.  
+“I expected this,” she said, “longer ago.”  
+The conversation took an hour. They sat on crates in the covered yard while the rain came in at the lateral angle of the outer district, where nothing interrupted it. The woman gave what she had calculated it would cost to give — the logistics chain, two additional contact names Maren had half-guessed, confirmation of the timing pattern she’d already diagrammed.  
+What she had not calculated on giving she gave anyway, toward the end. She had the quality of someone who had been carrying something for a long time and was arriving at the question of whether the weight was still worth it.  
+“The whole thing is built around what she found,” the woman said. “The researcher. The one who figured out what the program actually was.”  
+Maren made no move. She had learned when not to.  
+“I never met her,” the woman said. “Nobody I know has. But everybody knows the same story.” She looked at her hands briefly, then at the middle distance. “She was at the Institute. One of the research staff. She found something — something that would have changed what the whole program meant, if it was true. And then one day she wasn’t there anymore.” A pause. “Harlan moved her off her work. This was about twelve years ago. And whatever she’d found went somewhere it couldn’t be found anymore.”  
+“Why did she leave,” Maren said.  
+“He reassigned her,” the woman said. “She left after that.” Another pause, shorter. “The story also says she didn’t leave empty-handed. But nobody can verify that part.”  
+Somewhere in the covered yard, water was finding a gap in the roof — she could hear it collecting in something hollow, a slow irregular percussion underneath the rain.  
+She wrote it in her notebook: *She left the Institute. Twelve years ago. Harlan reassigned her.*  
+“Do you know her name,” she said.  
+“No,” the woman said. “Nobody does. That’s half the reason people believe it.”  
+—————  
+She walked back to the car.  
+The phrase had been circulating for eight or nine months, according to Peret. Long enough to have grown past its origin. Long enough to have become the kind of story that moved through a network without needing to be verified — an explanation that fit the shape of what people knew and filled the gaps they couldn’t account for.  
+She turned the notebook in her hands. The rain had soaked through the shoulder of her coat. She had been standing at the gate longer than she’d realized, in the habit of stillness while she thought.  
+*She left the Institute. Twelve years ago. Harlan reassigned her.*  
+Not expelled. Not transferred. *Reassigned*. The word carried a particular register. She had heard Harlan manage a question in a briefing room with exactly this method — moved it from one place to another without quite addressing it, in a way that was entirely professional and entirely effective. The word belonged to a specific kind of management.  
+She put the notebook in her pocket. She walked to the car. The outer district fell behind her, its buildings returning to the dark and the wet.  
+A researcher. Former Institute. Twelve years. Harlan had moved her off her work.  
+She knew what kind of work got moved.  
+
