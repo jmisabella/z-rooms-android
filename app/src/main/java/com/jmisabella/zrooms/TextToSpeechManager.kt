@@ -464,9 +464,8 @@ class TextToSpeechManager(
      */
     private fun loadRandomPoemFile(): String? {
         val manager = storyCollectionManager ?: return null
-        val collection = manager.selectedCollection ?: return null
 
-        val poemText = manager.getRandomPoem(collection)
+        val poemText = manager.getRandomPoem()
         if (poemText != null) {
             lastPlayedPoem = poemText
         }

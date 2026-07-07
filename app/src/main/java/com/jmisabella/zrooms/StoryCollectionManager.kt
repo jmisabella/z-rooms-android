@@ -17,7 +17,14 @@ class StoryCollectionManager(private val context: Context) {
     var selectedCollectionId by mutableStateOf<String?>(null)
         private set
 
+    var globalPoemFiles: List<String> = emptyList()
+        private set
+
     private val chapterPositions: MutableMap<String, Int> = mutableMapOf()
+
+    companion object {
+        private val COLLECTION_ORDER = listOf("sensorium", "aphelion", "calibration")
+    }
 
     init {
         loadChapterPositions()
@@ -35,8 +42,8 @@ class StoryCollectionManager(private val context: Context) {
             println("📁 Found ${ttsContentDirs.size} items in tts_content: ${ttsContentDirs.joinToString()}")
 
             for (dirName in ttsContentDirs) {
-                if (dirName.endsWith(".txt")) {
-                    println("⏭️ Skipping file: $dirName")
+                if (dirName.endsWith(".txt") || dirName == "poems") {
+                    println("⏭️ Skipping: $dirName")
                     continue
                 }
 
@@ -45,11 +52,11 @@ class StoryCollectionManager(private val context: Context) {
                     displayName = StoryCollection.formatDisplayName(dirName)
                 )
 
-                // Scan stories/ subdirectory
+                // Scan chapters/ subdirectory
                 try {
-                    val storyFiles = assetManager.list("tts_content/$dirName/stories") ?: emptyArray()
+                    val chapterFiles = assetManager.list("tts_content/$dirName/chapters") ?: emptyArray()
                     collection = collection.copy(
-                        storyFiles = storyFiles
+                        storyFiles = chapterFiles
                             .filter { it.endsWith(".txt") }
                             .mapNotNull { filename ->
                                 extractSequenceNumber(filename)?.let { seq ->
@@ -59,32 +66,34 @@ class StoryCollectionManager(private val context: Context) {
                     )
                 } catch (e: Exception) { }
 
-                // Scan poems/ subdirectory
-                try {
-                    val poemFiles = assetManager.list("tts_content/$dirName/poems") ?: emptyArray()
-                    collection = collection.copy(
-                        poemFiles = poemFiles.filter { it.endsWith(".txt") }
-                    )
-                } catch (e: Exception) { }
-
-                if (collection.storyFiles.isNotEmpty() || collection.poemFiles.isNotEmpty()) {
+                if (collection.storyFiles.isNotEmpty()) {
                     loadedCollections.add(collection)
                 }
             }
 
-            collections.addAll(loadedCollections.sortedBy { it.directoryName })
+            // Sort by defined order, unknown names fall to end alphabetically
+            val sorted = loadedCollections.sortedWith(compareBy(
+                { idx -> COLLECTION_ORDER.indexOf(idx.directoryName).let { if (it == -1) Int.MAX_VALUE else it } },
+                { it.directoryName }
+            ))
+            collections.addAll(sorted)
             println("✅ Loaded ${collections.size} collections: ${collections.map { it.directoryName }.joinToString()}")
 
+            // Load global poem pool
+            globalPoemFiles = assetManager.list("tts_content/poems")
+                ?.filter { it.endsWith(".txt") }
+                ?: emptyList()
+            println("🎵 Loaded ${globalPoemFiles.size} global poems")
+
             // Migration: Check if saved ID is an old UUID format (contains dashes)
-            // If so, reset to default since IDs are now directory names
             if (selectedCollectionId != null && selectedCollectionId!!.contains("-")) {
                 println("🔄 Migrating from old UUID-based ID to directory name")
                 selectedCollectionId = null
             }
 
-            // Auto-select "signal_decay" for new users or after migration
+            // Auto-select "sensorium" for new users or after migration
             if (selectedCollectionId == null && collections.isNotEmpty()) {
-                val defaultCollection = collections.find { it.directoryName == "signal_decay" }
+                val defaultCollection = collections.find { it.directoryName == "sensorium" }
                     ?: collections.first()
                 selectedCollectionId = defaultCollection.id
                 saveSelectedCollection()
@@ -148,8 +157,6 @@ class StoryCollectionManager(private val context: Context) {
                 null
             }
 
-            // If we have a saved ID but it doesn't match any collection, or if we have no saved ID,
-            // fallback to first available collection and save it
             return found ?: collections.firstOrNull()?.also {
                 selectedCollectionId = it.id
                 saveSelectedCollection()
@@ -163,7 +170,7 @@ class StoryCollectionManager(private val context: Context) {
             }
             ?: return null
 
-        val path = "tts_content/${collection.directoryName}/stories/${chapter.filename}"
+        val path = "tts_content/${collection.directoryName}/chapters/${chapter.filename}"
         return try {
             context.assets.open(path).bufferedReader().use { it.readText() }.trim()
         } catch (e: Exception) {
@@ -171,11 +178,11 @@ class StoryCollectionManager(private val context: Context) {
         }
     }
 
-    fun getRandomPoem(collection: StoryCollection): String? {
-        if (collection.poemFiles.isEmpty()) return null
+    fun getRandomPoem(): String? {
+        if (globalPoemFiles.isEmpty()) return null
 
-        val randomFile = collection.poemFiles.random()
-        val path = "tts_content/${collection.directoryName}/poems/$randomFile"
+        val randomFile = globalPoemFiles.random()
+        val path = "tts_content/poems/$randomFile"
         return try {
             context.assets.open(path).bufferedReader().use { it.readText() }.trim()
         } catch (e: Exception) {

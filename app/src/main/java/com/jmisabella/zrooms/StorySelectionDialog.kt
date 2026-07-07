@@ -16,7 +16,6 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.outlined.Eco
-import androidx.compose.material.icons.outlined.FormatQuote
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -94,24 +93,6 @@ fun StorySelectionDialog(
                                     )
                                 }
 
-                                if (collection.poemCount > 0) {
-                                    Row(
-                                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Icon(
-                                            Icons.Outlined.FormatQuote,
-                                            contentDescription = null,
-                                            tint = Color.Gray,
-                                            modifier = Modifier.size(14.dp)
-                                        )
-                                        Text(
-                                            text = "${collection.poemCount} poems",
-                                            fontSize = 12.sp,
-                                            color = Color.Gray
-                                        )
-                                    }
-                                }
                             }
                         }
 

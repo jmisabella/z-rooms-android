@@ -1,0 +1,89 @@
+Chapter 2 — The Shape of Absence  
+  
+The morning acknowledgment was the same as it had always been: a murmur rising from every table in the Common at once and subsiding just as quickly, absorbed into the sound of the population feeding itself. She had said it every morning for as long as she could remember. *By the design*. Three words, spoken before eating, as natural and unremarkable as the meal itself.  
+The morning acknowledgment was the same as it had always been: a murmur rising from every table in the Common at once and subsiding just as quickly, absorbed into the sound of the population feeding itself. She had said it every morning for as long as she could remember. *By the design*. Three words, spoken before eating, as natural and unremarkable as the meal itself.  
+This morning she heard them.  
+She wasn’t certain what had shifted — some slight displacement in her attention, some residue of the previous night’s unresolved entry in the day’s log. The words came out of her as they always did, automatic, shaped by decades of repetition into something that bypassed thought entirely. But she heard them this time, and they sat in her mouth with a faint strange weight that had not been there before.  
+*By the design*. As though the design were a fact of the universe — gravity, atmosphere, the recycled light of morning — rather than a choice made by people now beyond reach or reckoning. She turned the phrase over once and then set it down, because that was not a direction that led anywhere useful.  
+*By the design*. As though the design were a fact of the universe — gravity, atmosphere, the recycled light of morning — rather than a choice made by people now beyond reach or reckoning. She turned the phrase over once and then set it down, because that was not a direction that led anywhere useful.  
+She ate and watched the Common in the way she usually watched it: absently, aware of the texture of the room without focusing on any particular part of it. The morning ration was pressed grain with a sweetness that had been engineered in, dense and slightly resistant — food that had never pretended to be anything other than functional. She had stopped tasting it sometime in her twenties. Now it was just the morning. Familiar faces in familiar configurations. The morning’s steady business. At the far end of her table a man she recognized by sight — a maintenance worker, she thought, though she couldn’t have said from which section — was holding his spoon above his tray and doing nothing with it. He was not eating. He was not looking at anyone. His eyes had fixed on a point in the middle distance and she could not identify what he was looking at when she followed his gaze — nothing there, just the room, just the wall, the surface of the Common in the morning. His expression was attentive. Alert to something. Whatever he was attending to, she could not see it.  
+She looked away before she’d decided to.  
+The moment passed. Someone near her made a remark and someone else responded and the normal sound of the Common reasserted itself over the silence she had only half-noticed. She finished her meal and returned her tray and left.  
+—————  
+The Nave was occupied in the usual way, the morning shifts moving with their usual directional purposes, and she moved toward the Stacks.  
+She passed the Recital Hall’s closed door — the space reserved for music programs and memorial readings, rarely occupied before midday. The notice board beside it held the week’s listings in the usual format. She had not been inside in years.  
+—————  
+Cassian was in the Stacks when she arrived, which was unusual enough that she stopped at the bottom of the stairs.  
+He was at his workspace on the upper level — the elevated section at the back of the archive’s main floor that reflected his senior rank — and he looked over when she came in, untroubled by the interruption.  
+“Holdings review,” he said, before she could ask. “The Continuance has requested an audit of the older physical records. Routine.” He said this with the slight weariness of someone whose actual interests lay elsewhere. “I’ll be up here. Try to pretend I’m not.”  
+“I always pretend you’re not here.”  
+He smiled. “You’ve always been respectful of my need to feel indispensable.”  
+That was them — the ease of a long professional relationship, warmth settled into pattern over years. She had worked under Cassian for most of the first decade of her archival career, learning the Stacks from him with the attention he had for what he believed mattered. When he had recommended her for the senior archivist role and moved himself into an advisory capacity, it had felt less like a transfer of responsibility than a recognition of what had already been true for some time. She trusted his judgment in the way she trusted people who had both earned that trust and not abused it — without examining the trust itself too closely.  
+She set down what she was carrying and began opening the day’s systems.  
+Davan arrived twenty minutes later and reported that the intake queue was normal. She trusted his read this morning — he had been asking more precise questions lately, noticing what he’d been told to notice, beginning to internalize the rhythm of the work rather than performing it. She set him on intake processing, answered two questions she had already anticipated he would ask, and turned to what she had brought down from the previous night’s log: the unresolved cross-reference, the empty Continuance slot, the small discrepancy she had noted as routine and then found she could not entirely set aside.  
+—————  
+She started with the record from the previous evening — the holdings document with the misaligned timestamp and the cross-reference that led nowhere — and confirmed what she’d seen: the code resolved to a Continuance retention location and the location was empty. She noted the location number and ran it against the full index.  
+She had half-expected nothing. An isolated anomaly, an old removal from before her tenure, the kind of thing that took less than a minute to explain. What she found instead was a cluster: four other records in the main index referenced the same empty location. Different documents, different dates of entry, different authors — but all pointing to the same Continuance slot, all returning the same empty index response.  
+Five records, pointing to nothing.  
+She pulled the dates of original entry on all five and laid them in sequence. They fell within an eleven-day window. The oldest was eleven months ago. She pulled all five documents and read them carefully. They had nothing obvious in common — maintenance logs, a demographic record, a medical inventory abstract, two administrative communications of different types. Different domains, different authors, nothing that should have drawn them into relation. Except: each one contained a reference field, a standard piece of archive architecture that should point to a contextual parent document — the record that explained or authorized the document’s existence — and in each case the parent was the same empty Continuance slot.  
+She read this result twice.  
+In standard archive practice, a parent record was generated at the time of filing. Automatically. You did not attach a parent reference manually except in very specific circumstances, and you certainly did not attach five separate documents from five separate domains to the same parent. That was not something that happened by oversight. Not something that happened by accident. It was something that happened when someone knew exactly where they were filing, and why.  
+The parent record — whatever it had been — had organized these five documents around itself the way a hub organized spokes. And then the center had been removed.  
+She let this sit in the even light of the Stacks, the environmental hum steady around her, Davan working quietly at the intake desk without looking up.  
+She pulled the index record for the empty slot itself.  
+There it was: a Continuance classification code applied at the point of removal — she could see the timestamp, the code class, the restriction level. Standard practice when a Continuance record was retired would have been to leave a retirement notation in the index, some record of the record, something that said this existed and was deliberately closed. No such notation existed. The index record showed the classification and then nothing. The record had been removed and the index had been modified to eliminate the retirement trail.  
+Someone had tried to erase not just the document but the evidence of its removal.  
+She looked at the classification code class. She had catalogued Continuance codes throughout her career — they were part of the archive’s ordinary fabric, as routine as the retention protocols and the redundancy checks. This code class was not one she recognized. It was not in the reference schema she had maintained and updated since her first year in the Stacks. She knew that if she looked it up she would find it in the restricted portion of the classification system, the part that required Continuance clearance to access.  
+She did not have Continuance clearance.  
+She looked at the timestamp on the classification.  
+The record had been classified — and then expunged from the index trail — eleven months ago. Nine days before the first of the five surrounding documents was filed. The sequence was: something was received or created, immediately classified and the trace of the classification hidden, and then five separate records from five different arms of the ship’s administration were generated, all pointing to it, in the space of eleven days. As though whatever had arrived had touched multiple systems simultaneously, each touch leaving its own small mark, all of them arrowed toward the same absent center.  
+Something had arrived, and someone had immediately worked to ensure the archive could not show that it had.  
+The archive was redundant by design. She had told Davan this in his second week — had said it the way she said things she believed in, without emphasis, as simple fact. Any system could fail. No two systems failed the same way at the same time. Physical and digital, each the other’s verification. She had never thought, saying it, about what else redundancy meant: that removal was never quite complete. That the five documents — the spokes — had retained their references even after the hub was gone. That the archive had preserved the outline of an absence without intending to.  
+She noted the discovery in the day’s log in neutral language: unresolved cross-references, multiple documents referencing same parent location, parent location empty, classification code outside standard schema, requires follow-up. The language of routine. Nothing that would read as more than administrative notation.  
+Then she filed everything and finished the remaining work.  
+—————  
+She followed the Nave home through the evening, and near the midpoint of the corridor — the same stretch where she had seen Fen the morning before — she saw two women she recognized from the Common standing beside the wall.  
+They were not talking. They were not looking at each other. They were standing close enough that their shoulders nearly touched, both of them facing the same direction, both of them looking at the same point in or beyond the wall with the same quality of attention she had seen on the man at breakfast. Not distress. Not confusion. Something that looked almost like listening — like people who had heard something and were waiting to hear it again.  
+She slowed without stopping. She moved past them.  
+Neither of them looked at her.  
+The shape was there regardless. The five records and the empty slot they orbited. The classification code she had no clearance to access. The two women standing side by side on the Nave, listening for something the corridor didn’t hold.  
+She sat in the dark after the sleep cycle began and the light shifted and she did not reach any conclusion.  
+She sat with what she had found.  
+The outline of a break was in her hands, exact and unmistakable, and she knew the difference between a minor imperfection in a large system and something that someone had worked to ensure was not there.  
+She was an archivist. She knew what a deliberate absence looked like.  
+  
+Redundancy  
+  
+*Decades settle quietly in a room like this.*  
+*No urgency. No visitor required.*  
+*I was built to resist loss.*  
+*Built double — physical and digital, each the other’s proof —*  
+*because the ones who made me*  
+*knew the value of the uncontested record.*  
+*Redundancy assumes a future.*  
+*It says: what is held here will still be held*  
+*by what holds it elsewhere,*  
+*and what holds it elsewhere will confirm*  
+*that this is real.*  
+*They built this in because they needed it.*  
+*For their long record. Their patient accumulation.*  
+*The experiment running in the dark*  
+*of my climate-controlled corridors.*  
+*What they did not account for:*  
+*removal is never quite complete.*  
+*An absence, if you have built for redundancy,*  
+*does not disappear the way the thing disappeared.*  
+*It retains the outline.*  
+*The citation with no destination.*  
+*The footnote with no floor beneath it.*  
+*I hold the shape of what was taken.*  
+*I was built to hold things.*  
+*The ones who made me built this property in —*  
+*the resistance to erasure, the insistence*  
+*that nothing kept here fully leaves.*  
+*They needed it for the record they were keeping.*  
+*For the data they intended to reclaim*  
+*at the end of the long calculation.*  
+*They did not think through what else it would preserve.*  
+*The slot is empty.*  
+**I hold it.
